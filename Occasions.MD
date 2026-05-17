@@ -1,0 +1,20 @@
+- Thank You
+- Birthdays
+- New Baby
+- Team Celebration
+- Company Celebration
+- Work Anniversary
+- Farewell
+- Retirement
+- Congratulations
+- Recruiting & Onboarding
+- Office Competition
+- Sympathy
+- Get Well Soon
+- Employee Appreciation
+- Holiday Celebration
+- Father's Day
+- Mother's Day
+- Valentine's Day
+- Weddings
+- Any Other
