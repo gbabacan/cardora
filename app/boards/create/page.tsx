@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -253,7 +253,7 @@ const OCCASIONS = [
   },
 ];
 
-export default function CreateBoardPage() {
+function CreateBoardPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
@@ -854,5 +854,13 @@ export default function CreateBoardPage() {
       )}
     </div>
     </>
+  );
+}
+
+export default function CreateBoardPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-[#F7FAFC] to-[#E5EAF0] flex items-center justify-center"><div className="text-[#2CB1A6] text-xl">Loading...</div></div>}>
+      <CreateBoardPageContent />
+    </Suspense>
   );
 }
