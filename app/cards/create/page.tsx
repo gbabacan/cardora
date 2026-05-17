@@ -657,12 +657,7 @@ function CreateBoardPageContent() {
                         setToast({ message: 'Error creating board: ' + error, type: 'error' });
                         setAuthLoadingState(false);
                       } else if (board) {
-                        // Redirect based on format type
-                        if (selectedFormat === 'card') {
-                          router.push(`/cards/create?id=${board.id}`);
-                        } else {
-                          router.push(`/boards/editor?id=${board.id}`);
-                        }
+                        router.push(`/boards/editor?id=${board.id}`);
                       }
                     } else {
                       // User not logged in, go to step 3 (auth)
@@ -732,12 +727,7 @@ function CreateBoardPageContent() {
                         setAuthError('Error creating board: ' + boardError);
                         setAuthLoadingState(false);
                       } else if (board) {
-                        // Redirect based on format type
-                        if (selectedFormat === 'card') {
-                          router.push(`/cards/create?id=${board.id}`);
-                        } else {
-                          router.push(`/boards/editor?id=${board.id}`);
-                        }
+                        router.push(`/boards/editor?id=${board.id}`);
                       }
                     }
                   } else {
@@ -764,12 +754,7 @@ function CreateBoardPageContent() {
                           setAuthError('Error creating board: ' + boardError);
                           setAuthLoadingState(false);
                         } else if (board) {
-                          // Redirect based on format type
-                          if (selectedFormat === 'card') {
-                            router.push(`/cards/create?id=${board.id}`);
-                          } else {
-                            router.push(`/boards/editor?id=${board.id}`);
-                          }
+                          router.push(`/boards/editor?id=${board.id}`);
                         }
                       }
                     }
