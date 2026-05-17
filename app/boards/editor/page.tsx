@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -21,7 +21,7 @@ import { getBackgroundCssValue } from "@/lib/backgrounds";
 import { loadLottieAnimationData } from "@/lib/lotties";
 import { loadEffectAnimationData } from "@/lib/effects";
 
-export default function BoardEditorPage() {
+function BoardEditorPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, loading } = useAuth();
@@ -1795,5 +1795,13 @@ export default function BoardEditorPage() {
       </div>
     </div>
     </>
+  );
+}
+
+export default function BoardEditorPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#F7FAFC] flex items-center justify-center"><div className="text-[#2CB1A6] text-xl">Loading...</div></div>}>
+      <BoardEditorPageContent />
+    </Suspense>
   );
 }
