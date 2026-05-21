@@ -144,6 +144,8 @@ interface BackgroundSelectionPanelProps {
   selectedOccasion: string;
   onSelectBackground: (background: Background) => void;
   currentBackground?: Background | null;
+  hideAnimations?: boolean; // Hide animation tab (for page backgrounds)
+  onlyAnimations?: boolean; // Show only animations, hide patterns and solid colors (for card themes)
 }
 
 // Animation Card Component
@@ -233,8 +235,12 @@ export default function BackgroundSelectionPanel({
   selectedOccasion,
   onSelectBackground,
   currentBackground,
+  hideAnimations = false,
+  onlyAnimations = false,
 }: BackgroundSelectionPanelProps) {
-  const [activeTab, setActiveTab] = useState<TabType>('animation');
+  const [activeTab, setActiveTab] = useState<TabType>(
+    onlyAnimations ? 'animation' : hideAnimations ? 'pattern' : 'animation'
+  );
   const [loading, setLoading] = useState(false);
 
   // Solid color state
@@ -362,36 +368,42 @@ export default function BackgroundSelectionPanel({
           {/* Tabs */}
           <div className="border-b border-[#E5EAF0] bg-white">
             <div className="px-8 flex gap-1">
-              <button
-                onClick={() => setActiveTab('animation')}
-                className={`px-6 py-3 font-semibold transition-all ${
-                  activeTab === 'animation'
-                    ? 'text-[#2CB1A6] border-b-2 border-[#2CB1A6]'
-                    : 'text-[#5B6B75] hover:text-[#0B1F2A]'
-                }`}
-              >
-                Animations
-              </button>
-              <button
-                onClick={() => setActiveTab('pattern')}
-                className={`px-6 py-3 font-semibold transition-all ${
-                  activeTab === 'pattern'
-                    ? 'text-[#2CB1A6] border-b-2 border-[#2CB1A6]'
-                    : 'text-[#5B6B75] hover:text-[#0B1F2A]'
-                }`}
-              >
-                Patterns
-              </button>
-              <button
-                onClick={() => setActiveTab('solid')}
-                className={`px-6 py-3 font-semibold transition-all ${
-                  activeTab === 'solid'
-                    ? 'text-[#2CB1A6] border-b-2 border-[#2CB1A6]'
-                    : 'text-[#5B6B75] hover:text-[#0B1F2A]'
-                }`}
-              >
-                Solid Color
-              </button>
+              {!hideAnimations && (
+                <button
+                  onClick={() => setActiveTab('animation')}
+                  className={`px-6 py-3 font-semibold transition-all ${
+                    activeTab === 'animation'
+                      ? 'text-[#2CB1A6] border-b-2 border-[#2CB1A6]'
+                      : 'text-[#5B6B75] hover:text-[#0B1F2A]'
+                  }`}
+                >
+                  Animations
+                </button>
+              )}
+              {!onlyAnimations && (
+                <>
+                  <button
+                    onClick={() => setActiveTab('pattern')}
+                    className={`px-6 py-3 font-semibold transition-all ${
+                      activeTab === 'pattern'
+                        ? 'text-[#2CB1A6] border-b-2 border-[#2CB1A6]'
+                        : 'text-[#5B6B75] hover:text-[#0B1F2A]'
+                    }`}
+                  >
+                    Patterns
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('solid')}
+                    className={`px-6 py-3 font-semibold transition-all ${
+                      activeTab === 'solid'
+                        ? 'text-[#2CB1A6] border-b-2 border-[#2CB1A6]'
+                        : 'text-[#5B6B75] hover:text-[#0B1F2A]'
+                    }`}
+                  >
+                    Solid Color
+                  </button>
+                </>
+              )}
             </div>
           </div>
 

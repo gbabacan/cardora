@@ -3,6 +3,14 @@ import type { Background } from './backgrounds';
 import { createSolidBackground } from './backgrounds';
 import type { Effect } from './effects';
 
+export interface Texture {
+  id: string;
+  name: string;
+  description: string;
+  file_path: string;
+  category: string;
+}
+
 export interface Board {
   id: string;
   short_id: string;
@@ -17,6 +25,7 @@ export interface Board {
   scheduled_delivery?: string;
   background?: string;
   background_id?: string;
+  card_background_id?: string;
   header_color: boolean;
   header_color_code?: string;
   title_font: string;
@@ -26,12 +35,15 @@ export interface Board {
   intro_animation: boolean;
   effects: string;
   effect_id?: string;
+  texture_id?: string;
   created_at: string;
   updated_at: string;
 
   // Joined data
-  background_data?: Background;
+  background_data?: Background; // Page background (patterns/solid colors)
   effect_data?: Effect;
+  texture_data?: Texture;
+  card_background_data?: Background; // Card theme (animation/lottie)
 }
 
 export interface Recipient {
@@ -131,12 +143,17 @@ export async function getBoardById(boardId: string) {
       .from('boards')
       .select(`
         *,
-        background_data:backgrounds(
+        background_data:backgrounds!background_id(
           *,
           pattern:patterns(*),
           lottie_animation:lottie_animations(*)
         ),
-        effect_data:effects(*)
+        effect_data:effects(*),
+        texture_data:textures(*),
+        card_background_data:backgrounds!card_background_id(
+          *,
+          lottie_animation:lottie_animations(*)
+        )
       `)
       .eq('id', boardId)
       .single();
@@ -165,12 +182,17 @@ export async function getBoardByShortId(shortId: string) {
       .from('boards')
       .select(`
         *,
-        background_data:backgrounds(
+        background_data:backgrounds!background_id(
           *,
           pattern:patterns(*),
           lottie_animation:lottie_animations(*)
         ),
-        effect_data:effects(*)
+        effect_data:effects(*),
+        texture_data:textures(*),
+        card_background_data:backgrounds!card_background_id(
+          *,
+          lottie_animation:lottie_animations(*)
+        )
       `)
       .eq('short_id', shortId)
       .single();

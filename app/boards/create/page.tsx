@@ -659,7 +659,7 @@ function CreateBoardPageContent() {
                       } else if (board) {
                         // Redirect based on format type
                         if (selectedFormat === 'card') {
-                          router.push(`/cards/create?id=${board.id}`);
+                          router.push(`/cards/editor?id=${board.id}`);
                         } else {
                           router.push(`/boards/editor?id=${board.id}`);
                         }
@@ -734,7 +734,7 @@ function CreateBoardPageContent() {
                       } else if (board) {
                         // Redirect based on format type
                         if (selectedFormat === 'card') {
-                          router.push(`/cards/create?id=${board.id}`);
+                          router.push(`/cards/editor?id=${board.id}`);
                         } else {
                           router.push(`/boards/editor?id=${board.id}`);
                         }
@@ -766,7 +766,7 @@ function CreateBoardPageContent() {
                         } else if (board) {
                           // Redirect based on format type
                           if (selectedFormat === 'card') {
-                            router.push(`/cards/create?id=${board.id}`);
+                            router.push(`/cards/editor?id=${board.id}`);
                           } else {
                             router.push(`/boards/editor?id=${board.id}`);
                           }

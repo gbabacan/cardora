@@ -224,3 +224,43 @@ export async function addUnsplashToMessage(data: {
     return { media: null, error: error.message };
   }
 }
+
+// Delete all media for a message
+export async function deleteMessageMedia(messageId: string) {
+  try {
+    // First, get all media for this message to delete files from storage
+    const { data: mediaList, error: fetchError } = await supabase
+      .from('media')
+      .select('id, file_url')
+      .eq('message_id', messageId);
+
+    if (fetchError) throw fetchError;
+
+    // Delete files from storage (only for uploaded files, not external URLs)
+    if (mediaList) {
+      for (const media of mediaList) {
+        if (media.file_url.includes('board-media')) {
+          const fileName = media.file_url.split('board-media/')[1];
+          if (fileName) {
+            await supabase.storage
+              .from('board-media')
+              .remove([fileName]);
+          }
+        }
+      }
+    }
+
+    // Delete media records from database
+    const { error: deleteError } = await supabase
+      .from('media')
+      .delete()
+      .eq('message_id', messageId);
+
+    if (deleteError) throw deleteError;
+
+    return { error: null };
+  } catch (error: any) {
+    console.error('Error deleting message media:', error);
+    return { error: error.message };
+  }
+}
