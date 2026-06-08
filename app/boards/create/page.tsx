@@ -3,255 +3,14 @@
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import Lottie from "lottie-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { signUp, signIn } from "@/lib/auth";
 import { createBoard } from "@/lib/boards";
 import Toast from "@/components/Toast";
+import { getOccasionsWithLottieData, OccasionWithLottieData } from "@/lib/occasions";
 
-const OCCASIONS = [
-  {
-    id: 'thank-you',
-    name: 'Thank You',
-    placeholder: 'e.g., Thank You for Your Hard Work!',
-    exampleImage: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=600&h=800&fit=crop',
-    icon: (
-      <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-      </svg>
-    ),
-    gradient: 'from-rose-400 to-pink-500',
-  },
-  {
-    id: 'birthdays',
-    name: 'Birthdays',
-    placeholder: 'e.g., Happy Birthday Sarah!',
-    exampleImage: 'https://images.unsplash.com/photo-1558636508-e0db3814bd1d?w=600&h=800&fit=crop',
-    icon: (
-      <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.701 2.701 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18zm-3-9v-2a2 2 0 00-2-2H8a2 2 0 00-2 2v2h12z" />
-      </svg>
-    ),
-    gradient: 'from-purple-400 to-indigo-500',
-  },
-  {
-    id: 'new-baby',
-    name: 'New Baby',
-    placeholder: 'e.g., Welcome Baby Emma!',
-    exampleImage: 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=600&h=800&fit=crop',
-    icon: (
-      <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
-    gradient: 'from-blue-400 to-cyan-500',
-  },
-  {
-    id: 'team-celebration',
-    name: 'Team Celebration',
-    placeholder: 'e.g., Amazing Job on the Product Launch!',
-    exampleImage: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=600&h=800&fit=crop',
-    icon: (
-      <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-      </svg>
-    ),
-    gradient: 'from-emerald-400 to-teal-500',
-  },
-  {
-    id: 'company-celebration',
-    name: 'Company Celebration',
-    placeholder: 'e.g., Celebrating 10 Years of Success!',
-    exampleImage: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=600&h=800&fit=crop',
-    icon: (
-      <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-      </svg>
-    ),
-    gradient: 'from-amber-400 to-orange-500',
-  },
-  {
-    id: 'work-anniversary',
-    name: 'Work Anniversary',
-    placeholder: 'e.g., 5 Years with Our Amazing Team!',
-    exampleImage: 'https://images.unsplash.com/photo-1530099486328-e021101a494a?w=600&h=800&fit=crop',
-    icon: (
-      <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-      </svg>
-    ),
-    gradient: 'from-yellow-400 to-amber-500',
-  },
-  {
-    id: 'farewell',
-    name: 'Farewell',
-    placeholder: 'e.g., Goodbye and Good Luck, Michael!',
-    exampleImage: 'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=600&h=800&fit=crop',
-    icon: (
-      <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
-      </svg>
-    ),
-    gradient: 'from-sky-400 to-blue-500',
-  },
-  {
-    id: 'retirement',
-    name: 'Retirement',
-    placeholder: 'e.g., Happy Retirement, Bob!',
-    exampleImage: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&h=800&fit=crop',
-    icon: (
-      <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-      </svg>
-    ),
-    gradient: 'from-violet-400 to-purple-500',
-  },
-  {
-    id: 'congratulations',
-    name: 'Congratulations',
-    placeholder: 'e.g., Congrats on Your New Role!',
-    exampleImage: 'https://images.unsplash.com/photo-1464547323744-4edd0cd0c746?w=600&h=800&fit=crop',
-    icon: (
-      <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-      </svg>
-    ),
-    gradient: 'from-fuchsia-400 to-pink-500',
-  },
-  {
-    id: 'recruiting-onboarding',
-    name: 'Recruiting & Onboarding',
-    placeholder: 'e.g., Welcome to the Team, Jessica!',
-    exampleImage: 'https://images.unsplash.com/photo-1553877522-43269d4ea984?w=600&h=800&fit=crop',
-    icon: (
-      <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-      </svg>
-    ),
-    gradient: 'from-green-400 to-emerald-500',
-  },
-  {
-    id: 'office-competition',
-    name: 'Office Competition',
-    placeholder: 'e.g., Great Job Winning the Challenge!',
-    exampleImage: 'https://images.unsplash.com/photo-1552581234-26160f608093?w=600&h=800&fit=crop',
-    icon: (
-      <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-      </svg>
-    ),
-    gradient: 'from-red-400 to-rose-500',
-  },
-  {
-    id: 'sympathy',
-    name: 'Sympathy',
-    placeholder: 'e.g., Our Thoughts Are With You',
-    exampleImage: 'https://images.unsplash.com/photo-1490818387583-1baba5e638af?w=600&h=800&fit=crop',
-    icon: (
-      <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-      </svg>
-    ),
-    gradient: 'from-slate-400 to-gray-500',
-  },
-  {
-    id: 'get-well-soon',
-    name: 'Get Well Soon',
-    placeholder: 'e.g., Get Well Soon, Alex!',
-    exampleImage: 'https://images.unsplash.com/photo-1516733725897-1aa73b87c8e8?w=600&h=800&fit=crop',
-    icon: (
-      <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-      </svg>
-    ),
-    gradient: 'from-lime-400 to-green-500',
-  },
-  {
-    id: 'employee-appreciation',
-    name: 'Employee Appreciation',
-    placeholder: 'e.g., You Make a Difference Every Day!',
-    exampleImage: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=600&h=800&fit=crop',
-    icon: (
-      <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
-      </svg>
-    ),
-    gradient: 'from-orange-400 to-red-500',
-  },
-  {
-    id: 'holiday-celebration',
-    name: 'Holiday Celebration',
-    placeholder: 'e.g., Happy Holidays from Our Team!',
-    exampleImage: 'https://images.unsplash.com/photo-1512389142860-9c449e58a543?w=600&h=800&fit=crop',
-    icon: (
-      <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-      </svg>
-    ),
-    gradient: 'from-red-400 to-green-500',
-  },
-  {
-    id: 'fathers-day',
-    name: "Father's Day",
-    placeholder: "e.g., Happy Father's Day, Dad!",
-    exampleImage: 'https://images.unsplash.com/photo-1531983412531-1f49a365ffed?w=600&h=800&fit=crop',
-    icon: (
-      <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-      </svg>
-    ),
-    gradient: 'from-blue-500 to-indigo-600',
-  },
-  {
-    id: 'mothers-day',
-    name: "Mother's Day",
-    placeholder: "e.g., Happy Mother's Day, Mom!",
-    exampleImage: 'https://images.unsplash.com/photo-1527689368864-3a821dbccc34?w=600&h=800&fit=crop',
-    icon: (
-      <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-      </svg>
-    ),
-    gradient: 'from-pink-500 to-rose-600',
-  },
-  {
-    id: 'valentines-day',
-    name: "Valentine's Day",
-    placeholder: "e.g., Happy Valentine's Day, Sweetheart!",
-    exampleImage: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=600&h=800&fit=crop',
-    icon: (
-      <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-      </svg>
-    ),
-    gradient: 'from-red-500 to-pink-600',
-  },
-  {
-    id: 'weddings',
-    name: 'Weddings',
-    placeholder: 'e.g., Congratulations on Your Wedding!',
-    exampleImage: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=600&h=800&fit=crop',
-    icon: (
-      <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-      </svg>
-    ),
-    gradient: 'from-rose-300 to-pink-400',
-  },
-  {
-    id: 'any-other',
-    name: 'Any Other',
-    placeholder: 'e.g., Celebrating a Special Moment!',
-    exampleImage: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&h=800&fit=crop',
-    icon: (
-      <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-      </svg>
-    ),
-    gradient: 'from-gray-400 to-slate-500',
-  },
-];
 
 function CreateBoardPageContent() {
   const searchParams = useSearchParams();
@@ -264,6 +23,9 @@ function CreateBoardPageContent() {
   const [cardTitle, setCardTitle] = useState("");
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedFormat, setSelectedFormat] = useState<'board' | 'card' | null>(null);
+  const [occasions, setOccasions] = useState<OccasionWithLottieData[]>([]);
+  const [occasionsLoading, setOccasionsLoading] = useState(true);
+  const [occasionLottie, setOccasionLottie] = useState<any>(null);
 
   // Auth form states
   const [name, setName] = useState("");
@@ -276,17 +38,62 @@ function CreateBoardPageContent() {
   // Toast state
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
-  const filteredOccasions = OCCASIONS.filter((occasion) =>
+  const filteredOccasions = occasions.filter((occasion) =>
     occasion.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Fetch occasions from database with their lottie animations
+  useEffect(() => {
+    async function fetchOccasions() {
+      setOccasionsLoading(true);
+      try {
+        const { occasions: fetchedOccasions, error } = await getOccasionsWithLottieData();
+
+        if (error) {
+          console.error('Error fetching occasions:', error);
+        } else {
+          setOccasions(fetchedOccasions);
+        }
+      } catch (err) {
+        console.error('Error in fetchOccasions:', err);
+      } finally {
+        setOccasionsLoading(false);
+      }
+    }
+
+    fetchOccasions();
+  }, []);
 
   // Auto-select occasion from URL parameter
   useEffect(() => {
     const occasionParam = searchParams.get('occasion');
-    if (occasionParam && OCCASIONS.find(o => o.id === occasionParam)) {
+    if (occasionParam && occasions.find(o => o.short_id === occasionParam)) {
       setSelectedOccasion(occasionParam);
     }
-  }, [searchParams]);
+  }, [searchParams, occasions]);
+
+  // Load lottie when occasion is selected
+  useEffect(() => {
+    if (selectedOccasion) {
+      const occasion = occasions.find(o => o.short_id === selectedOccasion);
+      if (occasion?.lottieData) {
+        setOccasionLottie(occasion.lottieData);
+      } else if (selectedOccasion === 'any-other') {
+        // Load default lottie for "Any Other" occasion
+        fetch('/lotties/teamcelebration/teamCelebration1.json')
+          .then(res => res.json())
+          .then(data => setOccasionLottie(data))
+          .catch(err => {
+            console.error('Error loading any-other lottie:', err);
+            setOccasionLottie(null);
+          });
+      } else {
+        setOccasionLottie(null);
+      }
+    } else {
+      setOccasionLottie(null);
+    }
+  }, [selectedOccasion, occasions]);
 
   const addRecipient = () => {
     setRecipients([...recipients, '']);
@@ -400,18 +207,39 @@ function CreateBoardPageContent() {
             </div>
 
             {/* Occasions Grid */}
-            {filteredOccasions.length > 0 ? (
+            {occasionsLoading ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                {Array.from({ length: 20 }).map((_, index) => (
+                  <div key={index} className="bg-white rounded-xl p-4 shadow-md animate-pulse">
+                    <div className="w-24 h-24 mx-auto mb-3 bg-[#F7FAFC] rounded-lg"></div>
+                    <div className="h-4 bg-[#F7FAFC] rounded w-3/4 mx-auto"></div>
+                  </div>
+                ))}
+              </div>
+            ) : filteredOccasions.length > 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                 {filteredOccasions.map((occasion) => (
                 <button
                   key={occasion.id}
-                  onClick={() => setSelectedOccasion(occasion.id)}
-                  className="group relative bg-white rounded-xl p-4 shadow-md hover:shadow-2xl transition-all duration-300 hover:scale-105 border-2 border-[#E5EAF0] hover:border-[#2CB1A6]"
+                  onClick={() => setSelectedOccasion(occasion.short_id)}
+                  className={`group relative bg-white rounded-xl p-4 shadow-md hover:shadow-2xl transition-all duration-300 hover:scale-105 border-2 border-[#E5EAF0] hover:border-[#2CB1A6] ${occasion.short_id === 'any-other' ? 'col-span-2 md:col-span-3 lg:col-span-4 xl:col-span-5' : ''}`}
                 >
-                  {/* Icon Container */}
-                  <div className="w-14 h-14 mx-auto mb-3 rounded-lg bg-transparent p-3 text-[#2CB1A6] group-hover:scale-110 transition-transform duration-300">
-                    {occasion.icon}
-                  </div>
+                  {/* Lottie Animation */}
+                  {occasion.lottieData ? (
+                    <div className="w-24 h-24 mx-auto mb-3 rounded-lg bg-transparent text-[#2CB1A6] group-hover:scale-110 transition-transform duration-300">
+                      <Lottie
+                        animationData={occasion.lottieData}
+                        loop={true}
+                        style={{ width: '100%', height: '100%' }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-24 h-24 mx-auto mb-3 rounded-lg bg-[#F7FAFC] flex items-center justify-center text-[#2CB1A6] group-hover:scale-110 transition-transform duration-300">
+                      <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                      </svg>
+                    </div>
+                  )}
 
                   {/* Occasion Name */}
                   <h3 className="text-center text-sm font-bold text-[#0B1F2A] group-hover:text-[#2CB1A6] transition-colors">
@@ -440,27 +268,25 @@ function CreateBoardPageContent() {
         }`}
       >
         <div
-          className={`bg-white rounded-2xl shadow-2xl w-full max-w-6xl mx-4 max-h-[90vh] flex transform transition-all duration-500 overflow-hidden ${
+          className={`bg-white rounded-2xl shadow-2xl w-full max-w-6xl mx-4 my-4 h-[75vh] flex transform transition-all duration-500 overflow-hidden ${
             selectedOccasion ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
           }`}
         >
-          {/* Left Panel - Example Image */}
+          {/* Left Panel - Lottie Animation */}
           <div className="hidden md:flex md:w-1/2 bg-[#E8F5F4] items-center justify-center p-8 relative">
-            {selectedOccasion && (
-              <>
-                <div className="relative max-w-md">
-                  <img
-                    src={OCCASIONS.find(o => o.id === selectedOccasion)?.exampleImage}
-                    alt={OCCASIONS.find(o => o.id === selectedOccasion)?.name + " example"}
-                    className="rounded-2xl shadow-2xl w-full"
-                  />
-                </div>
-              </>
+            {selectedOccasion && occasionLottie && (
+              <div className="w-64 h-64">
+                <Lottie
+                  animationData={occasionLottie}
+                  loop={true}
+                  style={{ width: '100%', height: '100%' }}
+                />
+              </div>
             )}
           </div>
 
           {/* Right Panel - Form */}
-          <div className="w-full md:w-1/2 flex flex-col max-h-[90vh] relative overflow-hidden">
+          <div className="w-full md:w-1/2 flex flex-col h-full relative overflow-hidden">
             {/* Step 1: Details */}
             <div className={`absolute inset-0 flex flex-col transition-transform duration-500 ${currentStep === 1 ? 'translate-x-0' : '-translate-x-full'}`}>
               {/* Panel Header */}
@@ -473,13 +299,19 @@ function CreateBoardPageContent() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
-                {selectedOccasion && (
+                {selectedOccasion && occasions.find(o => o.short_id === selectedOccasion) && (
                   <>
-                    <div className="w-16 h-16 mb-4 rounded-xl bg-[#E8F5F4] p-3 text-[#2CB1A6]">
-                      {OCCASIONS.find(o => o.id === selectedOccasion)?.icon}
-                    </div>
+                    {occasionLottie && (
+                      <div className="w-16 h-16 mb-4">
+                        <Lottie
+                          animationData={occasionLottie}
+                          loop={true}
+                          style={{ width: '100%', height: '100%' }}
+                        />
+                      </div>
+                    )}
                     <h2 className="text-3xl font-bold text-[#0B1F2A] mb-2">
-                      {OCCASIONS.find(o => o.id === selectedOccasion)?.name}
+                      {occasions.find(o => o.short_id === selectedOccasion)?.name}
                     </h2>
                     <p className="text-[#5B6B75]">
                       Create a beautiful group card for this special occasion
@@ -500,7 +332,7 @@ function CreateBoardPageContent() {
                   type="text"
                   value={cardTitle}
                   onChange={(e) => setCardTitle(e.target.value)}
-                  placeholder={OCCASIONS.find(o => o.id === selectedOccasion)?.placeholder || "e.g., Happy Birthday Sarah!"}
+                  placeholder={`e.g., ${occasions.find(o => o.short_id === selectedOccasion)?.name || "Happy Birthday Sarah!"}`}
                   className="w-full px-4 py-3 bg-[#F7FAFC] border-2 border-[#E5EAF0] rounded-lg focus:border-[#2CB1A6] focus:outline-none transition-colors"
                 />
               </div>

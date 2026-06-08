@@ -3,7 +3,10 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import Lottie from "lottie-react";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/lib/supabase";
+import { getOccasionsWithLottieData, OccasionWithLottieData } from "@/lib/occasions";
 
 const TESTIMONIALS = [
   {
@@ -49,6 +52,32 @@ export default function Home() {
   const [isAnimating, setIsAnimating] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
   const [showFeaturesDropdown, setShowFeaturesDropdown] = useState(false);
+  const [alternateText, setAlternateText] = useState<'together' | 'individually'>('together');
+  const [currentHeroItem, setCurrentHeroItem] = useState(0);
+  const [heroLottie1, setHeroLottie1] = useState<any>(null);
+  const [heroLottie2, setHeroLottie2] = useState<any>(null);
+  const [heroLottie3, setHeroLottie3] = useState<any>(null);
+  const [heroLottie4, setHeroLottie4] = useState<any>(null);
+  const [heroLottie5, setHeroLottie5] = useState<any>(null);
+  const [occasions, setOccasions] = useState<any[]>([]);
+  const [occasionsLoading, setOccasionsLoading] = useState(true);
+  const [howItWorksLottie1, setHowItWorksLottie1] = useState<any>(null);
+  const [howItWorksLottie2, setHowItWorksLottie2] = useState<any>(null);
+  const [howItWorksLottie3, setHowItWorksLottie3] = useState<any>(null);
+  const [howItWorksLottie4, setHowItWorksLottie4] = useState<any>(null);
+  const [currentHowItWorksItem, setCurrentHowItWorksItem] = useState(0);
+  const [birthdayExampleLottie, setBirthdayExampleLottie] = useState<any>(null);
+  const [weddingExampleLottie, setWeddingExampleLottie] = useState<any>(null);
+  const [newBabyExampleLottie, setNewBabyExampleLottie] = useState<any>(null);
+  const [congratulationsExampleLottie, setCongratulationsExampleLottie] = useState<any>(null);
+  const [farewellExampleLottie, setFarewellExampleLottie] = useState<any>(null);
+  const [teamCelebrationExampleLottie, setTeamCelebrationExampleLottie] = useState<any>(null);
+  const [showFormatModal, setShowFormatModal] = useState(false);
+  const [showWeddingFormatModal, setShowWeddingFormatModal] = useState(false);
+  const [showNewBabyFormatModal, setShowNewBabyFormatModal] = useState(false);
+  const [showCongratulationsFormatModal, setShowCongratulationsFormatModal] = useState(false);
+  const [showFarewellFormatModal, setShowFarewellFormatModal] = useState(false);
+  const [showTeamCelebrationFormatModal, setShowTeamCelebrationFormatModal] = useState(false);
 
   const nextTestimonial = () => {
     setIsAnimating(true);
@@ -74,8 +103,402 @@ export default function Home() {
 
     return () => clearInterval(interval);
   }, []);
+
+  // Alternate between "Together" and "Individually" every 2 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setAlternateText(prev => prev === 'together' ? 'individually' : 'together');
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Load hero section lotties
+  useEffect(() => {
+    fetch('/lotties/birthday/birthday1.json')
+      .then(res => res.json())
+      .then(data => setHeroLottie1(data))
+      .catch(err => console.error('Error loading hero lottie 1:', err));
+
+    fetch('/lotties/welcome/welcome4.json')
+      .then(res => res.json())
+      .then(data => setHeroLottie2(data))
+      .catch(err => console.error('Error loading hero lottie 2:', err));
+
+    fetch('/lotties/love/love3.json')
+      .then(res => res.json())
+      .then(data => setHeroLottie3(data))
+      .catch(err => console.error('Error loading hero lottie 3:', err));
+
+    fetch('/lotties/newbaby/baby1.json')
+      .then(res => res.json())
+      .then(data => setHeroLottie4(data))
+      .catch(err => console.error('Error loading hero lottie 4:', err));
+
+    fetch('/lotties/love/love2.json')
+      .then(res => res.json())
+      .then(data => setHeroLottie5(data))
+      .catch(err => console.error('Error loading hero lottie 5:', err));
+
+    // Load "How It Works" section lotties
+    fetch('/lotties/love/love1.json')
+      .then(res => res.json())
+      .then(data => setHowItWorksLottie1(data))
+      .catch(err => console.error('Error loading how it works lottie 1:', err));
+
+    fetch('/lotties/love/love5.json')
+      .then(res => res.json())
+      .then(data => setHowItWorksLottie2(data))
+      .catch(err => console.error('Error loading how it works lottie 2:', err));
+
+    fetch('/lotties/newbaby/baby4.json')
+      .then(res => res.json())
+      .then(data => setHowItWorksLottie3(data))
+      .catch(err => console.error('Error loading how it works lottie 3:', err));
+
+    fetch('/lotties/christmas/christmas1.json')
+      .then(res => res.json())
+      .then(data => setHowItWorksLottie4(data))
+      .catch(err => console.error('Error loading how it works lottie 4:', err));
+
+    // Load birthday example lottie
+    fetch('/lotties/birthday/birthday1.json')
+      .then(res => res.json())
+      .then(data => setBirthdayExampleLottie(data))
+      .catch(err => console.error('Error loading birthday example lottie:', err));
+
+    // Load wedding example lottie
+    fetch('/lotties/wedding/wedding2.json')
+      .then(res => res.json())
+      .then(data => setWeddingExampleLottie(data))
+      .catch(err => console.error('Error loading wedding example lottie:', err));
+
+    // Load new baby example lottie
+    fetch('/lotties/newbaby/baby1.json')
+      .then(res => res.json())
+      .then(data => setNewBabyExampleLottie(data))
+      .catch(err => console.error('Error loading new baby example lottie:', err));
+
+    // Load congratulations example lottie
+    fetch('/lotties/congratulations/congratulations3.json')
+      .then(res => res.json())
+      .then(data => setCongratulationsExampleLottie(data))
+      .catch(err => console.error('Error loading congratulations example lottie:', err));
+
+    // Load farewell example lottie
+    fetch('/lotties/farewell/farewell4.json')
+      .then(res => res.json())
+      .then(data => setFarewellExampleLottie(data))
+      .catch(err => console.error('Error loading farewell example lottie:', err));
+
+    // Load team celebration example lottie
+    fetch('/lotties/teamcelebration/teamCelebration1.json')
+      .then(res => res.json())
+      .then(data => setTeamCelebrationExampleLottie(data))
+      .catch(err => console.error('Error loading team celebration example lottie:', err));
+  }, []);
+
+  // Rotate hero items (image + 5 lotties) every 3 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentHeroItem(prev => (prev + 1) % 6);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Rotate "How It Works" lotties every 3 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentHowItWorksItem(prev => (prev + 1) % 4);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Fetch occasions from database with their lottie animations
+  useEffect(() => {
+    async function fetchOccasions() {
+      setOccasionsLoading(true);
+      try {
+        const { occasions, error } = await getOccasionsWithLottieData(15);
+
+        if (error) {
+          console.error('Error fetching occasions:', error);
+        } else {
+          setOccasions(occasions);
+        }
+      } catch (err) {
+        console.error('Error in fetchOccasions:', err);
+      } finally {
+        setOccasionsLoading(false);
+      }
+    }
+
+    fetchOccasions();
+  }, []);
   return (
     <div className="min-h-screen bg-white">
+      {/* Team Celebration Format Selection Modal */}
+      {showTeamCelebrationFormatModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative">
+            <button
+              onClick={() => setShowTeamCelebrationFormatModal(false)}
+              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#F7FAFC] transition-colors"
+            >
+              <svg className="w-5 h-5 text-[#0B1F2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <h2 className="text-2xl font-bold text-[#0B1F2A] mb-2">Choose Format</h2>
+            <p className="text-[#5B6B75] mb-6">Select which type of team celebration sample you&apos;d like to view</p>
+            <div className="grid grid-cols-2 gap-4">
+              <Link href="/boards/3d06eddd/view" target="_blank" rel="noopener noreferrer" onClick={() => setShowTeamCelebrationFormatModal(false)}>
+                <div className="group p-6 border-2 border-[#E5EAF0] hover:border-[#2CB1A6] rounded-xl cursor-pointer transition-all hover:shadow-lg h-full flex flex-col items-center text-center">
+                  <div className="w-16 h-16 bg-[#E8F5F4] rounded-full flex items-center justify-center mb-4 group-hover:bg-[#2CB1A6] transition-colors">
+                    <svg className="w-8 h-8 text-[#2CB1A6] group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                  </div>
+                  <h3 className="font-bold text-[#0B1F2A] mb-2">Board</h3>
+                  <p className="text-sm text-[#5B6B75]">Multiple people add messages together</p>
+                </div>
+              </Link>
+              <Link href="/cards/ea80cbc1/view" target="_blank" rel="noopener noreferrer" onClick={() => setShowTeamCelebrationFormatModal(false)}>
+                <div className="group p-6 border-2 border-[#E5EAF0] hover:border-[#2CB1A6] rounded-xl cursor-pointer transition-all hover:shadow-lg h-full flex flex-col items-center text-center">
+                  <div className="w-16 h-16 bg-[#E8F5F4] rounded-full flex items-center justify-center mb-4 group-hover:bg-[#2CB1A6] transition-colors">
+                    <svg className="w-8 h-8 text-[#2CB1A6] group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                    </svg>
+                  </div>
+                  <h3 className="font-bold text-[#0B1F2A] mb-2">Card</h3>
+                  <p className="text-sm text-[#5B6B75]">Perfect for a single contributor</p>
+                </div>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Farewell Format Selection Modal */}
+      {showFarewellFormatModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative">
+            <button
+              onClick={() => setShowFarewellFormatModal(false)}
+              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#F7FAFC] transition-colors"
+            >
+              <svg className="w-5 h-5 text-[#0B1F2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <h2 className="text-2xl font-bold text-[#0B1F2A] mb-2">Choose Format</h2>
+            <p className="text-[#5B6B75] mb-6">Select which type of farewell sample you&apos;d like to view</p>
+            <div className="grid grid-cols-2 gap-4">
+              <Link href="/boards/778b616a/view" target="_blank" rel="noopener noreferrer" onClick={() => setShowFarewellFormatModal(false)}>
+                <div className="group p-6 border-2 border-[#E5EAF0] hover:border-[#2CB1A6] rounded-xl cursor-pointer transition-all hover:shadow-lg h-full flex flex-col items-center text-center">
+                  <div className="w-16 h-16 bg-[#E8F5F4] rounded-full flex items-center justify-center mb-4 group-hover:bg-[#2CB1A6] transition-colors">
+                    <svg className="w-8 h-8 text-[#2CB1A6] group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                  </div>
+                  <h3 className="font-bold text-[#0B1F2A] mb-2">Board</h3>
+                  <p className="text-sm text-[#5B6B75]">Multiple people add messages together</p>
+                </div>
+              </Link>
+              <Link href="/cards/159aa8d4/view" target="_blank" rel="noopener noreferrer" onClick={() => setShowFarewellFormatModal(false)}>
+                <div className="group p-6 border-2 border-[#E5EAF0] hover:border-[#2CB1A6] rounded-xl cursor-pointer transition-all hover:shadow-lg h-full flex flex-col items-center text-center">
+                  <div className="w-16 h-16 bg-[#E8F5F4] rounded-full flex items-center justify-center mb-4 group-hover:bg-[#2CB1A6] transition-colors">
+                    <svg className="w-8 h-8 text-[#2CB1A6] group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                    </svg>
+                  </div>
+                  <h3 className="font-bold text-[#0B1F2A] mb-2">Card</h3>
+                  <p className="text-sm text-[#5B6B75]">Perfect for a single contributor</p>
+                </div>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Congratulations Format Selection Modal */}
+      {showCongratulationsFormatModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative">
+            <button
+              onClick={() => setShowCongratulationsFormatModal(false)}
+              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#F7FAFC] transition-colors"
+            >
+              <svg className="w-5 h-5 text-[#0B1F2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <h2 className="text-2xl font-bold text-[#0B1F2A] mb-2">Choose Format</h2>
+            <p className="text-[#5B6B75] mb-6">Select which type of congratulations sample you&apos;d like to view</p>
+            <div className="grid grid-cols-2 gap-4">
+              <Link href="/boards/4c61181a/view" target="_blank" rel="noopener noreferrer" onClick={() => setShowCongratulationsFormatModal(false)}>
+                <div className="group p-6 border-2 border-[#E5EAF0] hover:border-[#2CB1A6] rounded-xl cursor-pointer transition-all hover:shadow-lg h-full flex flex-col items-center text-center">
+                  <div className="w-16 h-16 bg-[#E8F5F4] rounded-full flex items-center justify-center mb-4 group-hover:bg-[#2CB1A6] transition-colors">
+                    <svg className="w-8 h-8 text-[#2CB1A6] group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                  </div>
+                  <h3 className="font-bold text-[#0B1F2A] mb-2">Board</h3>
+                  <p className="text-sm text-[#5B6B75]">Multiple people add messages together</p>
+                </div>
+              </Link>
+              <Link href="/cards/40415dc3/view" target="_blank" rel="noopener noreferrer" onClick={() => setShowCongratulationsFormatModal(false)}>
+                <div className="group p-6 border-2 border-[#E5EAF0] hover:border-[#2CB1A6] rounded-xl cursor-pointer transition-all hover:shadow-lg h-full flex flex-col items-center text-center">
+                  <div className="w-16 h-16 bg-[#E8F5F4] rounded-full flex items-center justify-center mb-4 group-hover:bg-[#2CB1A6] transition-colors">
+                    <svg className="w-8 h-8 text-[#2CB1A6] group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                    </svg>
+                  </div>
+                  <h3 className="font-bold text-[#0B1F2A] mb-2">Card</h3>
+                  <p className="text-sm text-[#5B6B75]">Perfect for a single contributor</p>
+                </div>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* New Baby Format Selection Modal */}
+      {showNewBabyFormatModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative">
+            <button
+              onClick={() => setShowNewBabyFormatModal(false)}
+              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#F7FAFC] transition-colors"
+            >
+              <svg className="w-5 h-5 text-[#0B1F2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <h2 className="text-2xl font-bold text-[#0B1F2A] mb-2">Choose Format</h2>
+            <p className="text-[#5B6B75] mb-6">Select which type of new baby sample you&apos;d like to view</p>
+            <div className="grid grid-cols-2 gap-4">
+              <Link href="/boards/de2b4271/view" target="_blank" rel="noopener noreferrer" onClick={() => setShowNewBabyFormatModal(false)}>
+                <div className="group p-6 border-2 border-[#E5EAF0] hover:border-[#2CB1A6] rounded-xl cursor-pointer transition-all hover:shadow-lg h-full flex flex-col items-center text-center">
+                  <div className="w-16 h-16 bg-[#E8F5F4] rounded-full flex items-center justify-center mb-4 group-hover:bg-[#2CB1A6] transition-colors">
+                    <svg className="w-8 h-8 text-[#2CB1A6] group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                  </div>
+                  <h3 className="font-bold text-[#0B1F2A] mb-2">Board</h3>
+                  <p className="text-sm text-[#5B6B75]">Multiple people add messages together</p>
+                </div>
+              </Link>
+              <Link href="/cards/7c038a35/view" target="_blank" rel="noopener noreferrer" onClick={() => setShowNewBabyFormatModal(false)}>
+                <div className="group p-6 border-2 border-[#E5EAF0] hover:border-[#2CB1A6] rounded-xl cursor-pointer transition-all hover:shadow-lg h-full flex flex-col items-center text-center">
+                  <div className="w-16 h-16 bg-[#E8F5F4] rounded-full flex items-center justify-center mb-4 group-hover:bg-[#2CB1A6] transition-colors">
+                    <svg className="w-8 h-8 text-[#2CB1A6] group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                    </svg>
+                  </div>
+                  <h3 className="font-bold text-[#0B1F2A] mb-2">Card</h3>
+                  <p className="text-sm text-[#5B6B75]">Perfect for a single contributor</p>
+                </div>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Wedding Format Selection Modal */}
+      {showWeddingFormatModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative">
+            <button
+              onClick={() => setShowWeddingFormatModal(false)}
+              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#F7FAFC] transition-colors"
+            >
+              <svg className="w-5 h-5 text-[#0B1F2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <h2 className="text-2xl font-bold text-[#0B1F2A] mb-2">Choose Format</h2>
+            <p className="text-[#5B6B75] mb-6">Select which type of wedding sample you&apos;d like to view</p>
+            <div className="grid grid-cols-2 gap-4">
+              <Link href="/boards/1d95b4d0/view" target="_blank" rel="noopener noreferrer" onClick={() => setShowWeddingFormatModal(false)}>
+                <div className="group p-6 border-2 border-[#E5EAF0] hover:border-[#2CB1A6] rounded-xl cursor-pointer transition-all hover:shadow-lg h-full flex flex-col items-center text-center">
+                  <div className="w-16 h-16 bg-[#E8F5F4] rounded-full flex items-center justify-center mb-4 group-hover:bg-[#2CB1A6] transition-colors">
+                    <svg className="w-8 h-8 text-[#2CB1A6] group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                  </div>
+                  <h3 className="font-bold text-[#0B1F2A] mb-2">Board</h3>
+                  <p className="text-sm text-[#5B6B75]">Multiple people add messages together</p>
+                </div>
+              </Link>
+              <Link href="/cards/4cdf605e/view" target="_blank" rel="noopener noreferrer" onClick={() => setShowWeddingFormatModal(false)}>
+                <div className="group p-6 border-2 border-[#E5EAF0] hover:border-[#2CB1A6] rounded-xl cursor-pointer transition-all hover:shadow-lg h-full flex flex-col items-center text-center">
+                  <div className="w-16 h-16 bg-[#E8F5F4] rounded-full flex items-center justify-center mb-4 group-hover:bg-[#2CB1A6] transition-colors">
+                    <svg className="w-8 h-8 text-[#2CB1A6] group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                    </svg>
+                  </div>
+                  <h3 className="font-bold text-[#0B1F2A] mb-2">Card</h3>
+                  <p className="text-sm text-[#5B6B75]">Perfect for a single contributor</p>
+                </div>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Format Selection Modal */}
+      {showFormatModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative">
+            {/* Close Button */}
+            <button
+              onClick={() => setShowFormatModal(false)}
+              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#F7FAFC] transition-colors"
+            >
+              <svg className="w-5 h-5 text-[#0B1F2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* Title */}
+            <h2 className="text-2xl font-bold text-[#0B1F2A] mb-2">Choose Format</h2>
+            <p className="text-[#5B6B75] mb-6">Select which type of birthday sample you'd like to view</p>
+
+            {/* Format Options */}
+            <div className="grid grid-cols-2 gap-4">
+              {/* Board Option */}
+              <Link href="/boards/58fdbc1b/view" target="_blank" rel="noopener noreferrer" onClick={() => setShowFormatModal(false)}>
+                <div className="group p-6 border-2 border-[#E5EAF0] hover:border-[#2CB1A6] rounded-xl cursor-pointer transition-all hover:shadow-lg h-full flex flex-col items-center text-center">
+                  <div className="w-16 h-16 bg-[#E8F5F4] rounded-full flex items-center justify-center mb-4 group-hover:bg-[#2CB1A6] transition-colors">
+                    <svg className="w-8 h-8 text-[#2CB1A6] group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                  </div>
+                  <h3 className="font-bold text-[#0B1F2A] mb-2">Board</h3>
+                  <p className="text-sm text-[#5B6B75]">Multiple people add messages together</p>
+                </div>
+              </Link>
+
+              {/* Card Option */}
+              <Link href="/cards/ba377041/view" target="_blank" rel="noopener noreferrer" onClick={() => setShowFormatModal(false)}>
+                <div className="group p-6 border-2 border-[#E5EAF0] hover:border-[#2CB1A6] rounded-xl cursor-pointer transition-all hover:shadow-lg h-full flex flex-col items-center text-center">
+                  <div className="w-16 h-16 bg-[#E8F5F4] rounded-full flex items-center justify-center mb-4 group-hover:bg-[#2CB1A6] transition-colors">
+                    <svg className="w-8 h-8 text-[#2CB1A6] group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                    </svg>
+                  </div>
+                  <h3 className="font-bold text-[#0B1F2A] mb-2">Card</h3>
+                  <p className="text-sm text-[#5B6B75]">Perfect for a single contributor</p>
+                </div>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <header className="border-b border-[#E5EAF0] bg-white sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4">
@@ -193,9 +616,12 @@ export default function Home() {
               <Link href="/pricing" className="text-[#5B6B75] hover:text-[#0B1F2A] transition-colors font-bold">
                 Pricing
               </Link>
-              <a href="#templates" className="text-[#5B6B75] hover:text-[#0B1F2A] transition-colors font-bold">
+              <a href="/templates" className="text-[#5B6B75] hover:text-[#0B1F2A] transition-colors font-bold">
                 Templates
               </a>
+              <Link href="/contact" className="text-[#5B6B75] hover:text-[#0B1F2A] transition-colors font-bold">
+                Contact Us
+              </Link>
             </nav>
 
             {/* CTA Buttons / User Menu */}
@@ -238,7 +664,27 @@ export default function Home() {
                 <h1 className="text-5xl lg:text-6xl font-bold text-[#0B1F2A] leading-tight flex flex-col">
                   <span>Send digital cards.</span>
                   <span className="flex items-center gap-3">
-                    Together.{" "}
+                    <span className="relative inline-block min-w-[280px]">
+                      <span
+                        className={`absolute left-0 transition-all duration-500 ${
+                          alternateText === 'together'
+                            ? 'opacity-100 translate-y-0'
+                            : 'opacity-0 -translate-y-4'
+                        }`}
+                      >
+                        Together.
+                      </span>
+                      <span
+                        className={`absolute left-0 transition-all duration-500 ${
+                          alternateText === 'individually'
+                            ? 'opacity-100 translate-y-0'
+                            : 'opacity-0 translate-y-4'
+                        }`}
+                      >
+                        Individually.
+                      </span>
+                      <span className="invisible">Individually.</span>
+                    </span>
                     <Image
                       src="/cardoraHeart.png"
                       alt="heart"
@@ -250,18 +696,17 @@ export default function Home() {
                   </span>
                 </h1>
                 <p className="text-lg text-[#5B6B75] leading-relaxed max-w-lg">
-                  Create beautiful group cards for birthdays, farewells, and celebrations.
-                  Collect heartfelt messages from everyone in one place.
+                  Create beautiful digital cards for birthdays, farewells, and celebrations. Send solo or collect heartfelt messages from everyone in one place.
                 </p>
               </div>
 
               <div className="flex flex-wrap gap-4">
                 <Link href="/boards/create">
                   <button className="px-8 py-3.5 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl">
-                    Create a card
+                    Create a Cardora
                   </button>
                 </Link>
-                <Link href="#templates">
+                <Link href="/templates">
                   <button className="px-8 py-3.5 bg-white hover:bg-[#F7FAFC] text-[#2CB1A6] border-2 border-[#2CB1A6] hover:border-[#1F8F86] rounded-lg font-semibold transition-all">
                     Explore templates
                   </button>
@@ -299,17 +744,87 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Right Content - Demo Image */}
+            {/* Right Content - Rotating Demo Image and Lotties */}
             <div className="relative overflow-visible">
               <div className="relative scale-125 origin-center">
-                <Image
-                  src="/cardoraDemo.png"
-                  alt="Cardora Demo"
-                  width={700}
-                  height={700}
-                  className="w-full h-auto"
-                  unoptimized
-                />
+                {/* Invisible placeholder to maintain height */}
+                <div className="invisible">
+                  <Image
+                    src="/cardoraDemo.png"
+                    alt="Cardora Demo"
+                    width={700}
+                    height={700}
+                    className="w-full h-auto"
+                    unoptimized
+                  />
+                </div>
+
+                {/* Demo Image (index 0) */}
+                <div className={`transition-opacity duration-500 absolute inset-0 ${currentHeroItem === 0 ? 'opacity-100' : 'opacity-0'}`}>
+                  <Image
+                    src="/cardoraDemo.png"
+                    alt="Cardora Demo"
+                    width={700}
+                    height={700}
+                    className="w-full h-auto"
+                    unoptimized
+                  />
+                </div>
+
+                {/* Birthday Lottie (index 1) */}
+                {heroLottie1 && (
+                  <div className={`transition-opacity duration-500 absolute inset-0 ${currentHeroItem === 1 ? 'opacity-100' : 'opacity-0'}`}>
+                    <Lottie
+                      animationData={heroLottie1}
+                      loop={true}
+                      style={{ width: '100%', height: '100%' }}
+                    />
+                  </div>
+                )}
+
+                {/* Welcome Lottie (index 2) */}
+                {heroLottie2 && (
+                  <div className={`transition-opacity duration-500 absolute inset-0 ${currentHeroItem === 2 ? 'opacity-100' : 'opacity-0'}`}>
+                    <Lottie
+                      animationData={heroLottie2}
+                      loop={true}
+                      style={{ width: '100%', height: '100%' }}
+                    />
+                  </div>
+                )}
+
+                {/* Valentine Lottie (index 3) */}
+                {heroLottie3 && (
+                  <div className={`transition-opacity duration-500 absolute inset-0 ${currentHeroItem === 3 ? 'opacity-100' : 'opacity-0'}`}>
+                    <Lottie
+                      animationData={heroLottie3}
+                      loop={true}
+                      style={{ width: '100%', height: '100%' }}
+                    />
+                  </div>
+                )}
+
+                {/* Baby Lottie (index 4) */}
+                {heroLottie4 && (
+                  <div className={`transition-opacity duration-500 absolute inset-0 ${currentHeroItem === 4 ? 'opacity-100' : 'opacity-0'}`}>
+                    <Lottie
+                      animationData={heroLottie4}
+                      loop={true}
+                      style={{ width: '100%', height: '100%' }}
+                    />
+                  </div>
+                )}
+
+                {/* Love2 Lottie (index 5) */}
+                {heroLottie5 && (
+                  <div className={`transition-opacity duration-500 absolute inset-0 ${currentHeroItem === 5 ? 'opacity-100' : 'opacity-0'}`}>
+                    <Lottie
+                      animationData={heroLottie5}
+                      loop={true}
+                      style={{ width: '100%', height: '100%' }}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Decorative Elements */}
@@ -334,9 +849,9 @@ export default function Home() {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-[#0B1F2A] mb-2">Group cards made easy</h3>
+                    <h3 className="text-xl font-bold text-[#0B1F2A] mb-2">Cards your way</h3>
                     <p className="text-[#5B6B75] leading-relaxed">
-                      Invite others to add messages, photos, GIFs, and more.
+                      Send individually or invite others to add messages, photos, GIFs, and more.
                     </p>
                   </div>
                 </div>
@@ -464,179 +979,115 @@ export default function Home() {
               What moments do you want to celebrate?
             </h2>
             <p className="text-xl text-white opacity-90">
-              Cardora online group cards drive employee happiness for birthdays, milestones, and more.
+              Send beautiful digital cards solo or gather messages from everyone for birthdays, milestones, and more.
             </p>
           </div>
 
           {/* Occasions Grid */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 max-w-7xl mx-auto mb-12">
-            {/* Thank You */}
-            <Link href="/boards/create?occasion=thank-you" className="bg-white rounded-2xl p-6 flex flex-col items-center justify-center gap-4 hover:shadow-xl transition-all hover:scale-105">
-              <div className="w-20 h-20 bg-[#F7FAFC] rounded-full flex items-center justify-center">
-                <svg className="w-10 h-10 text-[#2CB1A6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
+            {occasionsLoading ? (
+              // Loading skeleton
+              Array.from({ length: 15 }).map((_, index) => (
+                <div key={index} className="bg-white rounded-2xl p-6 flex flex-col items-center justify-center gap-4 animate-pulse">
+                  <div className="w-20 h-20 bg-[#F7FAFC] rounded-full"></div>
+                  <div className="h-12 w-full bg-[#F7FAFC] rounded"></div>
+                </div>
+              ))
+            ) : occasions.length > 0 ? (
+              occasions.map((occasion) => (
+                <Link
+                  key={occasion.id}
+                  href={`/boards/create?occasion=${occasion.short_id}`}
+                  className="bg-white rounded-2xl p-6 flex flex-col items-center justify-center gap-4 hover:shadow-xl transition-all hover:scale-105"
+                >
+                  {occasion.lottieData ? (
+                    <div className="w-20 h-20">
+                      <Lottie
+                        animationData={occasion.lottieData}
+                        loop={true}
+                        style={{ width: '100%', height: '100%' }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-20 h-20 bg-[#F7FAFC] rounded-full flex items-center justify-center">
+                      <svg className="w-10 h-10 text-[#2CB1A6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                      </svg>
+                    </div>
+                  )}
+                  <h3 className="text-center font-semibold text-[#0B1F2A] min-h-[3rem] flex items-center justify-center">
+                    {occasion.name}
+                  </h3>
+                </Link>
+              ))
+            ) : (
+              // Fallback if no occasions loaded
+              <div className="col-span-full text-center text-white">
+                <p>No occasions available at the moment.</p>
               </div>
-              <h3 className="text-center font-semibold text-[#0B1F2A]">Thank You</h3>
-            </Link>
-
-            {/* Birthdays */}
-            <Link href="/boards/create?occasion=birthdays" className="bg-white rounded-2xl p-6 flex flex-col items-center justify-center gap-4 hover:shadow-xl transition-all hover:scale-105">
-              <div className="w-20 h-20 bg-[#F7FAFC] rounded-full flex items-center justify-center">
-                <svg className="w-10 h-10 text-[#2CB1A6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.701 2.701 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18zm-3-9v-2a2 2 0 00-2-2H8a2 2 0 00-2 2v2h12z" />
-                </svg>
-              </div>
-              <h3 className="text-center font-semibold text-[#0B1F2A]">Birthdays</h3>
-            </Link>
-
-            {/* New Baby */}
-            <Link href="/boards/create?occasion=new-baby" className="bg-white rounded-2xl p-6 flex flex-col items-center justify-center gap-4 hover:shadow-xl transition-all hover:scale-105">
-              <div className="w-20 h-20 bg-[#F7FAFC] rounded-full flex items-center justify-center">
-                <svg className="w-10 h-10 text-[#2CB1A6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h3 className="text-center font-semibold text-[#0B1F2A]">New Baby</h3>
-            </Link>
-
-            {/* Team Celebration */}
-            <Link href="/boards/create?occasion=team-celebration" className="bg-white rounded-2xl p-6 flex flex-col items-center justify-center gap-4 hover:shadow-xl transition-all hover:scale-105">
-              <div className="w-20 h-20 bg-[#F7FAFC] rounded-full flex items-center justify-center">
-                <svg className="w-10 h-10 text-[#2CB1A6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-              </div>
-              <h3 className="text-center font-semibold text-[#0B1F2A]">Team Celebration</h3>
-            </Link>
-
-            {/* Company Celebration */}
-            <Link href="/boards/create?occasion=company-celebration" className="bg-white rounded-2xl p-6 flex flex-col items-center justify-center gap-4 hover:shadow-xl transition-all hover:scale-105">
-              <div className="w-20 h-20 bg-[#F7FAFC] rounded-full flex items-center justify-center">
-                <svg className="w-10 h-10 text-[#2CB1A6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-              </div>
-              <h3 className="text-center font-semibold text-[#0B1F2A]">Company Celebration</h3>
-            </Link>
-
-            {/* Work Anniversary */}
-            <Link href="/boards/create?occasion=work-anniversary" className="bg-white rounded-2xl p-6 flex flex-col items-center justify-center gap-4 hover:shadow-xl transition-all hover:scale-105">
-              <div className="w-20 h-20 bg-[#F7FAFC] rounded-full flex items-center justify-center">
-                <svg className="w-10 h-10 text-[#2CB1A6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <h3 className="text-center font-semibold text-[#0B1F2A]">Work Anniversary</h3>
-            </Link>
-
-            {/* Farewell */}
-            <Link href="/boards/create?occasion=farewell" className="bg-white rounded-2xl p-6 flex flex-col items-center justify-center gap-4 hover:shadow-xl transition-all hover:scale-105">
-              <div className="w-20 h-20 bg-[#F7FAFC] rounded-full flex items-center justify-center">
-                <svg className="w-10 h-10 text-[#2CB1A6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
-                </svg>
-              </div>
-              <h3 className="text-center font-semibold text-[#0B1F2A]">Farewell</h3>
-            </Link>
-
-            {/* Retirement */}
-            <Link href="/boards/create?occasion=retirement" className="bg-white rounded-2xl p-6 flex flex-col items-center justify-center gap-4 hover:shadow-xl transition-all hover:scale-105">
-              <div className="w-20 h-20 bg-[#F7FAFC] rounded-full flex items-center justify-center">
-                <svg className="w-10 h-10 text-[#2CB1A6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-                </svg>
-              </div>
-              <h3 className="text-center font-semibold text-[#0B1F2A]">Retirement</h3>
-            </Link>
-
-            {/* Congratulations */}
-            <Link href="/boards/create?occasion=congratulations" className="bg-white rounded-2xl p-6 flex flex-col items-center justify-center gap-4 hover:shadow-xl transition-all hover:scale-105">
-              <div className="w-20 h-20 bg-[#F7FAFC] rounded-full flex items-center justify-center">
-                <svg className="w-10 h-10 text-[#2CB1A6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                </svg>
-              </div>
-              <h3 className="text-center font-semibold text-[#0B1F2A]">Congratulations</h3>
-            </Link>
-
-            {/* Recruiting & Onboarding */}
-            <Link href="/boards/create?occasion=recruiting-onboarding" className="bg-white rounded-2xl p-6 flex flex-col items-center justify-center gap-4 hover:shadow-xl transition-all hover:scale-105">
-              <div className="w-20 h-20 bg-[#F7FAFC] rounded-full flex items-center justify-center">
-                <svg className="w-10 h-10 text-[#2CB1A6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                </svg>
-              </div>
-              <h3 className="text-center font-semibold text-[#0B1F2A]">Recruiting & Onboarding</h3>
-            </Link>
-
-            {/* Office Competition */}
-            <Link href="/boards/create?occasion=office-competition" className="bg-white rounded-2xl p-6 flex flex-col items-center justify-center gap-4 hover:shadow-xl transition-all hover:scale-105">
-              <div className="w-20 h-20 bg-[#F7FAFC] rounded-full flex items-center justify-center">
-                <svg className="w-10 h-10 text-[#2CB1A6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                </svg>
-              </div>
-              <h3 className="text-center font-semibold text-[#0B1F2A]">Office Competition</h3>
-            </Link>
-
-            {/* Sympathy */}
-            <Link href="/boards/create?occasion=sympathy" className="bg-white rounded-2xl p-6 flex flex-col items-center justify-center gap-4 hover:shadow-xl transition-all hover:scale-105">
-              <div className="w-20 h-20 bg-[#F7FAFC] rounded-full flex items-center justify-center">
-                <svg className="w-10 h-10 text-[#2CB1A6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-              </div>
-              <h3 className="text-center font-semibold text-[#0B1F2A]">Sympathy</h3>
-            </Link>
-
-            {/* Get Well Soon */}
-            <Link href="/boards/create?occasion=get-well-soon" className="bg-white rounded-2xl p-6 flex flex-col items-center justify-center gap-4 hover:shadow-xl transition-all hover:scale-105">
-              <div className="w-20 h-20 bg-[#F7FAFC] rounded-full flex items-center justify-center">
-                <svg className="w-10 h-10 text-[#2CB1A6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-              </div>
-              <h3 className="text-center font-semibold text-[#0B1F2A]">Get Well Soon</h3>
-            </Link>
-
-            {/* Employee Appreciation */}
-            <Link href="/boards/create?occasion=employee-appreciation" className="bg-white rounded-2xl p-6 flex flex-col items-center justify-center gap-4 hover:shadow-xl transition-all hover:scale-105">
-              <div className="w-20 h-20 bg-[#F7FAFC] rounded-full flex items-center justify-center">
-                <svg className="w-10 h-10 text-[#2CB1A6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
-                </svg>
-              </div>
-              <h3 className="text-center font-semibold text-[#0B1F2A]">Employee Appreciation</h3>
-            </Link>
-
-            {/* Holiday Celebration */}
-            <Link href="/boards/create?occasion=holiday-celebration" className="bg-white rounded-2xl p-6 flex flex-col items-center justify-center gap-4 hover:shadow-xl transition-all hover:scale-105">
-              <div className="w-20 h-20 bg-[#F7FAFC] rounded-full flex items-center justify-center">
-                <svg className="w-10 h-10 text-[#2CB1A6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-                </svg>
-              </div>
-              <h3 className="text-center font-semibold text-[#0B1F2A]">Holiday Celebration</h3>
-            </Link>
+            )}
           </div>
 
           {/* See All Link */}
           <div className="text-center">
-            <a href="#" className="inline-flex items-center gap-2 text-white text-lg font-semibold hover:gap-4 transition-all">
+            <Link href="/boards/create" className="inline-flex items-center gap-2 text-white text-lg font-semibold hover:gap-4 transition-all">
               See all
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
-            </a>
+            </Link>
           </div>
         </div>
       </section>
 
       {/* How It Works Section */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-6">
+      <section className="py-20 bg-white relative overflow-hidden">
+        {/* Decorative Lotties around the section */}
+        {/* Top Left */}
+        {howItWorksLottie1 && (
+          <div className="absolute top-16 left-16 w-64 h-64 opacity-30">
+            <Lottie
+              animationData={howItWorksLottie1}
+              loop={true}
+              style={{ width: '100%', height: '100%' }}
+            />
+          </div>
+        )}
+
+        {/* Top Right */}
+        {howItWorksLottie2 && (
+          <div className="absolute top-16 right-16 w-64 h-64 opacity-30">
+            <Lottie
+              animationData={howItWorksLottie2}
+              loop={true}
+              style={{ width: '100%', height: '100%' }}
+            />
+          </div>
+        )}
+
+        {/* Bottom Left */}
+        {howItWorksLottie3 && (
+          <div className="absolute bottom-16 left-16 w-64 h-64 opacity-30">
+            <Lottie
+              animationData={howItWorksLottie3}
+              loop={true}
+              style={{ width: '100%', height: '100%' }}
+            />
+          </div>
+        )}
+
+        {/* Bottom Right */}
+        {howItWorksLottie4 && (
+          <div className="absolute bottom-16 right-16 w-64 h-64 opacity-30">
+            <Lottie
+              animationData={howItWorksLottie4}
+              loop={true}
+              style={{ width: '100%', height: '100%' }}
+            />
+          </div>
+        )}
+
+        <div className="container mx-auto px-6 relative z-10">
           <div className="max-w-7xl mx-auto">
             {/* Section Title */}
             <h2 className="text-4xl lg:text-5xl font-bold text-[#0B1F2A] text-center mb-12">
@@ -684,7 +1135,7 @@ export default function Home() {
                     <p className="text-sm font-semibold text-[#5B6B75] uppercase tracking-wide">INVITE</p>
                     <h3 className="text-4xl font-bold text-[#0B1F2A]">Get everyone involved</h3>
                     <p className="text-lg text-[#5B6B75] leading-relaxed">
-                      Send a simple link to friends, family, or coworkers. They can contribute messages and memories instantly, without signing up.
+                      Choose the Board format to send a simple link to friends, family, or coworkers. They can contribute messages and memories instantly, without signing up.
                     </p>
                     <Link href="/boards/create">
                       <button className="px-8 py-4 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold transition-colors text-lg">
@@ -699,7 +1150,7 @@ export default function Home() {
                     <p className="text-sm font-semibold text-[#5B6B75] uppercase tracking-wide">SHARE</p>
                     <h3 className="text-4xl font-bold text-[#0B1F2A]">Make the moment unforgettable</h3>
                     <p className="text-lg text-[#5B6B75] leading-relaxed">
-                      Send your group card instantly or schedule it for the perfect surprise. Share digitally, print it, or present it live—creating memories that last.
+                      Send your card instantly or schedule it for the perfect surprise. Share digitally, print it, or present it live—creating memories that last.
                     </p>
                     <Link href="/boards/create">
                       <button className="px-8 py-4 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold transition-colors text-lg">
@@ -714,7 +1165,7 @@ export default function Home() {
                     <p className="text-sm font-semibold text-[#5B6B75] uppercase tracking-wide">CELEBRATE</p>
                     <h3 className="text-4xl font-bold text-[#0B1F2A]">Create memories that last</h3>
                     <p className="text-lg text-[#5B6B75] leading-relaxed">
-                      Your recipient receives a heartfelt collection of messages, photos, and love from everyone. A keepsake they can treasure and revisit forever.
+                      Your recipient receives a heartfelt card filled with messages, photos, and love—whether from you alone or from everyone together. A keepsake they can treasure and revisit forever.
                     </p>
                     <Link href="/boards/create">
                       <button className="px-8 py-4 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold transition-colors text-lg">
@@ -922,25 +1373,28 @@ export default function Home() {
             {/* Examples Grid */}
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
               {/* Birthday Example */}
-              <a href="#" className="group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all hover:scale-105">
+              <div
+                onClick={() => setShowFormatModal(true)}
+                className="group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all hover:scale-105 bg-gradient-to-br from-pink-100 to-blue-100 cursor-pointer"
+              >
                 <div className="aspect-[4/3] relative">
-                  {/* Background Image */}
-                  <div
-                    className="absolute inset-0 bg-cover bg-center"
-                    style={{
-                      backgroundImage: 'url(https://images.unsplash.com/photo-1558636508-e0db3814bd1d?w=800&h=600&fit=crop)',
-                    }}
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-br from-pink-500/40 to-blue-500/40"></div>
-                  </div>
-
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-center">
-                      <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl">
-                        <svg className="w-16 h-16 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.701 2.701 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18zm-3-9v-2a2 2 0 00-2-2H8a2 2 0 00-2 2v2h12z" />
-                        </svg>
-                      </div>
+                      {birthdayExampleLottie ? (
+                        <div className="w-full h-full">
+                          <Lottie
+                            animationData={birthdayExampleLottie}
+                            loop={true}
+                            style={{ width: '100%', height: '100%' }}
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl">
+                          <svg className="w-16 h-16 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.701 2.701 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18zm-3-9v-2a2 2 0 00-2-2H8a2 2 0 00-2 2v2h12z" />
+                          </svg>
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-blue-500 to-pink-400 text-white py-3 px-4">
@@ -956,29 +1410,136 @@ export default function Home() {
                     </button>
                   </div>
                 </div>
-              </a>
+              </div>
+
+              {/* Wedding Example */}
+              <div
+                onClick={() => setShowWeddingFormatModal(true)}
+                className="group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all hover:scale-105 bg-gradient-to-br from-pink-50 to-rose-100 cursor-pointer"
+              >
+                <div className="aspect-[4/3] relative">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    {weddingExampleLottie ? (
+                      <Lottie
+                        animationData={weddingExampleLottie}
+                        loop={true}
+                        style={{ width: '100%', height: '100%' }}
+                      />
+                    ) : (
+                      <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center mx-auto shadow-xl">
+                        <svg className="w-16 h-16 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                  <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-rose-400 to-pink-300 text-white py-3 px-4">
+                    <h3 className="font-bold text-lg">Wedding</h3>
+                  </div>
+                  <div className="absolute inset-0 bg-[#2CB1A6]/0 group-hover:bg-[#2CB1A6]/20 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+                    <button className="px-6 py-3 bg-[#2CB1A6] text-white rounded-lg font-semibold shadow-lg flex items-center gap-2">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                      View sample
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* New Baby Example */}
+              <div
+                onClick={() => setShowNewBabyFormatModal(true)}
+                className="group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all hover:scale-105 bg-gradient-to-br from-yellow-50 to-sky-100 cursor-pointer"
+              >
+                <div className="aspect-[4/3] relative">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    {newBabyExampleLottie ? (
+                      <Lottie
+                        animationData={newBabyExampleLottie}
+                        loop={true}
+                        style={{ width: '100%', height: '100%' }}
+                      />
+                    ) : (
+                      <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center mx-auto shadow-xl">
+                        <svg className="w-16 h-16 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                  <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-sky-400 to-yellow-300 text-white py-3 px-4">
+                    <h3 className="font-bold text-lg">New Baby</h3>
+                  </div>
+                  <div className="absolute inset-0 bg-[#2CB1A6]/0 group-hover:bg-[#2CB1A6]/20 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+                    <button className="px-6 py-3 bg-[#2CB1A6] text-white rounded-lg font-semibold shadow-lg flex items-center gap-2">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                      View sample
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Congratulations Example */}
+              <div
+                onClick={() => setShowCongratulationsFormatModal(true)}
+                className="group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all hover:scale-105 bg-gradient-to-br from-amber-50 to-purple-100 cursor-pointer"
+              >
+                <div className="aspect-[4/3] relative">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    {congratulationsExampleLottie ? (
+                      <Lottie
+                        animationData={congratulationsExampleLottie}
+                        loop={true}
+                        style={{ width: '100%', height: '100%' }}
+                      />
+                    ) : (
+                      <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center mx-auto shadow-xl">
+                        <svg className="w-16 h-16 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                  <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-amber-500 to-purple-500 text-white py-3 px-4">
+                    <h3 className="font-bold text-lg">Congratulations</h3>
+                  </div>
+                  <div className="absolute inset-0 bg-[#2CB1A6]/0 group-hover:bg-[#2CB1A6]/20 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+                    <button className="px-6 py-3 bg-[#2CB1A6] text-white rounded-lg font-semibold shadow-lg flex items-center gap-2">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                      View sample
+                    </button>
+                  </div>
+                </div>
+              </div>
 
               {/* Farewell Example */}
-              <a href="#" className="group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all hover:scale-105">
+              <div
+                onClick={() => setShowFarewellFormatModal(true)}
+                className="group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all hover:scale-105 bg-gradient-to-br from-teal-50 to-cyan-100 cursor-pointer"
+              >
                 <div className="aspect-[4/3] relative">
-                  {/* Background Image */}
-                  <div
-                    className="absolute inset-0 bg-cover bg-center"
-                    style={{
-                      backgroundImage: 'url(https://images.unsplash.com/photo-1521791136064-7986c2920216?w=800&h=600&fit=crop)',
-                    }}
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-br from-teal-500/40 to-cyan-500/40"></div>
-                  </div>
-
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl">
+                    {farewellExampleLottie ? (
+                      <Lottie
+                        animationData={farewellExampleLottie}
+                        loop={true}
+                        style={{ width: '100%', height: '100%' }}
+                      />
+                    ) : (
+                      <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center mx-auto shadow-xl">
                         <svg className="w-16 h-16 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
                         </svg>
                       </div>
-                    </div>
+                    )}
                   </div>
                   <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-teal-500 to-cyan-400 text-white py-3 px-4">
                     <h3 className="font-bold text-lg">Farewell</h3>
@@ -993,143 +1554,31 @@ export default function Home() {
                     </button>
                   </div>
                 </div>
-              </a>
+              </div>
 
-              {/* Work Anniversary Example */}
-              <a href="#" className="group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all hover:scale-105">
+              {/* Team Celebration Example */}
+              <div
+                onClick={() => setShowTeamCelebrationFormatModal(true)}
+                className="group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all hover:scale-105 bg-gradient-to-br from-indigo-50 to-purple-100 cursor-pointer"
+              >
                 <div className="aspect-[4/3] relative">
-                  {/* Background Image */}
-                  <div
-                    className="absolute inset-0 bg-cover bg-center"
-                    style={{
-                      backgroundImage: 'url(https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800&h=600&fit=crop)',
-                    }}
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-br from-slate-600/60 to-slate-500/60"></div>
-                  </div>
-
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl">
-                        <svg className="w-16 h-16 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-slate-600 to-slate-500 text-white py-3 px-4">
-                    <h3 className="font-bold text-lg">Work Anniversary</h3>
-                  </div>
-                  <div className="absolute inset-0 bg-[#2CB1A6]/0 group-hover:bg-[#2CB1A6]/20 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
-                    <button className="px-6 py-3 bg-[#2CB1A6] text-white rounded-lg font-semibold shadow-lg flex items-center gap-2">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                      View sample
-                    </button>
-                  </div>
-                </div>
-              </a>
-
-              {/* Get Well Soon Example */}
-              <a href="#" className="group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all hover:scale-105">
-                <div className="aspect-[4/3] relative">
-                  {/* Background Image */}
-                  <div
-                    className="absolute inset-0 bg-cover bg-center"
-                    style={{
-                      backgroundImage: 'url(https://images.unsplash.com/photo-1490818387583-1baba5e638af?w=800&h=600&fit=crop)',
-                    }}
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-br from-orange-400/50 to-amber-400/50"></div>
-                  </div>
-
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl">
-                        <svg className="w-16 h-16 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-orange-400 to-amber-400 text-white py-3 px-4">
-                    <h3 className="font-bold text-lg">Get Well Soon</h3>
-                  </div>
-                  <div className="absolute inset-0 bg-[#2CB1A6]/0 group-hover:bg-[#2CB1A6]/20 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
-                    <button className="px-6 py-3 bg-[#2CB1A6] text-white rounded-lg font-semibold shadow-lg flex items-center gap-2">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                      View sample
-                    </button>
-                  </div>
-                </div>
-              </a>
-
-              {/* Retirement Example */}
-              <a href="#" className="group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all hover:scale-105">
-                <div className="aspect-[4/3] relative">
-                  {/* Background Image */}
-                  <div
-                    className="absolute inset-0 bg-cover bg-center"
-                    style={{
-                      backgroundImage: 'url(https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&h=600&fit=crop)',
-                    }}
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/40 to-teal-400/40"></div>
-                  </div>
-
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl">
-                        <svg className="w-16 h-16 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-emerald-500 to-teal-400 text-white py-3 px-4">
-                    <h3 className="font-bold text-lg">Retirement</h3>
-                  </div>
-                  <div className="absolute inset-0 bg-[#2CB1A6]/0 group-hover:bg-[#2CB1A6]/20 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
-                    <button className="px-6 py-3 bg-[#2CB1A6] text-white rounded-lg font-semibold shadow-lg flex items-center gap-2">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                      View sample
-                    </button>
-                  </div>
-                </div>
-              </a>
-
-              {/* Congratulations Example */}
-              <a href="#" className="group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all hover:scale-105">
-                <div className="aspect-[4/3] relative">
-                  {/* Background Image */}
-                  <div
-                    className="absolute inset-0 bg-cover bg-center"
-                    style={{
-                      backgroundImage: 'url(https://images.unsplash.com/photo-1464547323744-4edd0cd0c746?w=800&h=600&fit=crop)',
-                    }}
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/50 to-purple-500/50"></div>
-                  </div>
-
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl">
+                    {teamCelebrationExampleLottie ? (
+                      <Lottie
+                        animationData={teamCelebrationExampleLottie}
+                        loop={true}
+                        style={{ width: '100%', height: '100%' }}
+                      />
+                    ) : (
+                      <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center mx-auto shadow-xl">
                         <svg className="w-16 h-16 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
                       </div>
-                    </div>
+                    )}
                   </div>
                   <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-indigo-600 to-purple-500 text-white py-3 px-4">
-                    <h3 className="font-bold text-lg">Congratulations</h3>
+                    <h3 className="font-bold text-lg">Team Celebration</h3>
                   </div>
                   <div className="absolute inset-0 bg-[#2CB1A6]/0 group-hover:bg-[#2CB1A6]/20 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
                     <button className="px-6 py-3 bg-[#2CB1A6] text-white rounded-lg font-semibold shadow-lg flex items-center gap-2">
@@ -1141,14 +1590,14 @@ export default function Home() {
                     </button>
                   </div>
                 </div>
-              </a>
+              </div>
             </div>
 
             {/* CTA Button */}
             <div className="text-center">
-              <Link href="/boards/create">
+              <Link href="/templates">
                 <button className="px-10 py-4 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white text-lg rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl">
-                  Create a Cardora
+                  Explore All Templates
                 </button>
               </Link>
             </div>
@@ -1346,7 +1795,7 @@ export default function Home() {
                 <ul className="space-y-2">
                   <li><a href="#features" className="text-white opacity-80 hover:opacity-100 transition-opacity">Features</a></li>
                   <li><Link href="/pricing" className="text-white opacity-80 hover:opacity-100 transition-opacity">Pricing</Link></li>
-                  <li><a href="#templates" className="text-white opacity-80 hover:opacity-100 transition-opacity">Templates</a></li>
+                  <li><a href="/templates" className="text-white opacity-80 hover:opacity-100 transition-opacity">Templates</a></li>
                 </ul>
               </div>
 
@@ -1356,7 +1805,7 @@ export default function Home() {
                 <ul className="space-y-2">
                   <li><a href="#" className="text-white opacity-80 hover:opacity-100 transition-opacity">Blog</a></li>
                   <li><a href="#" className="text-white opacity-80 hover:opacity-100 transition-opacity">Help Center</a></li>
-                  <li><a href="#" className="text-white opacity-80 hover:opacity-100 transition-opacity">Contact</a></li>
+                  <li><Link href="/contact" className="text-white opacity-80 hover:opacity-100 transition-opacity">Contact Us</Link></li>
                 </ul>
               </div>
 

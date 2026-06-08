@@ -76,7 +76,7 @@ function BoardEditorPageContent() {
   // Delivery panel state
   const [showDelivery, setShowDelivery] = useState(false);
   const [recipientEmails, setRecipientEmails] = useState<{[key: number]: string}>({});
-  const [deliveryMessage, setDeliveryMessage] = useState(`Hi! Your group card from friends and colleagues is ready. We hope you enjoy all the wonderful messages!`);
+  const [deliveryMessage, setDeliveryMessage] = useState(`We've created something special for you! Dive into all the heartfelt messages from your friends and colleagues. Enjoy! 🎉`);
   const [notifyContributors, setNotifyContributors] = useState(true);
   const [scheduledDate, setScheduledDate] = useState('');
   const [scheduledTime, setScheduledTime] = useState('');
@@ -88,6 +88,8 @@ function BoardEditorPageContent() {
 
   // Toast state
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+  const [showMarkDeliveredConfirm, setShowMarkDeliveredConfirm] = useState(false);
+  const [markingDelivered, setMarkingDelivered] = useState(false);
 
   // Delivery confirmation modal state
   const [showDeliveryConfirmation, setShowDeliveryConfirmation] = useState(false);
@@ -188,8 +190,10 @@ function BoardEditorPageContent() {
       setBoardTitle(board.title);
       setRecipients(loadedRecipients.map(r => r.name));
 
-      // Load background if exists
-      if (board.background_data) {
+      // Load background - prioritize card_background_data (occasion lottie) over background_data (page background)
+      if (board.card_background_data) {
+        setSelectedBackground(board.card_background_data);
+      } else if (board.background_data) {
         setSelectedBackground(board.background_data);
       }
 
@@ -219,7 +223,7 @@ function BoardEditorPageContent() {
       setTitleFontColor(board.title_font_color || '#0B1F2A');
       setBodyFont(board.body_font);
       setBackgroundImage(board.background);
-      setDeliveryMessage(board.recipient_message || `Hi! Your group card from friends and colleagues is ready. We hope you enjoy all the wonderful messages!`);
+      setDeliveryMessage(board.recipient_message || `We've created something special for you! Dive into all the heartfelt messages from your friends and colleagues. Enjoy! 🎉`);
       setNotifyContributors(board.notify_contributors);
       if (board.scheduled_delivery) {
         const date = new Date(board.scheduled_delivery);
@@ -227,7 +231,7 @@ function BoardEditorPageContent() {
         setScheduledTime(date.toTimeString().split(' ')[0].substring(0, 5));
       }
 
-      // Set board link using short_id
+      // Set board link using short_id (for contributors, not view-only)
       setBoardLink(`www.cardora.io/boards/${board.short_id}`);
       setInviteMessage(`Hi! I've created a group card for ${loadedRecipients.map(r => r.name).join(', ')} and would love for you to contribute. Click the link below to add your message!`);
 
@@ -390,13 +394,18 @@ function BoardEditorPageContent() {
     setDeliveringNow(true);
 
     try {
+      // Determine which background field to update based on background type
+      const isAnimationBackground = selectedBackground?.type === 'ANIMATION';
+
       // Update board status to DELIVERED
       const { error: boardError } = await updateBoard(boardId, {
         status: 'DELIVERED',
         recipient_message: deliveryMessage,
         notify_contributors: notifyContributors,
         delivery_type: 'ON_DEMAND',
-        effect_id: selectedEffect?.id || undefined
+        effect_id: selectedEffect?.id || undefined,
+        background_id: isAnimationBackground ? undefined : (selectedBackground?.id || undefined),
+        card_background_id: isAnimationBackground ? (selectedBackground?.id || undefined) : undefined
       });
 
       if (boardError) {
@@ -434,7 +443,7 @@ function BoardEditorPageContent() {
             emails: recipientEmailsList,
             boardTitle,
             recipientNames: recipients.filter(r => r.trim()),
-            boardLink: boardLink,
+            boardLink: `www.cardora.io/boards/${boardData?.short_id}/view`,
             deliveryMessage: deliveryMessage || undefined
           })
         });
@@ -587,6 +596,35 @@ function BoardEditorPageContent() {
     }
   };
 
+  // Mark as delivered handler
+  const handleMarkAsDelivered = async () => {
+    if (!boardId) return;
+
+    setMarkingDelivered(true);
+
+    try {
+      const { error } = await updateBoard(boardId, {
+        status: 'DELIVERED'
+      });
+
+      if (error) {
+        setToast({ message: `Error marking ${formatType} as delivered: ` + error, type: 'error' });
+      } else {
+        setToast({ message: `${formatType === 'board' ? 'Board' : 'Card'} marked as delivered!`, type: 'success' });
+        setShowMarkDeliveredConfirm(false);
+
+        // Reload the page to reflect read-only state
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      }
+    } catch (error: any) {
+      setToast({ message: 'Error: ' + error.message, type: 'error' });
+    } finally {
+      setMarkingDelivered(false);
+    }
+  };
+
   // Save board handler
   const handleSaveBoard = async () => {
     if (!boardId) return;
@@ -594,6 +632,9 @@ function BoardEditorPageContent() {
     setSaving(true);
 
     try {
+      // Determine which background field to update based on background type
+      const isAnimationBackground = selectedBackground?.type === 'ANIMATION';
+
       // Update board
       const { error: boardError } = await updateBoard(boardId, {
         title: boardTitle,
@@ -606,7 +647,8 @@ function BoardEditorPageContent() {
         intro_animation: true,
         effect_id: selectedEffect?.id || undefined,
         background: backgroundImage,
-        background_id: selectedBackground?.id || undefined,
+        background_id: isAnimationBackground ? undefined : (selectedBackground?.id || undefined),
+        card_background_id: isAnimationBackground ? (selectedBackground?.id || undefined) : undefined,
         recipient_message: deliveryMessage,
         notify_contributors: notifyContributors,
         delivery_type: scheduledDate && scheduledTime ? 'SCHEDULED' : undefined,
@@ -676,7 +718,7 @@ function BoardEditorPageContent() {
         boardTitle={boardTitle}
         recipientNames={recipients.filter(r => r.trim())}
         deliveryMessage={deliveryMessage}
-        boardLink={boardLink}
+        boardLink={`www.cardora.io/boards/${boardData?.short_id}/view`}
       />
 
       <div className="h-screen flex flex-col bg-white overflow-hidden">
@@ -719,6 +761,14 @@ function BoardEditorPageContent() {
           </Link>
           {!isReadOnly && (
             <>
+              <Link href={`/boards/${boardData?.short_id}`} target="_blank">
+                <button className="px-4 py-2 border-2 border-[#2CB1A6] text-[#2CB1A6] hover:bg-[#E8F5F4] rounded-lg font-medium transition-colors flex items-center gap-2">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
+                  </svg>
+                  View as Contributor
+                </button>
+              </Link>
               <Link href={`/boards/${boardData?.short_id}/view`} target="_blank">
                 <button className="px-4 py-2 border-2 border-[#2CB1A6] text-[#2CB1A6] hover:bg-[#E8F5F4] rounded-lg font-medium transition-colors flex items-center gap-2">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -811,7 +861,7 @@ function BoardEditorPageContent() {
                   <div className="relative bg-white rounded-lg overflow-hidden border-2 border-[#E5EAF0]">
                     {/* Preview */}
                     <div
-                      className="h-48 relative"
+                      className="h-48 relative rounded-lg overflow-hidden"
                       style={
                         selectedBackground
                           ? {
@@ -820,9 +870,9 @@ function BoardEditorPageContent() {
                                 : selectedBackground.type === 'PATTERN' && selectedBackground.pattern?.file_path
                                 ? {
                                     backgroundImage: `url(${selectedBackground.pattern.file_path})`,
-                                    backgroundSize: '200px 200px',
+                                    backgroundSize: 'cover',
                                     backgroundPosition: 'center',
-                                    backgroundRepeat: 'repeat'
+                                    backgroundRepeat: 'no-repeat'
                                   }
                                 : {})
                             }
@@ -1489,6 +1539,20 @@ function BoardEditorPageContent() {
                     Deliver Now
                   </button>
                   <p className="text-xs text-center text-[#5B6B75] mt-2">{formatType === 'board' ? 'Board' : 'Card'} will be sent immediately to all recipients</p>
+
+                  {/* Preview Message Link */}
+                  <div className="pt-2 flex justify-center">
+                    <button
+                      onClick={() => setShowMessagePreview(true)}
+                      className="text-sm text-[#2CB1A6] hover:text-[#1F8F86] font-medium flex items-center gap-1 transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                      Preview message
+                    </button>
+                  </div>
                 </div>
 
                 {/* Divider */}
@@ -1504,7 +1568,7 @@ function BoardEditorPageContent() {
                 {/* Schedule Delivery */}
                 <div>
                   <label className="block text-sm font-bold text-[#0B1F2A] mb-3">Schedule for later</label>
-                  <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-medium text-[#5B6B75] mb-2">Date</label>
                       <input
@@ -1523,26 +1587,76 @@ function BoardEditorPageContent() {
                         className="w-full px-4 py-3 bg-white border-2 border-[#E5EAF0] rounded-lg focus:border-[#2CB1A6] focus:outline-none transition-colors"
                       />
                     </div>
+                  </div>
+                  {scheduledDate && scheduledTime ? (
+                    <div className="bg-[#E8F5F4] border border-[#2CB1A6] rounded-lg p-3 flex items-start gap-2">
+                      <svg className="w-5 h-5 text-[#2CB1A6] mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <p className="text-sm text-[#0B1F2A] font-medium">
+                        {formatType === 'board' ? 'Board' : 'Card'} will be delivered on {new Date(scheduledDate + 'T' + scheduledTime).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} at {scheduledTime}
+                      </p>
+                    </div>
+                  ) : (
                     <p className="text-xs text-[#5B6B75]">
-                      {scheduledDate && scheduledTime
-                        ? `${formatType === 'board' ? 'Board' : 'Card'} will be delivered on ${new Date(scheduledDate + 'T' + scheduledTime).toLocaleDateString()} at ${scheduledTime}`
-                        : 'Select date and time to schedule delivery'}
+                      Select date and time to schedule delivery
                     </p>
+                  )}
+                </div>
+
+                {/* Divider */}
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-[#E5EAF0]"></div>
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-4 bg-[#F7FAFC] text-[#5B6B75] font-medium">OR</span>
                   </div>
                 </div>
 
-                {/* Preview Message Link */}
-                <div className="pt-2">
-                  <button
-                    onClick={() => setShowMessagePreview(true)}
-                    className="text-sm text-[#2CB1A6] hover:text-[#1F8F86] font-medium flex items-center gap-1 transition-colors"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                    Preview message
-                  </button>
+                {/* Send Manually */}
+                <div>
+                  <label className="block text-sm font-bold text-[#0B1F2A] mb-3">Send Manually</label>
+                  <p className="text-xs text-[#5B6B75] mb-3">Copy the link below and share it with the recipient yourself</p>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={`www.cardora.io/boards/${boardData?.short_id}`}
+                      readOnly
+                      className="flex-1 px-4 py-3 bg-white border-2 border-[#E5EAF0] rounded-lg text-sm text-[#5B6B75] focus:border-[#2CB1A6] focus:outline-none"
+                    />
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(`www.cardora.io/boards/${boardData?.short_id}`);
+                        setToast({ message: 'Link copied to clipboard!', type: 'success' });
+                      }}
+                      className="px-6 py-3 bg-[#E8F5F4] hover:bg-[#A7E8E2] text-[#2CB1A6] rounded-lg font-medium transition-colors flex items-center gap-2"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                      Copy
+                    </button>
+                  </div>
+                  <p className="text-xs text-[#5B6B75] mt-2">Share this link with the recipient to view their {formatType}</p>
+
+                  {/* Mark as Delivered */}
+                  {boardData?.status !== 'DELIVERED' && (
+                    <div className="mt-6">
+                      <button
+                        onClick={() => setShowMarkDeliveredConfirm(true)}
+                        className="w-full px-4 py-3 bg-white hover:bg-[#FFF4E5] text-[#F59E0B] border-2 border-[#FFD88A] rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Mark as Delivered
+                      </button>
+                      <p className="text-xs text-[#5B6B75] mt-2">
+                        Once you've shared the link and want to mark this {formatType} as delivered, click the button above. This will make the {formatType} read-only.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -1604,7 +1718,7 @@ function BoardEditorPageContent() {
                       </div>
                     </div>
                   </div>
-                  <p className="text-xs text-[#5B6B75] mt-2">Board creator (cannot be changed)</p>
+                  <p className="text-xs text-[#5B6B75] mt-2">Board creator (name can be changed only from Account Settings)</p>
                 </div>
               </div>
             )}
@@ -1620,7 +1734,7 @@ function BoardEditorPageContent() {
               : selectedBackground?.type === 'PATTERN' && selectedBackground.pattern?.file_path
               ? {
                   backgroundImage: `url(${selectedBackground.pattern.file_path})`,
-                  backgroundSize: '200px 200px',
+                  backgroundSize: 'clamp(300px, 40vmin, 1200px) clamp(300px, 40vmin, 1200px)',
                   backgroundPosition: 'center',
                   backgroundRepeat: 'repeat'
                 }
@@ -1793,6 +1907,44 @@ function BoardEditorPageContent() {
           }}
         />
       </div>
+
+      {/* Mark as Delivered Confirmation Modal */}
+      {showMarkDeliveredConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 rounded-full bg-[#FFF4E5] flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-[#F59E0B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold text-[#0B1F2A] mb-2">
+                Mark as Delivered?
+              </h3>
+              <p className="text-[#5B6B75]">
+                Once marked as delivered, this {formatType} will become <strong>read-only</strong> and can no longer be edited. Are you sure you want to continue?
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowMarkDeliveredConfirm(false)}
+                disabled={markingDelivered}
+                className="flex-1 px-6 py-3 bg-white hover:bg-[#F7FAFC] text-[#5B6B75] border-2 border-[#E5EAF0] rounded-lg font-semibold transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleMarkAsDelivered}
+                disabled={markingDelivered}
+                className="flex-1 px-6 py-3 bg-[#F59E0B] hover:bg-[#D97706] text-white rounded-lg font-semibold transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                {markingDelivered ? 'Processing...' : 'Confirm'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
     </>
   );

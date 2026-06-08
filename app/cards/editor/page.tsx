@@ -7,7 +7,7 @@ import Image from "next/image";
 import Lottie from "lottie-react";
 import { useAuth } from "@/hooks/useAuth";
 import { getBoardById, updateBoard, updateBoardRecipients, addContributors, getBoardMessageCount, getBoardContributors } from "@/lib/boards";
-import { getBoardMessages, createMessage, uploadMessageMedia, addGifToMessage, addUnsplashToMessage, deleteMessageMedia } from "@/lib/messages";
+import { getBoardMessages, createMessage, updateMessage, uploadMessageMedia, addGifToMessage, addUnsplashToMessage, deleteMessageMedia } from "@/lib/messages";
 import { uploadCardMedia, addExternalMediaToCard, getCardMedia } from "@/lib/cards";
 import type { Board, Recipient } from "@/lib/boards";
 import type { Message } from "@/lib/messages";
@@ -52,10 +52,13 @@ function BoardEditorPageContent() {
   const [titleFont, setTitleFont] = useState('Inter');
   const [titleFontSize, setTitleFontSize] = useState<number>(28);
   const [titleFontColor, setTitleFontColor] = useState<string>('#0B1F2A');
+  const [envelopeFont, setEnvelopeFont] = useState('Inter');
+  const [envelopeColor, setEnvelopeColor] = useState<string>('#0B1F2A');
   const [bodyFont, setBodyFont] = useState('Inter');
   const [backgroundImage, setBackgroundImage] = useState<string | undefined>(undefined);
   const [showTitleFontPicker, setShowTitleFontPicker] = useState(false);
   const [showBodyFontPicker, setShowBodyFontPicker] = useState(false);
+  const [showEnvelopeFontPicker, setShowEnvelopeFontPicker] = useState(false);
   const [lottieAnimation, setLottieAnimation] = useState<any>(null);
   const [selectedLottieAnimation, setSelectedLottieAnimation] = useState<any>(null);
 
@@ -103,7 +106,7 @@ function BoardEditorPageContent() {
   const [showDelivery, setShowDelivery] = useState(false);
   const [recipientEmails, setRecipientEmails] = useState<{[key: number]: string}>({});
   const [deliveryMessage, setDeliveryMessage] = useState(''); // Message on the card (messages.content)
-  const [recipientMessage, setRecipientMessage] = useState(`Hi! Your group card from friends and colleagues is ready. We hope you enjoy all the wonderful messages!`); // Message in email (boards.recipient_message)
+  const [recipientMessage, setRecipientMessage] = useState(`Something special is waiting for you! Open this card to see a heartfelt message created just for you. Enjoy! 🎉`); // Message in email (boards.recipient_message)
   const [notifyContributors, setNotifyContributors] = useState(true);
   const [scheduledDate, setScheduledDate] = useState('');
   const [scheduledTime, setScheduledTime] = useState('');
@@ -115,6 +118,8 @@ function BoardEditorPageContent() {
 
   // Toast state
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+  const [showMarkDeliveredConfirm, setShowMarkDeliveredConfirm] = useState(false);
+  const [markingDelivered, setMarkingDelivered] = useState(false);
 
   // Delivery confirmation modal state
   const [showDeliveryConfirmation, setShowDeliveryConfirmation] = useState(false);
@@ -266,11 +271,13 @@ function BoardEditorPageContent() {
       setHeaderColorEnabled(board.header_color);
       setHeaderColorCode(board.header_color_code || '#2CB1A6');
       setTitleFont(board.title_font);
-      setTitleFontSize(board.title_font_size || 48);
+      setTitleFontSize(board.title_font_size || 28);
       setTitleFontColor(board.title_font_color || '#0B1F2A');
+      setEnvelopeFont(board.envelope_font || 'Inter');
+      setEnvelopeColor(board.envelope_color || '#0B1F2A');
       setBodyFont(board.body_font);
       setBackgroundImage(board.background);
-      setRecipientMessage(board.recipient_message || `Hi! Your group card from friends and colleagues is ready. We hope you enjoy all the wonderful messages!`);
+      setRecipientMessage(board.recipient_message || `Something special is waiting for you! Open this card to see a heartfelt message created just for you. Enjoy! 🎉`);
       setNotifyContributors(board.notify_contributors);
       if (board.scheduled_delivery) {
         const date = new Date(board.scheduled_delivery);
@@ -279,7 +286,7 @@ function BoardEditorPageContent() {
       }
 
       // Set board link using short_id
-      setBoardLink(`www.cardora.io/boards/${board.short_id}`);
+      setBoardLink(`www.cardora.io/${board.format_type === 'card' ? 'cards' : 'boards'}/${board.short_id}/view`);
       setInviteMessage(`Hi! I've created a group card for ${loadedRecipients.map(r => r.name).join(', ')} and would love for you to contribute. Click the link below to add your message!`);
 
       // Load messages
@@ -464,10 +471,72 @@ function BoardEditorPageContent() {
     setDeliveringNow(true);
 
     try {
+      // First, save the card message before delivering
+      if (deliveryMessage.trim()) {
+        const { messages: existingMessages } = await getBoardMessages(boardId);
+
+        if (existingMessages && existingMessages.length > 0) {
+          // Update existing message
+          const { error: updateError } = await updateMessage(existingMessages[0].id, deliveryMessage);
+          if (updateError) {
+            setToast({ message: 'Error saving card message: ' + updateError, type: 'error' });
+            setDeliveringNow(false);
+            return;
+          }
+        } else {
+          // Create new message for this card
+          const { message, contributorId, error: messageError } = await createMessage({
+            board_id: boardId,
+            contributor_name: user?.user_metadata?.name || user?.email || 'Card Creator',
+            contributor_email: user?.email,
+            content: deliveryMessage,
+            is_anonymous: false
+          });
+
+          if (messageError || !message || !contributorId) {
+            setToast({ message: 'Error creating card message: ' + messageError, type: 'error' });
+            setDeliveringNow(false);
+            return;
+          }
+
+          // Save media if there is any
+          if (selectedMedia && message.id && contributorId) {
+            if (selectedMedia.source === 'upload' && selectedMedia.file) {
+              const { error: uploadError } = await uploadMessageMedia(
+                message.id,
+                contributorId,
+                selectedMedia.file
+              );
+              if (uploadError) {
+                setToast({ message: 'Error uploading media: ' + uploadError, type: 'error' });
+              }
+            } else if (selectedMedia.source === 'gif' && selectedMedia.url) {
+              const { error: gifError } = await addGifToMessage(
+                message.id,
+                contributorId,
+                selectedMedia.url
+              );
+              if (gifError) {
+                setToast({ message: 'Error adding GIF: ' + gifError, type: 'error' });
+              }
+            } else if (selectedMedia.source === 'unsplash' && selectedMedia.url) {
+              const { error: unsplashError } = await addUnsplashToMessage(
+                message.id,
+                contributorId,
+                selectedMedia.url
+              );
+              if (unsplashError) {
+                setToast({ message: 'Error adding photo: ' + unsplashError, type: 'error' });
+              }
+            }
+          }
+        }
+      }
+
       // Update board status to DELIVERED
       const { error: boardError } = await updateBoard(boardId, {
         status: 'DELIVERED',
-        recipient_message: deliveryMessage,
+        recipient_message: recipientMessage,
         notify_contributors: notifyContributors,
         delivery_type: 'ON_DEMAND',
         effect_id: selectedEffect?.id || undefined,
@@ -509,8 +578,10 @@ function BoardEditorPageContent() {
             emails: recipientEmailsList,
             boardTitle,
             recipientNames: recipients.filter(r => r.trim()),
-            boardLink: boardLink,
-            deliveryMessage: deliveryMessage || undefined
+            boardLink: `www.cardora.io/${formatType === 'board' ? 'boards' : 'cards'}/${boardData?.short_id}/view`,
+            deliveryMessage: recipientMessage || undefined,
+            formatType: formatType,
+            senderName: user?.user_metadata?.name || user?.email || 'Sender'
           })
         });
 
@@ -663,6 +734,35 @@ function BoardEditorPageContent() {
   };
 
   // Save board handler
+  // Mark as delivered handler
+  const handleMarkAsDelivered = async () => {
+    if (!boardId) return;
+
+    setMarkingDelivered(true);
+
+    try {
+      const { error } = await updateBoard(boardId, {
+        status: 'DELIVERED'
+      });
+
+      if (error) {
+        setToast({ message: `Error marking ${formatType} as delivered: ` + error, type: 'error' });
+      } else {
+        setToast({ message: `${formatType === 'board' ? 'Board' : 'Card'} marked as delivered!`, type: 'success' });
+        setShowMarkDeliveredConfirm(false);
+
+        // Reload the page to reflect read-only state
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      }
+    } catch (error: any) {
+      setToast({ message: 'Error: ' + error.message, type: 'error' });
+    } finally {
+      setMarkingDelivered(false);
+    }
+  };
+
   const handleSaveBoard = async () => {
     if (!boardId) return;
 
@@ -681,7 +781,13 @@ function BoardEditorPageContent() {
           // Update existing message
           cardMessageId = existingMessages[0].id;
           cardContributorId = existingMessages[0].contributor_id;
-          // TODO: Add updateMessage function to lib/messages.ts
+
+          const { error: updateError } = await updateMessage(cardMessageId, deliveryMessage);
+          if (updateError) {
+            setToast({ message: 'Error updating card message: ' + updateError, type: 'error' });
+            setSaving(false);
+            return;
+          }
         } else {
           // Create new message for this card
           const { message, contributorId, error: messageError } = await createMessage({
@@ -706,11 +812,16 @@ function BoardEditorPageContent() {
         if (selectedMedia && cardMessageId && cardContributorId) {
           console.log('Saving card media:', selectedMedia);
 
-          // Only upload if this is new media (has a file property)
-          // If it only has an id, it's already saved media from the database
-          const isNewMedia = selectedMedia.file !== undefined;
+          // Check if this is new media or already saved media
+          // Media loaded from database will have: id (from media table), url, source, type
+          // Newly selected media will have: id (from giphy/unsplash), url, source, type, but NOT file_url
+          // We need to check if this media is already in our database
+          // Simple check: if the URL matches what's already in the message's media, skip saving
+          const { messages: currentMessages } = await getBoardMessages(boardId);
+          const currentMedia = currentMessages?.[0]?.media?.[0];
+          const isMediaAlreadySaved = currentMedia && currentMedia.file_url === selectedMedia.url;
 
-          if (isNewMedia) {
+          if (!isMediaAlreadySaved) {
             // Delete old media before uploading new media
             const { error: deleteError } = await deleteMessageMedia(cardMessageId);
             if (deleteError) {
@@ -777,6 +888,8 @@ function BoardEditorPageContent() {
         title_font: titleFont,
         title_font_size: titleFontSize,
         title_font_color: titleFontColor,
+        envelope_font: envelopeFont,
+        envelope_color: envelopeColor,
         body_font: bodyFont,
         intro_animation: true,
         effect_id: selectedEffect?.id || undefined,
@@ -853,7 +966,9 @@ function BoardEditorPageContent() {
         boardTitle={boardTitle}
         recipientNames={recipients.filter(r => r.trim())}
         deliveryMessage={recipientMessage}
-        boardLink={boardLink}
+        boardLink={`www.cardora.io/${formatType === 'board' ? 'boards' : 'cards'}/${boardData?.short_id}/view`}
+        formatType={formatType}
+        senderName={user?.user_metadata?.name || user?.email || 'Sender'}
       />
 
       <div className="h-screen flex flex-col bg-white overflow-hidden">
@@ -896,7 +1011,7 @@ function BoardEditorPageContent() {
           </Link>
           {!isReadOnly && (
             <>
-              <Link href={`/boards/${boardData?.short_id}/view`} target="_blank">
+              <Link href={`/${formatType === 'card' ? 'cards' : 'boards'}/${boardData?.short_id}/view`} target="_blank">
                 <button className="px-4 py-2 border-2 border-[#2CB1A6] text-[#2CB1A6] hover:bg-[#E8F5F4] rounded-lg font-medium transition-colors flex items-center gap-2">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -983,7 +1098,7 @@ function BoardEditorPageContent() {
                   <div className="relative bg-white rounded-lg overflow-hidden border-2 border-[#E5EAF0]">
                     {/* Preview */}
                     <div
-                      className="h-48 relative"
+                      className="h-48 relative rounded-lg overflow-hidden"
                       style={
                         selectedBackground
                           ? {
@@ -992,9 +1107,9 @@ function BoardEditorPageContent() {
                                 : selectedBackground.type === 'PATTERN' && selectedBackground.pattern?.file_path
                                 ? {
                                     backgroundImage: `url(${selectedBackground.pattern.file_path})`,
-                                    backgroundSize: '200px 200px',
+                                    backgroundSize: 'cover',
                                     backgroundPosition: 'center',
-                                    backgroundRepeat: 'repeat'
+                                    backgroundRepeat: 'no-repeat'
                                   }
                                 : {})
                             }
@@ -1148,14 +1263,15 @@ function BoardEditorPageContent() {
                   <div className="relative bg-white rounded-lg overflow-hidden border-2 border-[#E5EAF0]">
                     {/* Background Preview */}
                     <div
-                      className="h-48 relative"
+                      className="h-48 relative rounded-lg overflow-hidden"
                       style={
                         pageBackground
                           ? pageBackground.type === 'PATTERN'
                             ? {
                                 backgroundImage: getBackgroundCssValue(pageBackground),
-                                backgroundRepeat: 'repeat',
-                                backgroundSize: '100px 100px'
+                                backgroundRepeat: 'no-repeat',
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center'
                               }
                             : {
                                 background: getBackgroundCssValue(pageBackground)
@@ -1203,7 +1319,7 @@ function BoardEditorPageContent() {
                         min="8"
                         max="128"
                         value={titleFontSize}
-                        onChange={(e) => setTitleFontSize(parseInt(e.target.value) || 48)}
+                        onChange={(e) => setTitleFontSize(parseInt(e.target.value) || 28)}
                         className="w-full px-3 py-2 border-2 border-[#E5EAF0] rounded-lg focus:border-[#2CB1A6] focus:outline-none text-sm"
                       />
                     </div>
@@ -1213,8 +1329,8 @@ function BoardEditorPageContent() {
                       <label className="block text-xs font-semibold text-[#5B6B75] mb-2">Envelope Color</label>
                       <input
                         type="color"
-                        value={titleFontColor}
-                        onChange={(e) => setTitleFontColor(e.target.value)}
+                        value={envelopeColor}
+                        onChange={(e) => setEnvelopeColor(e.target.value)}
                         className="w-full h-10 rounded border-2 border-[#E5EAF0] cursor-pointer"
                       />
                     </div>
@@ -1225,17 +1341,17 @@ function BoardEditorPageContent() {
                 <div className="relative">
                   <label className="block text-sm font-bold text-[#0B1F2A] mb-2">Envelope font</label>
                   <button
-                    onClick={() => setShowTitleFontPicker(!showTitleFontPicker)}
+                    onClick={() => setShowEnvelopeFontPicker(!showEnvelopeFontPicker)}
                     className="w-full bg-white border-2 border-[#E5EAF0] rounded-lg p-4 flex items-center justify-between hover:border-[#2CB1A6] transition-colors"
                   >
-                    <span className="text-[#5B6B75] font-medium">{titleFont}</span>
+                    <span className="text-[#5B6B75] font-medium">{envelopeFont}</span>
                     <svg className="w-5 h-5 text-[#5B6B75]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                   </button>
 
                   {/* Font Picker Dropdown */}
-                  {showTitleFontPicker && (
+                  {showEnvelopeFontPicker && (
                     <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-[#E5EAF0] rounded-lg shadow-xl max-h-96 overflow-y-auto z-50">
                       {/* Professional Fonts */}
                       <div className="p-3 bg-[#F7FAFC] border-b border-[#E5EAF0]">
@@ -1245,11 +1361,11 @@ function BoardEditorPageContent() {
                         <button
                           key={font.name}
                           onClick={() => {
-                            setTitleFont(font.name);
-                            setShowTitleFontPicker(false);
+                            setEnvelopeFont(font.name);
+                            setShowEnvelopeFontPicker(false);
                           }}
                           className={`w-full p-3 text-left hover:bg-[#F7FAFC] transition-colors border-b border-[#E5EAF0] ${
-                            titleFont === font.name ? 'bg-[#E8F5F4] text-[#2CB1A6]' : 'text-[#0B1F2A]'
+                            envelopeFont === font.name ? 'bg-[#E8F5F4] text-[#2CB1A6]' : 'text-[#0B1F2A]'
                           }`}
                           style={{ fontFamily: font.name }}
                         >
@@ -1265,11 +1381,11 @@ function BoardEditorPageContent() {
                         <button
                           key={font.name}
                           onClick={() => {
-                            setTitleFont(font.name);
-                            setShowTitleFontPicker(false);
+                            setEnvelopeFont(font.name);
+                            setShowEnvelopeFontPicker(false);
                           }}
                           className={`w-full p-3 text-left hover:bg-[#F7FAFC] transition-colors border-b border-[#E5EAF0] ${
-                            titleFont === font.name ? 'bg-[#E8F5F4] text-[#2CB1A6]' : 'text-[#0B1F2A]'
+                            envelopeFont === font.name ? 'bg-[#E8F5F4] text-[#2CB1A6]' : 'text-[#0B1F2A]'
                           }`}
                           style={{ fontFamily: font.name }}
                         >
@@ -1285,11 +1401,11 @@ function BoardEditorPageContent() {
                         <button
                           key={font.name}
                           onClick={() => {
-                            setTitleFont(font.name);
-                            setShowTitleFontPicker(false);
+                            setEnvelopeFont(font.name);
+                            setShowEnvelopeFontPicker(false);
                           }}
                           className={`w-full p-3 text-left hover:bg-[#F7FAFC] transition-colors border-b border-[#E5EAF0] last:border-b-0 ${
-                            titleFont === font.name ? 'bg-[#E8F5F4] text-[#2CB1A6]' : 'text-[#0B1F2A]'
+                            envelopeFont === font.name ? 'bg-[#E8F5F4] text-[#2CB1A6]' : 'text-[#0B1F2A]'
                           }`}
                           style={{ fontFamily: font.name }}
                         >
@@ -1718,6 +1834,20 @@ function BoardEditorPageContent() {
                     Deliver Now
                   </button>
                   <p className="text-xs text-center text-[#5B6B75] mt-2">{formatType === 'board' ? 'Board' : 'Card'} will be sent immediately to all recipients</p>
+
+                  {/* Preview Message Link */}
+                  <div className="pt-2 flex justify-center">
+                    <button
+                      onClick={() => setShowMessagePreview(true)}
+                      className="text-sm text-[#2CB1A6] hover:text-[#1F8F86] font-medium flex items-center gap-1 transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                      Preview message
+                    </button>
+                  </div>
                 </div>
 
                 {/* Divider */}
@@ -1733,7 +1863,7 @@ function BoardEditorPageContent() {
                 {/* Schedule Delivery */}
                 <div>
                   <label className="block text-sm font-bold text-[#0B1F2A] mb-3">Schedule for later</label>
-                  <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-medium text-[#5B6B75] mb-2">Date</label>
                       <input
@@ -1752,26 +1882,76 @@ function BoardEditorPageContent() {
                         className="w-full px-4 py-3 bg-white border-2 border-[#E5EAF0] rounded-lg focus:border-[#2CB1A6] focus:outline-none transition-colors"
                       />
                     </div>
+                  </div>
+                  {scheduledDate && scheduledTime ? (
+                    <div className="bg-[#E8F5F4] border border-[#2CB1A6] rounded-lg p-3 flex items-start gap-2">
+                      <svg className="w-5 h-5 text-[#2CB1A6] mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <p className="text-sm text-[#0B1F2A] font-medium">
+                        {formatType === 'board' ? 'Board' : 'Card'} will be delivered on {new Date(scheduledDate + 'T' + scheduledTime).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} at {scheduledTime}
+                      </p>
+                    </div>
+                  ) : (
                     <p className="text-xs text-[#5B6B75]">
-                      {scheduledDate && scheduledTime
-                        ? `${formatType === 'board' ? 'Board' : 'Card'} will be delivered on ${new Date(scheduledDate + 'T' + scheduledTime).toLocaleDateString()} at ${scheduledTime}`
-                        : 'Select date and time to schedule delivery'}
+                      Select date and time to schedule delivery
                     </p>
+                  )}
+                </div>
+
+                {/* Divider */}
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-[#E5EAF0]"></div>
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-4 bg-[#F7FAFC] text-[#5B6B75] font-medium">OR</span>
                   </div>
                 </div>
 
-                {/* Preview Message Link */}
-                <div className="pt-2">
-                  <button
-                    onClick={() => setShowMessagePreview(true)}
-                    className="text-sm text-[#2CB1A6] hover:text-[#1F8F86] font-medium flex items-center gap-1 transition-colors"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                    Preview message
-                  </button>
+                {/* Send Manually */}
+                <div>
+                  <label className="block text-sm font-bold text-[#0B1F2A] mb-3">Send Manually</label>
+                  <p className="text-xs text-[#5B6B75] mb-3">Copy the link below and share it with the recipient yourself</p>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={`www.cardora.io/${formatType === 'board' ? 'boards' : 'cards'}/${boardData?.short_id}/view`}
+                      readOnly
+                      className="flex-1 px-4 py-3 bg-white border-2 border-[#E5EAF0] rounded-lg text-sm text-[#5B6B75] focus:border-[#2CB1A6] focus:outline-none"
+                    />
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(`www.cardora.io/${formatType === 'board' ? 'boards' : 'cards'}/${boardData?.short_id}/view`);
+                        setToast({ message: 'Link copied to clipboard!', type: 'success' });
+                      }}
+                      className="px-6 py-3 bg-[#E8F5F4] hover:bg-[#A7E8E2] text-[#2CB1A6] rounded-lg font-medium transition-colors flex items-center gap-2"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                      Copy
+                    </button>
+                  </div>
+                  <p className="text-xs text-[#5B6B75] mt-2">Share this link with the recipient to view their {formatType === 'board' ? 'board' : 'card'}</p>
+
+                  {/* Mark as Delivered */}
+                  {boardData?.status !== 'DELIVERED' && (
+                    <div className="mt-6">
+                      <button
+                        onClick={() => setShowMarkDeliveredConfirm(true)}
+                        className="w-full px-4 py-3 bg-white hover:bg-[#FFF4E5] text-[#F59E0B] border-2 border-[#FFD88A] rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Mark as Delivered
+                      </button>
+                      <p className="text-xs text-[#5B6B75] mt-2">
+                        Once you've shared the link and want to mark this {formatType === 'board' ? 'board' : 'card'} as delivered, click the button above. This will make the {formatType === 'board' ? 'board' : 'card'} read-only.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -1833,7 +2013,7 @@ function BoardEditorPageContent() {
                       </div>
                     </div>
                   </div>
-                  <p className="text-xs text-[#5B6B75] mt-2">Board creator (cannot be changed)</p>
+                  <p className="text-xs text-[#5B6B75] mt-2">Board creator (name can be changed only from Account Settings)</p>
                 </div>
               </div>
             )}
@@ -1849,7 +2029,7 @@ function BoardEditorPageContent() {
                 ? {
                     backgroundImage: getBackgroundCssValue(pageBackground),
                     backgroundRepeat: 'repeat',
-                    backgroundSize: '200px 200px' // Adjust size as needed
+                    backgroundSize: 'clamp(300px, 40vmin, 1200px) clamp(300px, 40vmin, 1200px)'
                   }
                 : { background: getBackgroundCssValue(pageBackground) }
               : { background: 'linear-gradient(to bottom right, rgb(252, 231, 243), rgb(249, 168, 212), rgb(236, 72, 153))' }
@@ -1880,7 +2060,7 @@ function BoardEditorPageContent() {
                         isFlipping && viewMode === 'envelope' ? 'animate-flip' : ''
                       }`}
                       style={{
-                        backgroundColor: titleFontColor || '#8B4513',
+                        backgroundColor: envelopeColor || '#8B4513',
                         boxShadow: viewMode === 'envelope'
                           ? '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
                           : '0 10px 15px -3px rgba(0, 0, 0, 0.3)',
@@ -1995,7 +2175,7 @@ function BoardEditorPageContent() {
                           className="space-y-2"
                           style={{
                             fontFamily: titleFont,
-                            color: isLightColor(titleFontColor || '#8B4513') ? '#1F2937' : '#FFFFFF'
+                            color: isLightColor(envelopeColor || '#8B4513') ? '#1F2937' : '#FFFFFF'
                           }}
                         >
                           <p className="text-xl">
@@ -2023,20 +2203,20 @@ function BoardEditorPageContent() {
                             autoFocus
                             className="font-bold text-center bg-transparent border-2 border-dashed border-white/50 rounded px-4 py-2 outline-none w-full max-w-2xl"
                             style={{
-                              fontFamily: titleFont,
+                              fontFamily: envelopeFont,
                               fontSize: `${titleFontSize * 1.5}px`,
-                              color: isLightColor(titleFontColor || '#8B4513') ? '#1F2937' : '#FFFFFF'
+                              color: isLightColor(envelopeColor || '#8B4513') ? '#1F2937' : '#FFFFFF'
                             }}
                             placeholder="Card Title"
                           />
                         ) : (
                           <h1
-                            onClick={() => viewMode === 'envelope' && setIsEditingTitle(true)}
-                            className="font-bold text-center cursor-pointer hover:opacity-80 transition-opacity"
+                            onClick={() => !isReadOnly && viewMode === 'envelope' && setIsEditingTitle(true)}
+                            className={`font-bold text-center ${!isReadOnly ? 'cursor-pointer hover:opacity-80' : 'cursor-default'} transition-opacity`}
                             style={{
-                              fontFamily: titleFont,
+                              fontFamily: envelopeFont,
                               fontSize: `${titleFontSize * 1.5}px`,
-                              color: isLightColor(titleFontColor || '#8B4513') ? '#1F2937' : '#FFFFFF'
+                              color: isLightColor(envelopeColor || '#8B4513') ? '#1F2937' : '#FFFFFF'
                             }}
                           >
                             {boardTitle || 'Card Title'}
@@ -2053,7 +2233,7 @@ function BoardEditorPageContent() {
                         isFlipping && viewMode === 'envelope' ? 'animate-flip' : ''
                       }`}
                       style={{
-                        backgroundColor: titleFontColor || '#8B4513',
+                        backgroundColor: envelopeColor || '#8B4513',
                         boxShadow: viewMode === 'envelope'
                           ? '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
                           : '0 10px 15px -3px rgba(0, 0, 0, 0.3)',
@@ -2064,7 +2244,7 @@ function BoardEditorPageContent() {
                       <div className="absolute inset-0">
                         {/* Bottom part of envelope */}
                         <div className="absolute inset-x-0 bottom-0 h-2/3"
-                          style={{ backgroundColor: titleFontColor || '#8B4513' }}
+                          style={{ backgroundColor: envelopeColor || '#8B4513' }}
                         />
 
                         {/* Top flap opened */}
@@ -2171,7 +2351,7 @@ function BoardEditorPageContent() {
                                   <audio src={selectedMedia.url} controls className="w-full max-w-md" />
                                 </div>
                               ) : null}
-                              {viewMode === 'card' && cardView === 'inside' && (
+                              {viewMode === 'card' && cardView === 'inside' && !isReadOnly && (
                                 <button
                                   onClick={() => setShowMediaPanel(true)}
                                   className="absolute top-4 right-4 w-10 h-10 bg-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all hover:scale-105 border-2 border-gray-200 z-10"
@@ -2183,7 +2363,7 @@ function BoardEditorPageContent() {
                                 </button>
                               )}
                             </div>
-                          ) : (
+                          ) : !isReadOnly ? (
                             <button
                               onClick={() => setShowMediaPanel(true)}
                               className="flex flex-col items-center gap-4 hover:scale-105 transition-transform"
@@ -2196,13 +2376,13 @@ function BoardEditorPageContent() {
                               </div>
                               <p className="text-gray-600 font-medium text-lg">Add media</p>
                             </button>
-                          )}
+                          ) : null}
                         </div>
 
                         {/* Bottom Section - Message */}
                         <div className="h-1/2 flex flex-col p-8 relative overflow-visible">
                           {/* T Button for editing */}
-                          {viewMode === 'card' && cardView === 'inside' && (
+                          {viewMode === 'card' && cardView === 'inside' && !isReadOnly && (
                             <button
                               onClick={() => {
                                 setIsEditingMessage(!isEditingMessage);
@@ -2222,7 +2402,7 @@ function BoardEditorPageContent() {
                           <div
                             className="flex-1 overflow-y-auto relative"
                             onClick={() => {
-                              if (viewMode === 'card' && cardView === 'inside' && !isEditingMessage) {
+                              if (viewMode === 'card' && cardView === 'inside' && !isEditingMessage && !isReadOnly) {
                                 setIsEditingMessage(true);
                                 setTimeout(() => {
                                   if (messageEditor) {
@@ -2368,6 +2548,44 @@ function BoardEditorPageContent() {
           });
         }}
       />
+
+      {/* Mark as Delivered Confirmation Modal */}
+      {showMarkDeliveredConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 rounded-full bg-[#FFF4E5] flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-[#F59E0B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold text-[#0B1F2A] mb-2">
+                Mark as Delivered?
+              </h3>
+              <p className="text-[#5B6B75]">
+                Once marked as delivered, this {formatType === 'board' ? 'board' : 'card'} will become <strong>read-only</strong> and can no longer be edited. Are you sure you want to continue?
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowMarkDeliveredConfirm(false)}
+                disabled={markingDelivered}
+                className="flex-1 px-6 py-3 bg-white hover:bg-[#F7FAFC] text-[#5B6B75] border-2 border-[#E5EAF0] rounded-lg font-semibold transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleMarkAsDelivered}
+                disabled={markingDelivered}
+                className="flex-1 px-6 py-3 bg-[#F59E0B] hover:bg-[#D97706] text-white rounded-lg font-semibold transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                {markingDelivered ? 'Processing...' : 'Confirm'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
     </>
   );

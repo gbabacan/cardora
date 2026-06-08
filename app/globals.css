@@ -28,6 +28,97 @@ a, button {
   cursor: pointer;
 }
 
+/* Print Styles */
+@media print {
+  /* Hide UI elements that shouldn't be printed */
+  header,
+  footer,
+  button,
+  .no-print,
+  nav {
+    display: none !important;
+  }
+
+  /* Hide interactive view when printing */
+  .interactive-card-view {
+    display: none !important;
+  }
+
+  /* Show print-only layout */
+  .print-only-layout {
+    display: block !important;
+  }
+
+  /* Page breaks between sections */
+  .page-break-before {
+    page-break-before: always;
+  }
+
+  /* Each print page takes full page */
+  .print-page {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    page-break-after: always;
+  }
+
+  /* Last page shouldn't force page break */
+  .print-page:last-child {
+    page-break-after: auto;
+  }
+
+  /* Ensure proper page breaks */
+  .message-container,
+  .card-container {
+    page-break-inside: avoid;
+    margin-bottom: 20px;
+  }
+
+  /* Force color printing */
+  * {
+    color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Optimize layout for printing */
+  body {
+    background: white !important;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Remove shadows for cleaner print */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Ensure links are visible */
+  a[href]:after {
+    content: none !important;
+  }
+
+  /* Make sure content fits on page */
+  @page {
+    margin: 1cm;
+    size: auto;
+  }
+
+  /* Prevent orphans and widows */
+  p, h1, h2, h3, h4, h5, h6 {
+    orphans: 3;
+    widows: 3;
+  }
+
+  /* Keep headings with their content */
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+}
+
 a:hover, button:hover {
   cursor: pointer;
 }

@@ -1,13 +1,48 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import Lottie from "lottie-react";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function CorporateBenefitsPage() {
   const { user } = useAuth();
   const [showFeaturesDropdown, setShowFeaturesDropdown] = useState(false);
+  const [welcomeAnimation, setWelcomeAnimation] = useState<any>(null);
+  const [benefitAnimation1, setBenefitAnimation1] = useState<any>(null);
+  const [benefitAnimation2, setBenefitAnimation2] = useState<any>(null);
+  const [benefitAnimation3, setBenefitAnimation3] = useState<any>(null);
+  const [benefitAnimation4, setBenefitAnimation4] = useState<any>(null);
+
+  useEffect(() => {
+    // Load welcome animation
+    fetch('/lotties/welcome/welcome1.json')
+      .then(res => res.json())
+      .then(data => setWelcomeAnimation(data))
+      .catch(err => console.error('Error loading welcome animation:', err));
+
+    // Load benefit section animations
+    fetch('/lotties/farewell/farewell4.json')
+      .then(res => res.json())
+      .then(data => setBenefitAnimation1(data))
+      .catch(err => console.error('Error loading benefit animation 1:', err));
+
+    fetch('/lotties/congratulations/congratulations3.json')
+      .then(res => res.json())
+      .then(data => setBenefitAnimation2(data))
+      .catch(err => console.error('Error loading benefit animation 2:', err));
+
+    fetch('/lotties/welcome/welcome3.json')
+      .then(res => res.json())
+      .then(data => setBenefitAnimation3(data))
+      .catch(err => console.error('Error loading benefit animation 3:', err));
+
+    fetch('/lotties/thankyou/thankYou1.json')
+      .then(res => res.json())
+      .then(data => setBenefitAnimation4(data))
+      .catch(err => console.error('Error loading benefit animation 4:', err));
+  }, []);
 
   return (
     <div className="min-h-screen bg-white">
@@ -128,8 +163,11 @@ export default function CorporateBenefitsPage() {
               <Link href="/pricing" className="text-[#5B6B75] hover:text-[#0B1F2A] transition-colors font-bold">
                 Pricing
               </Link>
-              <Link href="/#templates" className="text-[#5B6B75] hover:text-[#0B1F2A] transition-colors font-bold">
+              <Link href="/templates" className="text-[#5B6B75] hover:text-[#0B1F2A] transition-colors font-bold">
                 Templates
+              </Link>
+              <Link href="/contact" className="text-[#5B6B75] hover:text-[#0B1F2A] transition-colors font-bold">
+                Contact Us
               </Link>
             </nav>
 
@@ -164,32 +202,86 @@ export default function CorporateBenefitsPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-[#0B1F2A] to-[#1F8F86] py-20 text-white">
+      <section className="bg-gradient-to-br from-[#0B1F2A] to-[#1F8F86] py-8 text-white relative overflow-hidden">
         <div className="container mx-auto px-6">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-xl">
-              <svg className="w-10 h-10 text-[#2CB1A6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-              </svg>
+          <div className="max-w-7xl mx-auto relative">
+            <div className="grid lg:grid-cols-2 items-center">
+              {/* Left Content */}
+              <div className="relative z-10 py-8">
+                <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center mb-6 shadow-xl">
+                  <svg className="w-10 h-10 text-[#2CB1A6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                </div>
+                <h1 className="text-5xl lg:text-6xl font-bold mb-4">
+                  Build a Culture Where Everyone Thrives
+                </h1>
+                <p className="text-xl opacity-90 mb-6 leading-relaxed">
+                  Transform your workplace with meaningful recognition that drives engagement, strengthens culture, and helps your organization succeed.
+                </p>
+                <Link href="/boards/create">
+                  <button className="px-10 py-4 bg-white hover:bg-[#F7FAFC] text-[#2CB1A6] text-lg rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl">
+                    Create a Cardora
+                  </button>
+                </Link>
+              </div>
+
+              {/* Right Content - Lottie Animation */}
+              {welcomeAnimation && (
+                <div className="absolute right-0 top-0 w-[700px] h-[700px] -mr-32 -mt-16">
+                  <Lottie
+                    animationData={welcomeAnimation}
+                    loop={true}
+                    style={{ width: '100%', height: '100%' }}
+                  />
+                </div>
+              )}
             </div>
-            <h1 className="text-5xl lg:text-6xl font-bold mb-6">
-              Build a Culture Where Everyone Thrives
-            </h1>
-            <p className="text-xl opacity-90 mb-8 leading-relaxed">
-              Transform your workplace with meaningful recognition that drives engagement, strengthens culture, and helps your organization succeed.
-            </p>
-            <Link href="/boards/create">
-              <button className="px-10 py-4 bg-white hover:bg-[#F7FAFC] text-[#2CB1A6] text-lg rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl">
-                Create a Cardora
-              </button>
-            </Link>
           </div>
         </div>
       </section>
 
       {/* Main Benefits */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-6">
+      <section className="py-20 bg-white relative overflow-hidden">
+        {/* Background Lotties */}
+        {benefitAnimation1 && (
+          <div className="absolute top-0 left-0 w-[300px] h-[300px] opacity-20 pointer-events-none">
+            <Lottie
+              animationData={benefitAnimation1}
+              loop={true}
+              style={{ width: '100%', height: '100%' }}
+            />
+          </div>
+        )}
+        {benefitAnimation2 && (
+          <div className="absolute top-0 right-0 w-[300px] h-[300px] opacity-20 pointer-events-none">
+            <Lottie
+              animationData={benefitAnimation2}
+              loop={true}
+              style={{ width: '100%', height: '100%' }}
+            />
+          </div>
+        )}
+        {benefitAnimation3 && (
+          <div className="absolute bottom-0 left-0 w-[300px] h-[300px] opacity-20 pointer-events-none">
+            <Lottie
+              animationData={benefitAnimation3}
+              loop={true}
+              style={{ width: '100%', height: '100%' }}
+            />
+          </div>
+        )}
+        {benefitAnimation4 && (
+          <div className="absolute bottom-0 right-0 w-[300px] h-[300px] opacity-20 pointer-events-none">
+            <Lottie
+              animationData={benefitAnimation4}
+              loop={true}
+              style={{ width: '100%', height: '100%' }}
+            />
+          </div>
+        )}
+
+        <div className="container mx-auto px-6 relative z-10">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-4xl lg:text-5xl font-bold text-[#0B1F2A] mb-4">
@@ -510,7 +602,7 @@ export default function CorporateBenefitsPage() {
                   <span className="text-2xl font-bold text-white">Cardora</span>
                 </div>
                 <p className="text-sm text-white opacity-90">
-                  Beautiful group cards for every celebration
+                  Beautiful cards for every celebration
                 </p>
               </div>
 
@@ -520,7 +612,7 @@ export default function CorporateBenefitsPage() {
                 <ul className="space-y-2">
                   <li><a href="/#features" className="text-white opacity-80 hover:opacity-100 transition-opacity">Features</a></li>
                   <li><Link href="/pricing" className="text-white opacity-80 hover:opacity-100 transition-opacity">Pricing</Link></li>
-                  <li><a href="/#templates" className="text-white opacity-80 hover:opacity-100 transition-opacity">Templates</a></li>
+                  <li><a href="/templates" className="text-white opacity-80 hover:opacity-100 transition-opacity">Templates</a></li>
                 </ul>
               </div>
 

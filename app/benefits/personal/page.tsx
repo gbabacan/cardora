@@ -1,13 +1,48 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import Lottie from "lottie-react";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function PersonalBenefitsPage() {
   const { user } = useAuth();
   const [showFeaturesDropdown, setShowFeaturesDropdown] = useState(false);
+  const [birthdayAnimation, setBirthdayAnimation] = useState<any>(null);
+  const [benefitAnimation1, setBenefitAnimation1] = useState<any>(null);
+  const [benefitAnimation2, setBenefitAnimation2] = useState<any>(null);
+  const [benefitAnimation3, setBenefitAnimation3] = useState<any>(null);
+  const [benefitAnimation4, setBenefitAnimation4] = useState<any>(null);
+
+  useEffect(() => {
+    // Load birthday animation
+    fetch('/lotties/birthday/birthday7.json')
+      .then(res => res.json())
+      .then(data => setBirthdayAnimation(data))
+      .catch(err => console.error('Error loading birthday animation:', err));
+
+    // Load benefit section animations
+    fetch('/lotties/love/love8.json')
+      .then(res => res.json())
+      .then(data => setBenefitAnimation1(data))
+      .catch(err => console.error('Error loading benefit animation 1:', err));
+
+    fetch('/lotties/newbaby/baby1.json')
+      .then(res => res.json())
+      .then(data => setBenefitAnimation2(data))
+      .catch(err => console.error('Error loading benefit animation 2:', err));
+
+    fetch('/lotties/wedding/wedding2.json')
+      .then(res => res.json())
+      .then(data => setBenefitAnimation3(data))
+      .catch(err => console.error('Error loading benefit animation 3:', err));
+
+    fetch('/lotties/valentinesday/valentine4.json')
+      .then(res => res.json())
+      .then(data => setBenefitAnimation4(data))
+      .catch(err => console.error('Error loading benefit animation 4:', err));
+  }, []);
 
   return (
     <div className="min-h-screen bg-white">
@@ -128,8 +163,11 @@ export default function PersonalBenefitsPage() {
               <Link href="/pricing" className="text-[#5B6B75] hover:text-[#0B1F2A] transition-colors font-bold">
                 Pricing
               </Link>
-              <Link href="/#templates" className="text-[#5B6B75] hover:text-[#0B1F2A] transition-colors font-bold">
+              <Link href="/templates" className="text-[#5B6B75] hover:text-[#0B1F2A] transition-colors font-bold">
                 Templates
+              </Link>
+              <Link href="/contact" className="text-[#5B6B75] hover:text-[#0B1F2A] transition-colors font-bold">
+                Contact Us
               </Link>
             </nav>
 
@@ -164,32 +202,86 @@ export default function PersonalBenefitsPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-[#F7FAFC] to-[#E8F5F4] py-20">
+      <section className="bg-gradient-to-br from-[#F7FAFC] to-[#E8F5F4] py-8 relative overflow-hidden">
         <div className="container mx-auto px-6">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="w-20 h-20 bg-[#2CB1A6] rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-xl">
-              <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-              </svg>
+          <div className="max-w-7xl mx-auto relative">
+            <div className="grid lg:grid-cols-2 items-center">
+              {/* Left Content */}
+              <div className="relative z-10 py-8">
+                <div className="w-20 h-20 bg-[#2CB1A6] rounded-3xl flex items-center justify-center mb-6 shadow-xl">
+                  <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  </svg>
+                </div>
+                <h1 className="text-5xl lg:text-6xl font-bold text-[#0B1F2A] mb-4">
+                  Celebrate Every Moment Together
+                </h1>
+                <p className="text-xl text-[#5B6B75] mb-6 leading-relaxed">
+                  Transform ordinary occasions into extraordinary memories. Cardora makes it easy to gather heartfelt messages from everyone who matters.
+                </p>
+                <Link href="/boards/create">
+                  <button className="px-10 py-4 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white text-lg rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl">
+                    Create a Cardora
+                  </button>
+                </Link>
+              </div>
+
+              {/* Right Content - Lottie Animation */}
+              {birthdayAnimation && (
+                <div className="absolute right-0 top-0 w-[700px] h-[700px] -mr-32 -mt-16">
+                  <Lottie
+                    animationData={birthdayAnimation}
+                    loop={true}
+                    style={{ width: '100%', height: '100%' }}
+                  />
+                </div>
+              )}
             </div>
-            <h1 className="text-5xl lg:text-6xl font-bold text-[#0B1F2A] mb-6">
-              Celebrate Every Moment Together
-            </h1>
-            <p className="text-xl text-[#5B6B75] mb-8 leading-relaxed">
-              Transform ordinary occasions into extraordinary memories. Cardora makes it easy to gather heartfelt messages from everyone who matters.
-            </p>
-            <Link href="/boards/create">
-              <button className="px-10 py-4 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white text-lg rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl">
-                Create a Cardora
-              </button>
-            </Link>
           </div>
         </div>
       </section>
 
       {/* Main Benefits */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-6">
+      <section className="py-20 bg-white relative overflow-hidden">
+        {/* Background Lotties */}
+        {benefitAnimation1 && (
+          <div className="absolute top-0 left-0 w-[300px] h-[300px] opacity-20 pointer-events-none">
+            <Lottie
+              animationData={benefitAnimation1}
+              loop={true}
+              style={{ width: '100%', height: '100%' }}
+            />
+          </div>
+        )}
+        {benefitAnimation2 && (
+          <div className="absolute top-0 right-0 w-[300px] h-[300px] opacity-20 pointer-events-none">
+            <Lottie
+              animationData={benefitAnimation2}
+              loop={true}
+              style={{ width: '100%', height: '100%' }}
+            />
+          </div>
+        )}
+        {benefitAnimation3 && (
+          <div className="absolute bottom-0 left-0 w-[300px] h-[300px] opacity-20 pointer-events-none">
+            <Lottie
+              animationData={benefitAnimation3}
+              loop={true}
+              style={{ width: '100%', height: '100%' }}
+            />
+          </div>
+        )}
+        {benefitAnimation4 && (
+          <div className="absolute bottom-0 right-0 w-[300px] h-[300px] opacity-20 pointer-events-none">
+            <Lottie
+              animationData={benefitAnimation4}
+              loop={true}
+              style={{ width: '100%', height: '100%' }}
+            />
+          </div>
+        )}
+
+        <div className="container mx-auto px-6 relative z-10">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-4xl lg:text-5xl font-bold text-[#0B1F2A] mb-4">
@@ -405,7 +497,7 @@ export default function PersonalBenefitsPage() {
                   <span className="text-2xl font-bold text-white">Cardora</span>
                 </div>
                 <p className="text-sm text-white opacity-90">
-                  Beautiful group cards for every celebration
+                  Beautiful cards for every celebration
                 </p>
               </div>
 
@@ -415,7 +507,7 @@ export default function PersonalBenefitsPage() {
                 <ul className="space-y-2">
                   <li><a href="/#features" className="text-white opacity-80 hover:opacity-100 transition-opacity">Features</a></li>
                   <li><Link href="/pricing" className="text-white opacity-80 hover:opacity-100 transition-opacity">Pricing</Link></li>
-                  <li><a href="/#templates" className="text-white opacity-80 hover:opacity-100 transition-opacity">Templates</a></li>
+                  <li><a href="/templates" className="text-white opacity-80 hover:opacity-100 transition-opacity">Templates</a></li>
                 </ul>
               </div>
 

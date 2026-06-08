@@ -1,13 +1,73 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import Lottie from "lottie-react";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function PricingPage() {
   const { user } = useAuth();
   const [showFeaturesDropdown, setShowFeaturesDropdown] = useState(false);
+  const [animationData, setAnimationData] = useState<any>(null);
+  const [loveAnimation, setLoveAnimation] = useState<any>(null);
+  const [thankYouAnimation, setThankYouAnimation] = useState<any>(null);
+  const [welcomeAnimation, setWelcomeAnimation] = useState<any>(null);
+  const [weddingAnimation, setWeddingAnimation] = useState<any>(null);
+  const [faqAnimation1, setFaqAnimation1] = useState<any>(null);
+  const [faqAnimation2, setFaqAnimation2] = useState<any>(null);
+  const [faqAnimation3, setFaqAnimation3] = useState<any>(null);
+  const [faqAnimation4, setFaqAnimation4] = useState<any>(null);
+
+  useEffect(() => {
+    // Load free animation
+    fetch('/free.json')
+      .then(res => res.json())
+      .then(data => setAnimationData(data))
+      .catch(err => console.error('Error loading free animation:', err));
+
+    // Load background animations
+    fetch('/lotties/love/love5.json')
+      .then(res => res.json())
+      .then(data => setLoveAnimation(data))
+      .catch(err => console.error('Error loading love animation:', err));
+
+    fetch('/lotties/thankyou/thankYou5.json')
+      .then(res => res.json())
+      .then(data => setThankYouAnimation(data))
+      .catch(err => console.error('Error loading thank you animation:', err));
+
+    fetch('/lotties/welcome/welcome4.json')
+      .then(res => res.json())
+      .then(data => setWelcomeAnimation(data))
+      .catch(err => console.error('Error loading welcome animation:', err));
+
+    fetch('/lotties/wedding/wedding1.json')
+      .then(res => res.json())
+      .then(data => setWeddingAnimation(data))
+      .catch(err => console.error('Error loading wedding animation:', err));
+
+    // Load FAQ section animations
+    fetch('/lotties/birthday/birthday3.json')
+      .then(res => res.json())
+      .then(data => setFaqAnimation1(data))
+      .catch(err => console.error('Error loading FAQ animation 1:', err));
+
+    fetch('/lotties/christmas/christmas3.json')
+      .then(res => res.json())
+      .then(data => setFaqAnimation2(data))
+      .catch(err => console.error('Error loading FAQ animation 2:', err));
+
+    fetch('/lotties/newbaby/baby2.json')
+      .then(res => res.json())
+      .then(data => setFaqAnimation3(data))
+      .catch(err => console.error('Error loading FAQ animation 3:', err));
+
+    fetch('/lotties/farewell/farewell3.json')
+      .then(res => res.json())
+      .then(data => setFaqAnimation4(data))
+      .catch(err => console.error('Error loading FAQ animation 4:', err));
+  }, []);
 
   return (
     <div className="min-h-screen bg-white">
@@ -128,8 +188,11 @@ export default function PricingPage() {
               <Link href="/pricing" className="text-[#5B6B75] hover:text-[#0B1F2A] transition-colors font-bold">
                 Pricing
               </Link>
-              <Link href="/#templates" className="text-[#5B6B75] hover:text-[#0B1F2A] transition-colors font-bold">
+              <Link href="/templates" className="text-[#5B6B75] hover:text-[#0B1F2A] transition-colors font-bold">
                 Templates
+              </Link>
+              <Link href="/contact" className="text-[#5B6B75] hover:text-[#0B1F2A] transition-colors font-bold">
+                Contact Us
               </Link>
             </nav>
 
@@ -164,36 +227,90 @@ export default function PricingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-[#F7FAFC] to-[#E8F5F4] py-20">
+      <section className="bg-gradient-to-br from-[#F7FAFC] to-[#E8F5F4] py-8 relative overflow-hidden">
         <div className="container mx-auto px-6">
-          <div className="max-w-4xl mx-auto text-center">
-            {/* Limited Time Badge */}
-            <div className="inline-flex items-center gap-2 bg-[#2CB1A6] text-white px-6 py-3 rounded-full mb-6 shadow-lg">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-              </svg>
-              <span className="font-bold">Limited Time Offer</span>
+          <div className="max-w-7xl mx-auto relative">
+            <div className="grid lg:grid-cols-2 items-center">
+              {/* Left Content */}
+              <div className="relative z-10 py-8">
+                {/* Limited Time Badge */}
+                <div className="inline-flex items-center gap-2 bg-[#2CB1A6] text-white px-6 py-3 rounded-full mb-4 shadow-lg">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                  </svg>
+                  <span className="font-bold">Limited Time Offer</span>
+                </div>
+
+                <h1 className="text-5xl lg:text-6xl font-bold text-[#0B1F2A] mb-4">
+                  Cardora is Free for a Short Time
+                </h1>
+                <p className="text-xl text-[#5B6B75] mb-6 leading-relaxed">
+                  Create unlimited cards individually or as a group, invite unlimited contributors, and celebrate every moment — completely free for a limited time. No credit card required.
+                </p>
+
+                <Link href="/boards/create">
+                  <button className="px-10 py-4 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white text-lg rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl">
+                    Create a Cardora Now
+                  </button>
+                </Link>
+              </div>
+
+              {/* Right Content - Lottie Animation */}
+              {animationData && (
+                <div className="absolute right-0 top-0 w-[700px] h-[700px] -mr-32 -mt-16">
+                  <Lottie
+                    animationData={animationData}
+                    loop={true}
+                    style={{ width: '100%', height: '100%' }}
+                  />
+                </div>
+              )}
             </div>
-
-            <h1 className="text-5xl lg:text-6xl font-bold text-[#0B1F2A] mb-6">
-              Cardora is Free for a Short Time
-            </h1>
-            <p className="text-xl text-[#5B6B75] mb-8 leading-relaxed">
-              Create unlimited group cards, invite unlimited contributors, and celebrate every moment — completely free for a limited time. No credit card required.
-            </p>
-
-            <Link href="/boards/create">
-              <button className="px-10 py-4 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white text-lg rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl">
-                Create a Cardora Now
-              </button>
-            </Link>
           </div>
         </div>
       </section>
 
       {/* What's Included Section */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-6">
+      <section className="py-20 bg-white relative overflow-hidden">
+        {/* Background Lottie Animations */}
+        {loveAnimation && (
+          <div className="absolute top-10 left-10 w-64 h-64 opacity-20 pointer-events-none">
+            <Lottie
+              animationData={loveAnimation}
+              loop={true}
+              style={{ width: '100%', height: '100%' }}
+            />
+          </div>
+        )}
+        {thankYouAnimation && (
+          <div className="absolute top-20 right-10 w-72 h-72 opacity-20 pointer-events-none">
+            <Lottie
+              animationData={thankYouAnimation}
+              loop={true}
+              style={{ width: '100%', height: '100%' }}
+            />
+          </div>
+        )}
+        {welcomeAnimation && (
+          <div className="absolute bottom-10 left-10 w-64 h-64 opacity-20 pointer-events-none">
+            <Lottie
+              animationData={welcomeAnimation}
+              loop={true}
+              style={{ width: '100%', height: '100%' }}
+            />
+          </div>
+        )}
+        {weddingAnimation && (
+          <div className="absolute bottom-20 right-20 w-64 h-64 opacity-20 pointer-events-none">
+            <Lottie
+              animationData={weddingAnimation}
+              loop={true}
+              style={{ width: '100%', height: '100%' }}
+            />
+          </div>
+        )}
+
+        <div className="container mx-auto px-6 relative z-10">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-4xl lg:text-5xl font-bold text-[#0B1F2A] mb-4">
@@ -215,7 +332,7 @@ export default function PricingPage() {
                 </div>
                 <h3 className="text-xl font-bold text-[#0B1F2A] mb-2">Unlimited Cards</h3>
                 <p className="text-[#5B6B75]">
-                  Create as many group cards as you want for all your celebrations.
+                  Create as many cards as you want — solo or group — for all your celebrations.
                 </p>
               </div>
 
@@ -291,12 +408,12 @@ export default function PricingPage() {
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-br from-[#2CB1A6] to-[#1F8F86]">
         <div className="container mx-auto px-6">
-          <div className="max-w-4xl mx-auto text-center">
+          <div className="max-w-6xl mx-auto text-center">
             <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">
               Ready to Start Celebrating?
             </h2>
             <p className="text-xl text-white opacity-90 mb-8">
-              Join thousands of people creating memorable group cards with Cardora. Free for a limited time.
+              Join thousands creating memorable cards with Cardora — solo or together — free for a limited time.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/boards/create">
@@ -315,8 +432,46 @@ export default function PricingPage() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-6">
+      <section className="py-20 bg-white relative overflow-hidden">
+        {/* Background Lottie Animations for FAQ */}
+        {faqAnimation1 && (
+          <div className="absolute top-10 left-10 w-64 h-64 opacity-15 pointer-events-none">
+            <Lottie
+              animationData={faqAnimation1}
+              loop={true}
+              style={{ width: '100%', height: '100%' }}
+            />
+          </div>
+        )}
+        {faqAnimation2 && (
+          <div className="absolute top-10 right-10 w-64 h-64 opacity-15 pointer-events-none">
+            <Lottie
+              animationData={faqAnimation2}
+              loop={true}
+              style={{ width: '100%', height: '100%' }}
+            />
+          </div>
+        )}
+        {faqAnimation3 && (
+          <div className="absolute bottom-10 left-10 w-64 h-64 opacity-15 pointer-events-none">
+            <Lottie
+              animationData={faqAnimation3}
+              loop={true}
+              style={{ width: '100%', height: '100%' }}
+            />
+          </div>
+        )}
+        {faqAnimation4 && (
+          <div className="absolute bottom-10 right-10 w-64 h-64 opacity-15 pointer-events-none">
+            <Lottie
+              animationData={faqAnimation4}
+              loop={true}
+              style={{ width: '100%', height: '100%' }}
+            />
+          </div>
+        )}
+
+        <div className="container mx-auto px-6 relative z-10">
           <div className="max-w-3xl mx-auto">
             <h2 className="text-4xl font-bold text-[#0B1F2A] text-center mb-12">
               Frequently Asked Questions
@@ -385,7 +540,7 @@ export default function PricingPage() {
                   <span className="text-2xl font-bold text-white">Cardora</span>
                 </div>
                 <p className="text-sm text-white opacity-90">
-                  Beautiful group cards for every celebration
+                  Beautiful cards for every celebration
                 </p>
               </div>
 
@@ -395,7 +550,7 @@ export default function PricingPage() {
                 <ul className="space-y-2">
                   <li><a href="/#features" className="text-white opacity-80 hover:opacity-100 transition-opacity">Features</a></li>
                   <li><Link href="/pricing" className="text-white opacity-80 hover:opacity-100 transition-opacity">Pricing</Link></li>
-                  <li><a href="/#templates" className="text-white opacity-80 hover:opacity-100 transition-opacity">Templates</a></li>
+                  <li><a href="/templates" className="text-white opacity-80 hover:opacity-100 transition-opacity">Templates</a></li>
                 </ul>
               </div>
 

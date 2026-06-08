@@ -1,7 +1,8 @@
 import { supabase } from './supabase';
 import type { Background } from './backgrounds';
-import { createSolidBackground } from './backgrounds';
+import { createSolidBackground, createAnimationBackground } from './backgrounds';
 import type { Effect } from './effects';
+import { getOccasionByShortId } from './occasions';
 
 export interface Texture {
   id: string;
@@ -31,11 +32,14 @@ export interface Board {
   title_font: string;
   title_font_size?: number;
   title_font_color?: string;
+  envelope_font?: string;
+  envelope_color?: string;
   body_font: string;
   intro_animation: boolean;
   effects: string;
   effect_id?: string;
   texture_id?: string;
+  is_template?: boolean;
   created_at: string;
   updated_at: string;
 
@@ -81,11 +85,78 @@ export async function createBoard(data: {
     // Extract last 8 characters for short_id (removing hyphens)
     const shortId = boardId.replace(/-/g, '').slice(-8).toLowerCase();
 
-    // Create default light teal solid background
+    // Create default light teal solid background for page (fallback)
     const defaultBackgroundColor = '#B2F5EA'; // Light teal from the color palette
     const { data: defaultBackground } = await createSolidBackground(defaultBackgroundColor);
 
-    // Insert board
+    // Fetch occasion to get defaults
+    let backgroundId: string | null = defaultBackground?.id || null; // Page background
+    let cardBackgroundId = null; // Card theme/lottie
+    let effectId: string | null = null;
+    let textureId: string | null = null;
+    let headerColor = false;
+    let headerColorCode: string | null = null;
+    let titleFontSize = 48;
+    let titleFontColor = '#1F2937';
+    let titleFont = 'Open Sans';
+    let envelopeFont: string | null = null;
+    let envelopeColor: string | null = null;
+
+    if (data.occasion_type) {
+      const { occasion, error: occasionError } = await getOccasionByShortId(data.occasion_type);
+      if (!occasionError && occasion) {
+        // For cards: set page background from default_card_background_id
+        if (data.format_type === 'card' && occasion.default_card_background_id) {
+          backgroundId = occasion.default_card_background_id;
+        }
+
+        // Get card theme/lottie from default_lottie
+        if (occasion.default_lottie?.id) {
+          const { data: cardBackground } = await createAnimationBackground(occasion.default_lottie.id);
+          cardBackgroundId = cardBackground?.id || null;
+        }
+
+        // Get default_effect
+        if (occasion.default_effect?.id) {
+          effectId = occasion.default_effect.id;
+        }
+
+        // Get default_card_texture
+        if (occasion.default_card_texture) {
+          textureId = occasion.default_card_texture;
+        }
+
+        // Get other defaults from occasion
+        if (occasion.default_header !== undefined && occasion.default_header !== null) {
+          headerColor = occasion.default_header;
+        }
+        if (occasion.default_header_color) {
+          headerColorCode = occasion.default_header_color;
+        }
+        if (occasion.default_title_size) {
+          titleFontSize = occasion.default_title_size;
+        }
+        if (occasion.default_title_color) {
+          titleFontColor = occasion.default_title_color;
+        }
+        if (occasion.default_title_font) {
+          titleFont = occasion.default_title_font;
+        }
+
+        // Get envelope defaults
+        if (occasion.default_envelope_font) {
+          envelopeFont = occasion.default_envelope_font;
+        }
+        if (occasion.default_envelope_font_size) {
+          titleFontSize = occasion.default_envelope_font_size; // Use envelope size for title_font_size
+        }
+        if (occasion.default_envelope_color) {
+          envelopeColor = occasion.default_envelope_color;
+        }
+      }
+    }
+
+    // Insert board with occasion defaults
     const { data: board, error: boardError } = await supabase
       .from('boards')
       .insert({
@@ -98,15 +169,20 @@ export async function createBoard(data: {
         status: 'CREATED',
         notify_contributors: true,
         delivery_type: null,
-        header_color: false,
-        header_color_code: null,
-        title_font: 'Open Sans',
-        title_font_size: 48,
-        title_font_color: '#1F2937',
+        header_color: headerColor,
+        header_color_code: headerColorCode,
+        title_font: titleFont,
+        title_font_size: titleFontSize,
+        title_font_color: titleFontColor,
+        envelope_font: envelopeFont,
+        envelope_color: envelopeColor,
         body_font: 'Open Sans',
         intro_animation: true,
         effects: null,
-        background_id: defaultBackground?.id || null
+        effect_id: effectId,
+        texture_id: textureId,
+        background_id: backgroundId,
+        card_background_id: cardBackgroundId
       })
       .select()
       .single();

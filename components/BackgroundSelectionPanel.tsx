@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import Lottie from "lottie-react";
 import { getAllLottieAnimations, groupAnimationsByOccasion, loadLottieAnimationData } from "@/lib/lotties";
 import { getAllPatterns } from "@/lib/backgrounds";
 import { createSolidBackground, createPatternBackground, createAnimationBackground } from "@/lib/backgrounds";
+import { getOccasions } from "@/lib/occasions";
 import type { LottieAnimation } from "@/lib/lotties";
 import type { Background, Pattern } from "@/lib/backgrounds";
+import type { Occasion } from "@/lib/occasions";
 
 // 50 Cool colors for web, ranging from white to black with main colors
 // All colors are pastel/muted for better background suitability
@@ -162,8 +164,40 @@ function AnimationCard({
 }) {
   const [animationData, setAnimationData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
+  const cardRef = useRef<HTMLButtonElement>(null);
 
+  // Intersection Observer to detect when card is visible
   useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+          }
+        });
+      },
+      {
+        rootMargin: '50px', // Start loading 50px before card enters viewport
+        threshold: 0.1
+      }
+    );
+
+    if (cardRef.current) {
+      observer.observe(cardRef.current);
+    }
+
+    return () => {
+      if (cardRef.current) {
+        observer.unobserve(cardRef.current);
+      }
+    };
+  }, []);
+
+  // Load animation only when visible
+  useEffect(() => {
+    if (!isVisible) return;
+
     let mounted = true;
 
     const loadAnimation = async () => {
@@ -179,13 +213,14 @@ function AnimationCard({
     return () => {
       mounted = false;
     };
-  }, [animation]);
+  }, [animation, isVisible]);
 
   return (
     <button
+      ref={cardRef}
       onClick={onSelect}
       onMouseEnter={onHover}
-      className={`group relative aspect-square rounded-lg border-2 transition-all hover:scale-105 hover:shadow-lg overflow-hidden ${
+      className={`group relative w-full aspect-square rounded-lg border-2 transition-all hover:scale-105 hover:shadow-lg overflow-hidden ${
         isSelected
           ? 'border-[#2CB1A6] bg-white'
           : 'border-[#E5EAF0] bg-white hover:border-[#2CB1A6]'
@@ -251,21 +286,43 @@ export default function BackgroundSelectionPanel({
   const [patterns, setPatterns] = useState<Pattern[]>([]);
   const [selectedPattern, setSelectedPattern] = useState<Pattern | null>(null);
   const [previewPattern, setPreviewPattern] = useState<Pattern | null>(null);
+  const [visiblePatternsCount, setVisiblePatternsCount] = useState(20);
+  const PATTERNS_PER_PAGE = 20;
 
   // Animation state
   const [animations, setAnimations] = useState<LottieAnimation[]>([]);
   const [groupedAnimations, setGroupedAnimations] = useState<Record<string, LottieAnimation[]>>({});
   const [selectedAnimation, setSelectedAnimation] = useState<LottieAnimation | null>(null);
   const [previewAnimation, setPreviewAnimation] = useState<any>(null);
+  const [occasions, setOccasions] = useState<Occasion[]>([]);
+  const [selectedOccasionFilter, setSelectedOccasionFilter] = useState<string>('ALL');
+
+  // Refs for scrolling to occasions
+  const occasionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const scrollContainerRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
     if (isOpen) {
       loadData();
+      // Reset visible patterns count when opening
+      setVisiblePatternsCount(PATTERNS_PER_PAGE);
+      // Set default occasion filter based on selectedOccasion
+      if (selectedOccasion) {
+        setSelectedOccasionFilter(selectedOccasion);
+      } else {
+        setSelectedOccasionFilter('ALL');
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, selectedOccasion]);
 
   const loadData = async () => {
     setLoading(true);
+
+    // Load occasions for ordering
+    const { occasions: fetchedOccasions } = await getOccasions();
+    if (fetchedOccasions) {
+      setOccasions(fetchedOccasions);
+    }
 
     // Load animations
     const { animations: fetchedAnimations } = await getAllLottieAnimations();
@@ -336,19 +393,67 @@ export default function BackgroundSelectionPanel({
       .join(' ');
   };
 
-  const orderedOccasions = Object.keys(groupedAnimations).sort((a, b) => {
-    if (a === selectedOccasion) return -1;
-    if (b === selectedOccasion) return 1;
-    return a.localeCompare(b);
-  });
+  // Create a map of occasion_type/short_id to occasion for easy lookup
+  const occasionMap = useMemo(() => {
+    const map = new Map<string, Occasion>();
+    occasions.forEach(occ => {
+      map.set(occ.short_id, occ);
+    });
+    return map;
+  }, [occasions]);
+
+  // Order occasions by the occasions table order field
+  const orderedOccasions = useMemo(() => {
+    const occasionShortIds = Object.keys(groupedAnimations);
+
+    // Sort by order field from occasions table
+    return occasionShortIds.sort((a, b) => {
+      const orderA = occasionMap.get(a)?.order ?? 999;
+      const orderB = occasionMap.get(b)?.order ?? 999;
+      return orderA - orderB;
+    });
+  }, [groupedAnimations, occasionMap]);
+
+  // Handle occasion filter change and scroll
+  const handleOccasionFilterChange = (occasionShortId: string) => {
+    setSelectedOccasionFilter(occasionShortId);
+
+    if (occasionShortId !== 'ALL' && occasionRefs.current[occasionShortId]) {
+      // Scroll to the selected occasion
+      occasionRefs.current[occasionShortId]?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    } else if (occasionShortId === 'ALL') {
+      // Scroll to top
+      const scrollContainer = document.getElementById('animations-scroll-container');
+      scrollContainer?.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  // Handle horizontal scroll for occasion rows
+  const scrollOccasionRow = (occasionId: string, direction: 'left' | 'right') => {
+    const container = scrollContainerRefs.current[occasionId];
+    if (container) {
+      const scrollAmount = 400; // Scroll by ~2.5 cards (160px each + gap)
+      const newScrollLeft = direction === 'left'
+        ? container.scrollLeft - scrollAmount
+        : container.scrollLeft + scrollAmount;
+
+      container.scrollTo({
+        left: newScrollLeft,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex overflow-hidden" style={{ minWidth: '1200px' }}>
         {/* Main Panel */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col overflow-hidden">
           {/* Header */}
           <div className="px-8 py-6 border-b border-[#E5EAF0] flex items-center justify-between bg-white">
             <div>
@@ -407,8 +512,30 @@ export default function BackgroundSelectionPanel({
             </div>
           </div>
 
+          {/* Occasion Filter - Fixed Section (Only for Animation Tab) */}
+          {!loading && activeTab === 'animation' && (
+            <div className="px-8 py-4 border-b border-[#E5EAF0] bg-white">
+              <label className="block text-sm font-semibold text-[#0B1F2A] mb-2">Filter by Occasion</label>
+              <select
+                value={selectedOccasionFilter}
+                onChange={(e) => handleOccasionFilterChange(e.target.value)}
+                className="w-full px-4 py-3 bg-white border-2 border-[#E5EAF0] rounded-lg focus:border-[#2CB1A6] focus:outline-none text-[#0B1F2A] font-medium"
+              >
+                <option value="ALL">All Occasions</option>
+                {orderedOccasions.map((occasionShortId) => {
+                  const occasion = occasionMap.get(occasionShortId);
+                  return (
+                    <option key={occasionShortId} value={occasionShortId}>
+                      {occasion?.name || formatOccasionName(occasionShortId)}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+          )}
+
           {/* Content - Scrollable */}
-          <div className="flex-1 overflow-y-auto px-8 py-6">
+          <div className="flex-1 overflow-y-auto px-8 py-6" id="animations-scroll-container">
             {loading ? (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center">
@@ -467,39 +594,56 @@ export default function BackgroundSelectionPanel({
                 {activeTab === 'pattern' && (
                   <div>
                     {patterns.length > 0 ? (
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {patterns.map((pattern) => (
-                          <button
-                            key={pattern.id}
-                            onClick={() => handlePatternSelect(pattern)}
-                            onMouseEnter={() => setPreviewPattern(pattern)}
-                            className={`group relative aspect-square rounded-lg border-2 transition-all hover:scale-105 hover:shadow-lg overflow-hidden ${
-                              selectedPattern?.id === pattern.id || currentBackground?.pattern_id === pattern.id
-                                ? 'border-[#2CB1A6] ring-2 ring-[#2CB1A6] ring-offset-2'
-                                : 'border-[#E5EAF0] hover:border-[#2CB1A6]'
-                            }`}
-                          >
-                            <div
-                              className="absolute inset-0"
-                              style={{
-                                backgroundImage: `url(${pattern.file_path})`,
-                                backgroundSize: '100px 100px',
-                                backgroundPosition: 'center',
-                                backgroundRepeat: 'repeat'
-                              }}
-                            />
+                      <>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                          {patterns.slice(0, visiblePatternsCount).map((pattern) => (
+                            <button
+                              key={pattern.id}
+                              onClick={() => handlePatternSelect(pattern)}
+                              onMouseEnter={() => setPreviewPattern(pattern)}
+                              className={`group relative aspect-square rounded-lg border-2 transition-all hover:scale-105 hover:shadow-lg overflow-hidden ${
+                                selectedPattern?.id === pattern.id || currentBackground?.pattern_id === pattern.id
+                                  ? 'border-[#2CB1A6] ring-2 ring-[#2CB1A6] ring-offset-2'
+                                  : 'border-[#E5EAF0] hover:border-[#2CB1A6]'
+                              }`}
+                            >
+                              <div
+                                className="absolute inset-0"
+                                style={{
+                                  backgroundImage: `url(${pattern.file_path})`,
+                                  backgroundSize: 'cover',
+                                  backgroundPosition: 'center',
+                                  backgroundRepeat: 'no-repeat'
+                                }}
+                              />
 
-                            {/* Selected Badge */}
-                            {(selectedPattern?.id === pattern.id || currentBackground?.pattern_id === pattern.id) && (
-                              <div className="absolute top-2 right-2 w-6 h-6 bg-[#2CB1A6] rounded-full flex items-center justify-center shadow-lg">
-                                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                </svg>
-                              </div>
-                            )}
-                          </button>
-                        ))}
-                      </div>
+                              {/* Selected Badge */}
+                              {(selectedPattern?.id === pattern.id || currentBackground?.pattern_id === pattern.id) && (
+                                <div className="absolute top-2 right-2 w-6 h-6 bg-[#2CB1A6] rounded-full flex items-center justify-center shadow-lg">
+                                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                  </svg>
+                                </div>
+                              )}
+                            </button>
+                          ))}
+                        </div>
+
+                        {/* Load More Button */}
+                        {visiblePatternsCount < patterns.length && (
+                          <div className="flex justify-center mt-8">
+                            <button
+                              onClick={() => setVisiblePatternsCount(prev => prev + PATTERNS_PER_PAGE)}
+                              className="px-6 py-3 bg-transparent hover:bg-[#E8F5F4] text-[#2CB1A6] hover:text-[#1F8F86] rounded-lg font-medium transition-colors flex items-center gap-2 border-2 border-[#2CB1A6] hover:border-[#1F8F86]"
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                              </svg>
+                              Load More ({Math.min(PATTERNS_PER_PAGE, patterns.length - visiblePatternsCount)} more)
+                            </button>
+                          </div>
+                        )}
+                      </>
                     ) : (
                       <div className="text-center py-16">
                         <svg className="w-16 h-16 text-[#E5EAF0] mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -516,11 +660,14 @@ export default function BackgroundSelectionPanel({
                 {activeTab === 'animation' && (
                   <div className="space-y-8">
                     {orderedOccasions.map((occasion) => (
-                      <div key={occasion}>
+                      <div
+                        key={occasion}
+                        ref={(el) => { occasionRefs.current[occasion] = el; }}
+                      >
                         {/* Occasion Header */}
                         <div className="flex items-center gap-3 mb-4">
                           <h3 className="text-lg font-bold text-[#0B1F2A]">
-                            {formatOccasionName(occasion)}
+                            {occasionMap.get(occasion)?.name || formatOccasionName(occasion)}
                           </h3>
                           {occasion === selectedOccasion && (
                             <span className="px-3 py-1 bg-[#2CB1A6] text-white text-xs font-semibold rounded-full">
@@ -530,17 +677,47 @@ export default function BackgroundSelectionPanel({
                           <div className="flex-1 h-px bg-[#E5EAF0]"></div>
                         </div>
 
-                        {/* Animations Grid */}
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                          {groupedAnimations[occasion].map((animation) => (
-                            <AnimationCard
-                              key={animation.id}
-                              animation={animation}
-                              isSelected={selectedAnimation?.id === animation.id || currentBackground?.lottie_animation_id === animation.id}
-                              onSelect={() => handleAnimationSelect(animation)}
-                              onHover={() => handleAnimationPreview(animation)}
-                            />
-                          ))}
+                        {/* Animations Row - Horizontal Scroll with Arrows */}
+                        <div className="relative group">
+                          {/* Left Arrow */}
+                          <button
+                            onClick={() => scrollOccasionRow(occasion, 'left')}
+                            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white hover:bg-[#2CB1A6] text-[#0B1F2A] hover:text-white rounded-full shadow-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                            aria-label="Scroll left"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                          </button>
+
+                          {/* Right Arrow */}
+                          <button
+                            onClick={() => scrollOccasionRow(occasion, 'right')}
+                            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white hover:bg-[#2CB1A6] text-[#0B1F2A] hover:text-white rounded-full shadow-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                            aria-label="Scroll right"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </button>
+
+                          <div
+                            ref={(el) => { scrollContainerRefs.current[occasion] = el; }}
+                            className="overflow-x-auto pb-2 scrollbar-hide"
+                          >
+                            <div className="flex gap-4 w-max py-2 px-1">
+                              {groupedAnimations[occasion].map((animation) => (
+                                <div key={animation.id} className="flex-shrink-0 w-40">
+                                  <AnimationCard
+                                    animation={animation}
+                                    isSelected={selectedAnimation?.id === animation.id || currentBackground?.lottie_animation_id === animation.id}
+                                    onSelect={() => handleAnimationSelect(animation)}
+                                    onHover={() => handleAnimationPreview(animation)}
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -562,7 +739,7 @@ export default function BackgroundSelectionPanel({
         </div>
 
         {/* Right Panel - Preview */}
-        <div className="w-96 bg-[#F7FAFC] border-l border-[#E5EAF0] flex flex-col">
+        <div className="w-[500px] bg-[#F7FAFC] border-l border-[#E5EAF0] flex flex-col flex-shrink-0">
           <div className="p-6 border-b border-[#E5EAF0]">
             <h3 className="font-bold text-[#0B1F2A]">Preview</h3>
           </div>
@@ -595,9 +772,9 @@ export default function BackgroundSelectionPanel({
                   className="absolute inset-0"
                   style={{
                     backgroundImage: `url(${previewPattern.file_path})`,
-                    backgroundSize: '200px 200px',
+                    backgroundSize: 'cover',
                     backgroundPosition: 'center',
-                    backgroundRepeat: 'repeat'
+                    backgroundRepeat: 'no-repeat'
                   }}
                 />
               </div>

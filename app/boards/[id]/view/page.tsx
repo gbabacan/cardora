@@ -4,6 +4,7 @@ import { use, useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import Lottie from "lottie-react";
+import { useRouter } from "next/navigation";
 import { getBoardByShortId } from "@/lib/boards";
 import { getBoardMessages } from "@/lib/messages";
 import type { Board, Recipient } from "@/lib/boards";
@@ -13,12 +14,15 @@ import type { Effect } from "@/lib/effects";
 import Toast from "@/components/Toast";
 import EffectOverlay from "@/components/EffectOverlay";
 import { loadLottieAnimationData } from "@/lib/lotties";
+import { supabase } from "@/lib/supabase";
 
 export default function RecipientViewPage({ params }: { params: Promise<{ id: string }> }) {
   // Unwrap params promise
   const { id: boardShortId } = use(params);
+  const router = useRouter();
 
   const [board, setBoard] = useState<Board | null>(null);
+  const [usingTemplate, setUsingTemplate] = useState(false);
   const [recipients, setRecipients] = useState<Recipient[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
@@ -121,6 +125,58 @@ export default function RecipientViewPage({ params }: { params: Promise<{ id: st
     }
   }, [showIntro, messages]);
 
+  const handleUseTemplate = async () => {
+    if (!board) return;
+    setUsingTemplate(true);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push(`/login?redirect=/boards/${boardShortId}/view`);
+        return;
+      }
+
+      const { data: newBoard, error } = await supabase
+        .from('boards')
+        .insert({
+          user_id: user.id,
+          title: board.title,
+          occasion_type: board.occasion_type,
+          format_type: 'board',
+          background_id: board.background_id,
+          card_background_id: board.card_background_id,
+          effect_id: board.effect_id,
+          texture_id: board.texture_id,
+          header_color: board.header_color,
+          header_color_code: board.header_color_code,
+          title_font: board.title_font,
+          title_font_size: board.title_font_size,
+          title_font_color: board.title_font_color,
+          body_font: board.body_font,
+          envelope_font: board.envelope_font,
+          envelope_color: board.envelope_color,
+          intro_animation: board.intro_animation,
+          status: 'CREATED',
+          delivery_type: 'ON_DEMAND',
+          notify_contributors: true,
+          is_template: false,
+        })
+        .select()
+        .single();
+
+      if (error || !newBoard) {
+        setToast({ message: 'Failed to create board from template', type: 'error' });
+        setUsingTemplate(false);
+        return;
+      }
+
+      router.push(`/boards/editor?id=${newBoard.id}`);
+    } catch (err) {
+      setToast({ message: 'Something went wrong', type: 'error' });
+      setUsingTemplate(false);
+    }
+  };
+
   const loadBoardData = async () => {
     setLoading(true);
 
@@ -136,8 +192,10 @@ export default function RecipientViewPage({ params }: { params: Promise<{ id: st
     setBoard(boardData);
     setRecipients(recipientsData);
 
-    // Load background if exists
-    if (boardData.background_data) {
+    // Load background - prioritize card_background_data (occasion lottie) over background_data (page background)
+    if (boardData.card_background_data) {
+      setBackground(boardData.card_background_data);
+    } else if (boardData.background_data) {
       setBackground(boardData.background_data);
     }
 
@@ -248,7 +306,7 @@ export default function RecipientViewPage({ params }: { params: Promise<{ id: st
             : background?.type === 'PATTERN' && background.pattern?.file_path
             ? {
                 backgroundImage: `url(${background.pattern.file_path})`,
-                backgroundSize: '200px 200px',
+                backgroundSize: 'clamp(300px, 40vmin, 1200px) clamp(300px, 40vmin, 1200px)',
                 backgroundPosition: 'center',
                 backgroundRepeat: 'repeat'
               }
@@ -315,15 +373,40 @@ export default function RecipientViewPage({ params }: { params: Promise<{ id: st
             </div>
           )}
 
-          {/* Right side - Status Badge for Recipients */}
-          {board && isDelivered && (
-            <div className="px-4 py-2 bg-green-100 text-green-800 rounded-full font-semibold text-sm flex items-center gap-2">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              Delivered
-            </div>
-          )}
+          {/* Right side - Use Template / Print Button and Status Badge */}
+          <div className="flex items-center gap-3">
+            {board?.is_template ? (
+              <button
+                onClick={handleUseTemplate}
+                disabled={usingTemplate}
+                className="no-print px-6 py-2 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold transition-colors flex items-center gap-2 shadow-md disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                {usingTemplate ? 'Creating...' : 'Use This Template'}
+              </button>
+            ) : (
+              <button
+                onClick={() => window.print()}
+                className="no-print px-4 py-2 bg-white hover:bg-[#E8F5F4] text-[#2CB1A6] border-2 border-[#2CB1A6] rounded-lg font-medium transition-colors flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+                Print / Save PDF
+              </button>
+            )}
+
+            {board && isDelivered && (
+              <div className="no-print px-4 py-2 bg-green-100 text-green-800 rounded-full font-semibold text-sm flex items-center gap-2">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                Delivered
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
