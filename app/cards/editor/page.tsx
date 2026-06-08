@@ -281,8 +281,9 @@ function BoardEditorPageContent() {
       setNotifyContributors(board.notify_contributors);
       if (board.scheduled_delivery) {
         const date = new Date(board.scheduled_delivery);
-        setScheduledDate(date.toISOString().split('T')[0]);
-        setScheduledTime(date.toTimeString().split(' ')[0].substring(0, 5));
+        const pad = (n: number) => String(n).padStart(2, '0');
+        setScheduledDate(`${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`);
+        setScheduledTime(`${pad(date.getHours())}:${pad(date.getMinutes())}`);
       }
 
       // Set board link using short_id
@@ -914,10 +915,10 @@ function BoardEditorPageContent() {
         card_background_id: formatType === 'card' ? selectedBackground?.id : undefined, // Card theme (lottie/animation)
         recipient_message: recipientMessage, // Email message
         notify_contributors: notifyContributors,
-        delivery_type: scheduledDate && scheduledTime ? 'SCHEDULED' : undefined,
+        delivery_type: scheduledDate && scheduledTime ? 'SCHEDULED' : 'ON_DEMAND',
         scheduled_delivery: scheduledDate && scheduledTime
-          ? `${scheduledDate}T${scheduledTime}:00`
-          : undefined,
+          ? new Date(`${scheduledDate}T${scheduledTime}:00`).toISOString()
+          : null,
         status: 'PUBLISHED',
         texture_id: selectedTexture?.id || undefined
       });
