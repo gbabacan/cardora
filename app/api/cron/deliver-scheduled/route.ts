@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
     if (!scheduledBoards || scheduledBoards.length === 0) {
       return NextResponse.json({
         success: true,
-        message: 'No boards due for delivery',
+        message: 'No boards or cards due for delivery',
         delivered: 0
       });
     }
@@ -74,7 +74,8 @@ export async function GET(request: NextRequest) {
         console.log(`Processing board: ${board.id} - ${board.title}`);
 
         const recipientNames = board.recipients.map((r: any) => r.name);
-        const boardLink = `www.cardora.io/boards/${board.short_id}`;
+        const formatType = board.format_type || 'board';
+        const boardLink = `www.cardora.io/${formatType === 'card' ? 'cards' : 'boards'}/${board.short_id}/view`;
 
         // Send emails to recipients
         const recipientEmails = board.recipients

@@ -766,6 +766,22 @@ function BoardEditorPageContent() {
   const handleSaveBoard = async () => {
     if (!boardId) return;
 
+    // Validate scheduled delivery date is in the future
+    if (scheduledDate && scheduledTime) {
+      const scheduledDateTime = new Date(`${scheduledDate}T${scheduledTime}:00`);
+      if (scheduledDateTime <= new Date()) {
+        setToast({ message: 'Scheduled delivery date and time must be in the future', type: 'error' });
+        return;
+      }
+
+      // Validate all recipients have emails when scheduling
+      const recipientsWithoutEmails = recipients.filter((_, index) => !recipientEmails[index]?.trim());
+      if (recipientsWithoutEmails.length > 0) {
+        setToast({ message: 'All recipients must have email addresses for scheduled delivery', type: 'error' });
+        return;
+      }
+    }
+
     setSaving(true);
 
     try {
@@ -1862,13 +1878,27 @@ function BoardEditorPageContent() {
 
                 {/* Schedule Delivery */}
                 <div>
-                  <label className="block text-sm font-bold text-[#0B1F2A] mb-3">Schedule for later</label>
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="block text-sm font-bold text-[#0B1F2A]">Schedule for later</label>
+                    {scheduledDate && scheduledTime && (
+                      <button
+                        onClick={() => { setScheduledDate(''); setScheduledTime(''); }}
+                        className="text-xs text-red-500 hover:text-red-700 font-medium flex items-center gap-1 transition-colors"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        Clear schedule
+                      </button>
+                    )}
+                  </div>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-medium text-[#5B6B75] mb-2">Date</label>
                       <input
                         type="date"
                         value={scheduledDate}
+                        min={new Date().toISOString().split('T')[0]}
                         onChange={(e) => setScheduledDate(e.target.value)}
                         className="w-full px-4 py-3 bg-white border-2 border-[#E5EAF0] rounded-lg focus:border-[#2CB1A6] focus:outline-none transition-colors"
                       />
@@ -1884,17 +1914,32 @@ function BoardEditorPageContent() {
                     </div>
                   </div>
                   {scheduledDate && scheduledTime ? (
-                    <div className="bg-[#E8F5F4] border border-[#2CB1A6] rounded-lg p-3 flex items-start gap-2">
-                      <svg className="w-5 h-5 text-[#2CB1A6] mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <p className="text-sm text-[#0B1F2A] font-medium">
-                        {formatType === 'board' ? 'Board' : 'Card'} will be delivered on {new Date(scheduledDate + 'T' + scheduledTime).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} at {scheduledTime}
-                      </p>
-                    </div>
+                    (() => {
+                      const scheduledDT = new Date(`${scheduledDate}T${scheduledTime}:00`);
+                      const isPast = scheduledDT <= new Date();
+                      return isPast ? (
+                        <div className="bg-red-50 border border-red-300 rounded-lg p-3 flex items-start gap-2">
+                          <svg className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                          </svg>
+                          <p className="text-sm text-red-700 font-medium">
+                            This date is in the past. Please select a future date and time.
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="bg-[#E8F5F4] border border-[#2CB1A6] rounded-lg p-3 flex items-start gap-2">
+                          <svg className="w-5 h-5 text-[#2CB1A6] mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <p className="text-sm text-[#0B1F2A] font-medium">
+                            Scheduled for {scheduledDT.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} at {scheduledTime}. Save to confirm.
+                          </p>
+                        </div>
+                      );
+                    })()
                   ) : (
                     <p className="text-xs text-[#5B6B75]">
-                      Select date and time to schedule delivery
+                      Select date and time to schedule delivery. Recipients must have email addresses.
                     </p>
                   )}
                 </div>
