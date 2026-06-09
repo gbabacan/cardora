@@ -102,6 +102,25 @@ export async function createMessage(data: {
   }
 }
 
+// Update an existing message
+export async function updateMessage(messageId: string, content: string) {
+  try {
+    const { data: message, error } = await supabase
+      .from('messages')
+      .update({ content })
+      .eq('id', messageId)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return { message, error: null };
+  } catch (error: any) {
+    console.error('Error updating message:', error);
+    return { message: null, error: error.message };
+  }
+}
+
 // Upload media for a message
 export async function uploadMessageMedia(data: {
   board_id: string;
