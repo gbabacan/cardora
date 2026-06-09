@@ -671,7 +671,7 @@ function BoardEditorPageContent() {
         delivery_type: scheduledDate && scheduledTime ? 'SCHEDULED' : 'ON_DEMAND',
         scheduled_delivery: scheduledDate && scheduledTime
           ? new Date(`${scheduledDate}T${scheduledTime}:00`).toISOString()
-          : null,
+          : undefined,
         status: 'PUBLISHED'
       });
 

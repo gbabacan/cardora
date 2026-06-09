@@ -870,7 +870,7 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
                           <div className="absolute bottom-8 right-8 text-right">
                             <p className="text-sm text-gray-500">From:</p>
                             <p className="font-semibold text-[#0B1F2A]">
-                              {board.is_template ? 'James Mitchell' : cardMessage.contributor.name}
+                              {board.is_template ? 'James Mitchell' : cardMessage.contributor?.name}
                             </p>
                           </div>
                         )}
@@ -893,7 +893,7 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
           {cardFullyEmerged && (
             <div className="flex justify-center mt-8 ml-[700px]">
               <button
-                onClick={viewMode === 'envelope' ? handleFlipEnvelope : handleFlipCard}
+                onClick={viewMode === 'envelope' ? handleFlipEnvelope : () => handleFlipCard()}
                 className="bg-white/90 hover:bg-white text-[#2CB1A6] p-4 rounded-full shadow-2xl hover:shadow-[0_0_40px_rgba(44,177,166,0.4)] transition-all duration-300 hover:scale-110"
                 title={viewMode === 'envelope' ? 'Flip Envelope' : 'Flip Card'}
               >
@@ -961,7 +961,7 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
                 From:
               </div>
               <div className="font-semibold text-lg" style={{ color: board.envelope_font === 'cursive' ? '#111' : '#000', fontFamily: board.envelope_font || 'serif' }}>
-                {board.is_template ? 'James Mitchell' : (cardMessage?.contributor_name || 'Sender')}
+                {board.is_template ? 'James Mitchell' : (cardMessage?.contributor?.name || 'Sender')}
               </div>
             </div>
 
@@ -989,7 +989,7 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
             style={
               board.card_background_data
                 ? {
-                    backgroundImage: `url(${board.card_background_data.file_path})`,
+                    backgroundImage: `url(${board.card_background_data.pattern?.file_path})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center'
                   }
@@ -1039,7 +1039,7 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
               {cardMessage?.media && cardMessage.media.length > 0 && (
                 <div className="mt-6 flex justify-center">
                   <img
-                    src={cardMessage.media[0].url}
+                    src={cardMessage.media[0].file_url}
                     alt="Card media"
                     className="max-w-full max-h-64 object-contain rounded-lg"
                   />
@@ -1049,7 +1049,7 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
               {/* Sender Name */}
               <div className="mt-8 text-right">
                 <p className="text-lg font-semibold" style={{ fontFamily: board.body_font || 'sans-serif' }}>
-                  - {board.is_template ? 'James Mitchell' : (cardMessage?.contributor_name || 'Sender')}
+                  - {board.is_template ? 'James Mitchell' : (cardMessage?.contributor?.name || 'Sender')}
                 </p>
               </div>
             </div>

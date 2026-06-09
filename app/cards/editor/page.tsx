@@ -503,29 +503,35 @@ function BoardEditorPageContent() {
           // Save media if there is any
           if (selectedMedia && message.id && contributorId) {
             if (selectedMedia.source === 'upload' && selectedMedia.file) {
-              const { error: uploadError } = await uploadMessageMedia(
-                message.id,
-                contributorId,
-                selectedMedia.file
-              );
+              const { error: uploadError } = await uploadMessageMedia({
+                board_id: boardId,
+                message_id: message.id,
+                contributor_id: contributorId,
+                file: selectedMedia.file,
+                file_type: 'image',
+              });
               if (uploadError) {
                 setToast({ message: 'Error uploading media: ' + uploadError, type: 'error' });
               }
-            } else if (selectedMedia.source === 'gif' && selectedMedia.url) {
-              const { error: gifError } = await addGifToMessage(
-                message.id,
-                contributorId,
-                selectedMedia.url
-              );
+            } else if (selectedMedia.source === 'giphy' && selectedMedia.url) {
+              const { error: gifError } = await addGifToMessage({
+                board_id: boardId,
+                message_id: message.id,
+                contributor_id: contributorId,
+                gif_url: selectedMedia.url,
+              });
               if (gifError) {
                 setToast({ message: 'Error adding GIF: ' + gifError, type: 'error' });
               }
             } else if (selectedMedia.source === 'unsplash' && selectedMedia.url) {
-              const { error: unsplashError } = await addUnsplashToMessage(
-                message.id,
-                contributorId,
-                selectedMedia.url
-              );
+              const { error: unsplashError } = await addUnsplashToMessage({
+                board_id: boardId,
+                message_id: message.id,
+                contributor_id: contributorId,
+                unsplash_url: selectedMedia.url,
+                unsplash_author: '',
+                unsplash_author_url: '',
+              });
               if (unsplashError) {
                 setToast({ message: 'Error adding photo: ' + unsplashError, type: 'error' });
               }
@@ -799,7 +805,7 @@ function BoardEditorPageContent() {
           cardMessageId = existingMessages[0].id;
           cardContributorId = existingMessages[0].contributor_id;
 
-          const { error: updateError } = await updateMessage(cardMessageId, deliveryMessage);
+          const { error: updateError } = await updateMessage(cardMessageId!, deliveryMessage);
           if (updateError) {
             setToast({ message: 'Error updating card message: ' + updateError, type: 'error' });
             setSaving(false);
@@ -918,7 +924,7 @@ function BoardEditorPageContent() {
         delivery_type: scheduledDate && scheduledTime ? 'SCHEDULED' : 'ON_DEMAND',
         scheduled_delivery: scheduledDate && scheduledTime
           ? new Date(`${scheduledDate}T${scheduledTime}:00`).toISOString()
-          : null,
+          : undefined,
         status: 'PUBLISHED',
         texture_id: selectedTexture?.id || undefined
       });
