@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
     if (fetchError) {
       console.error('Error fetching scheduled boards:', fetchError);
       return NextResponse.json(
-        { error: 'Failed to fetch scheduled boards' },
+        { error: 'Failed to fetch scheduled boards', details: fetchError.message, hint: fetchError.hint },
         { status: 500 }
       );
     }
