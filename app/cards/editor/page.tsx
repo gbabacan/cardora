@@ -95,7 +95,7 @@ function BoardEditorPageContent() {
   // Invite Contributors panel state
   const [showInvite, setShowInvite] = useState(false);
   const [inviteTab, setInviteTab] = useState<'link' | 'email' | 'social' | 'qr'>('link');
-  const [boardLink, setBoardLink] = useState('www.cardora.io/boards/loading');
+  const [boardLink, setBoardLink] = useState('cardora-livid.vercel.app/boards/loading');
   const [inviteEmails, setInviteEmails] = useState<string[]>(['']);
   const [inviteMessage, setInviteMessage] = useState(`Hi! I've created a group card and would love for you to contribute. Click the link below to add your message!`);
 
@@ -287,7 +287,7 @@ function BoardEditorPageContent() {
       }
 
       // Set board link using short_id
-      setBoardLink(`www.cardora.io/${board.format_type === 'card' ? 'cards' : 'boards'}/${board.short_id}/view`);
+      setBoardLink(`cardora-livid.vercel.app/${board.format_type === 'card' ? 'cards' : 'boards'}/${board.short_id}/view`);
       setInviteMessage(`Hi! I've created a group card for ${loadedRecipients.map(r => r.name).join(', ')} and would love for you to contribute. Click the link below to add your message!`);
 
       // Load messages
@@ -585,7 +585,7 @@ function BoardEditorPageContent() {
             emails: recipientEmailsList,
             boardTitle,
             recipientNames: recipients.filter(r => r.trim()),
-            boardLink: `www.cardora.io/${formatType === 'board' ? 'boards' : 'cards'}/${boardData?.short_id}/view`,
+            boardLink: `cardora-livid.vercel.app/${formatType === 'board' ? 'boards' : 'cards'}/${boardData?.short_id}/view`,
             deliveryMessage: recipientMessage || undefined,
             formatType: formatType,
             senderName: user?.user_metadata?.name || user?.email || 'Sender'
@@ -989,7 +989,7 @@ function BoardEditorPageContent() {
         boardTitle={boardTitle}
         recipientNames={recipients.filter(r => r.trim())}
         deliveryMessage={recipientMessage}
-        boardLink={`www.cardora.io/${formatType === 'board' ? 'boards' : 'cards'}/${boardData?.short_id}/view`}
+        boardLink={`cardora-livid.vercel.app/${formatType === 'board' ? 'boards' : 'cards'}/${boardData?.short_id}/view`}
         formatType={formatType}
         senderName={user?.user_metadata?.name || user?.email || 'Sender'}
       />
@@ -1968,13 +1968,13 @@ function BoardEditorPageContent() {
                   <div className="flex gap-2">
                     <input
                       type="text"
-                      value={`www.cardora.io/${formatType === 'board' ? 'boards' : 'cards'}/${boardData?.short_id}/view`}
+                      value={`cardora-livid.vercel.app/${formatType === 'board' ? 'boards' : 'cards'}/${boardData?.short_id}/view`}
                       readOnly
                       className="flex-1 px-4 py-3 bg-white border-2 border-[#E5EAF0] rounded-lg text-sm text-[#5B6B75] focus:border-[#2CB1A6] focus:outline-none"
                     />
                     <button
                       onClick={() => {
-                        navigator.clipboard.writeText(`www.cardora.io/${formatType === 'board' ? 'boards' : 'cards'}/${boardData?.short_id}/view`);
+                        navigator.clipboard.writeText(`cardora-livid.vercel.app/${formatType === 'board' ? 'boards' : 'cards'}/${boardData?.short_id}/view`);
                         setToast({ message: 'Link copied to clipboard!', type: 'success' });
                       }}
                       className="px-6 py-3 bg-[#E8F5F4] hover:bg-[#A7E8E2] text-[#2CB1A6] rounded-lg font-medium transition-colors flex items-center gap-2"

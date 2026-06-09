@@ -261,9 +261,19 @@ export default function DashboardPage() {
 
   const formatRelativeDate = (dateString: string) => {
     const date = new Date(dateString);
-    const today = new Date();
-    const diffTime = date.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const now = new Date();
+    const diffMs = date.getTime() - now.getTime();
+    const diffMinutes = Math.round(diffMs / (1000 * 60));
+    const diffHours = Math.round(diffMs / (1000 * 60 * 60));
+
+    if (diffMinutes < 0) return 'Overdue';
+    if (diffMinutes < 60) return `In ${diffMinutes} min`;
+    if (diffHours < 24) return `In ${diffHours}h`;
+
+    // Compare calendar days in local time
+    const dateDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const todayDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const diffDays = Math.round((dateDay.getTime() - todayDay.getTime()) / (1000 * 60 * 60 * 24));
 
     if (diffDays === 0) return 'Today';
     if (diffDays === 1) return 'Tomorrow';
@@ -674,7 +684,7 @@ export default function DashboardPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                       </svg>
                       <code className="text-xs bg-[#F7FAFC] px-2 py-1 rounded">
-                        cardora.io/{board.format_type === 'card' ? 'cards' : 'boards'}/{board.short_id}
+                        cardora-livid.vercel.app/{board.format_type === 'card' ? 'cards' : 'boards'}/{board.short_id}
                       </code>
                     </div>
                   </div>

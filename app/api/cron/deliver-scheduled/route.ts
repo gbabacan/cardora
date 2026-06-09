@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
 
         const recipientNames = board.recipients.map((r: any) => r.name);
         const formatType = board.format_type || 'board';
-        const boardLink = `www.cardora.io/${formatType === 'card' ? 'cards' : 'boards'}/${board.short_id}/view`;
+        const boardLink = `cardora-livid.vercel.app/${formatType === 'card' ? 'cards' : 'boards'}/${board.short_id}/view`;
 
         // Send emails to recipients
         const recipientEmails = board.recipients
