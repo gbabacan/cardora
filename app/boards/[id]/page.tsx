@@ -104,8 +104,10 @@ export default function BoardViewPage({ params }: { params: Promise<{ id: string
     setBoard(boardData);
     setRecipients(recipientsData);
 
-    // Load background if exists
-    if (boardData.background_data) {
+    // Load background - prioritize card_background_data (occasion lottie) over background_data (page background)
+    if (boardData.card_background_data) {
+      setBackground(boardData.card_background_data);
+    } else if (boardData.background_data) {
       setBackground(boardData.background_data);
     }
 

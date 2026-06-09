@@ -17,6 +17,8 @@ interface DeliveryEmailProps {
   recipientNames: string[];
   boardLink: string;
   deliveryMessage?: string;
+  formatType?: 'board' | 'card';
+  senderName?: string;
 }
 
 export default function DeliveryEmail({
@@ -25,6 +27,8 @@ export default function DeliveryEmail({
   recipientNames,
   boardLink,
   deliveryMessage,
+  formatType = 'board',
+  senderName,
 }: DeliveryEmailProps) {
   // Convert board link to recipient view link
   // boardLink format: "localhost:3000/boards/[shortId]"
@@ -51,6 +55,11 @@ export default function DeliveryEmail({
             {/* Board Info */}
             <Section style={boardInfoBox}>
               <Text style={boardTitleStyle}>{boardTitle}</Text>
+              {formatType === 'card' && senderName && (
+                <Text style={boardRecipientsStyle}>
+                  From: {senderName}
+                </Text>
+              )}
               <Text style={boardRecipientsStyle}>
                 For: {recipientNames.filter(r => r.trim()).join(', ')}
               </Text>

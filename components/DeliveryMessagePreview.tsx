@@ -7,6 +7,8 @@ interface DeliveryMessagePreviewProps {
   recipientNames: string[];
   deliveryMessage: string;
   boardLink: string;
+  formatType?: 'board' | 'card';
+  senderName?: string;
 }
 
 export default function DeliveryMessagePreview({
@@ -16,6 +18,8 @@ export default function DeliveryMessagePreview({
   recipientNames,
   deliveryMessage,
   boardLink,
+  formatType = 'board',
+  senderName,
 }: DeliveryMessagePreviewProps) {
   if (!isOpen) return null;
 
@@ -71,6 +75,11 @@ export default function DeliveryMessagePreview({
                     <p className="text-lg font-bold text-[#0B1F2A] mb-2">
                       {boardTitle}
                     </p>
+                    {formatType === 'card' && senderName && (
+                      <p className="text-sm text-[#5B6B75] mb-1">
+                        From: {senderName}
+                      </p>
+                    )}
                     <p className="text-sm text-[#5B6B75]">
                       For: {recipientNames.filter(r => r.trim()).join(', ')}
                     </p>

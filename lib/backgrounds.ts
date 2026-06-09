@@ -146,6 +146,7 @@ export async function getAllPatterns() {
     .from('patterns')
     .select('*')
     .eq('is_active', true)
+    .order('order', { ascending: true, nullsFirst: false })
     .order('name');
 
   return { data: data as Pattern[] | null, error: error?.message };

@@ -94,16 +94,22 @@ export async function loadLottieAnimationData(animation: LottieAnimation) {
       // For local files, we'll import them dynamically
       // This requires the JSON file to exist in the public folder
       const response = await fetch(animation.file_path || '');
-      if (!response.ok) throw new Error('Failed to load local Lottie file');
+      if (!response.ok) {
+        console.error(`Failed to load local Lottie file: ${animation.file_path} (${response.status} ${response.statusText})`);
+        throw new Error(`Failed to load local Lottie file: ${animation.file_path}`);
+      }
       return await response.json();
     } else {
       // For remote URLs, fetch from the CDN
       const response = await fetch(animation.remote_url || '');
-      if (!response.ok) throw new Error('Failed to load remote Lottie file');
+      if (!response.ok) {
+        console.error(`Failed to load remote Lottie file: ${animation.remote_url} (${response.status} ${response.statusText})`);
+        throw new Error(`Failed to load remote Lottie file: ${animation.remote_url}`);
+      }
       return await response.json();
     }
   } catch (error: any) {
-    console.error('Error loading Lottie animation data:', error);
+    console.error('Error loading Lottie animation data:', error.message || error);
     return null;
   }
 }

@@ -23,6 +23,8 @@ export async function POST(request: NextRequest) {
       recipientNames,
       boardLink,
       deliveryMessage,
+      formatType,
+      senderName,
     } = body;
 
     // Validate required fields
@@ -49,6 +51,8 @@ export async function POST(request: NextRequest) {
           recipientNames,
           boardLink,
           deliveryMessage,
+          formatType,
+          senderName,
         })
       );
 
