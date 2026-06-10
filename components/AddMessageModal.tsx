@@ -8,7 +8,7 @@ interface AddMessageModalProps {
   boardShortId: string;
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: (messageId?: string, editToken?: string) => void;
   onError?: (message: string) => void;
 }
 
@@ -488,8 +488,8 @@ export default function AddMessageModal({
         editor.innerHTML = '';
       }
 
-      // Call success callback
-      onSuccess();
+      // Call success callback with token for edit/delete capability
+      onSuccess(result.data?.id, result.editToken);
 
     } catch (error: any) {
       console.error('Error posting message:', error);

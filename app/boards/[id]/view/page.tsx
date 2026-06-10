@@ -352,36 +352,36 @@ export default function RecipientViewPage({ params }: { params: Promise<{ id: st
           transform: showHeader ? 'translateY(0)' : 'translateY(-100%)'
         }}
       >
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-3 md:py-4 flex items-center justify-between gap-2">
+          <Link href="/" className="flex items-center gap-2 md:gap-3 flex-shrink-0">
             <Image
               src="/cardoraLogo.png"
               alt="Cardora"
               width={180}
               height={48}
-              className="h-12 w-auto"
+              className="h-9 md:h-12 w-auto"
             />
-            <span className="text-2xl font-bold text-[#2CB1A6]">Cardora</span>
+            <span className="text-xl md:text-2xl font-bold text-[#2CB1A6]">Cardora</span>
           </Link>
 
-          {/* Center - For Recipients */}
+          {/* Center - For Recipients (desktop only) */}
           {recipients.length > 0 && (
-            <div className="absolute left-1/2 transform -translate-x-1/2">
+            <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2">
               <span className="text-xl font-bold text-[#2CB1A6]">
                 For: {recipients.map(r => r.name).join(', ')}
               </span>
             </div>
           )}
 
-          {/* Right side - Use Template / Print Button and Status Badge */}
-          <div className="flex items-center gap-3">
+          {/* Right side - Buttons */}
+          <div className="flex items-center gap-2">
             {board?.is_template ? (
               <button
                 onClick={handleUseTemplate}
                 disabled={usingTemplate}
-                className="no-print px-6 py-2 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold transition-colors flex items-center gap-2 shadow-md disabled:opacity-60 disabled:cursor-not-allowed"
+                className="no-print px-3 md:px-6 py-2 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold transition-colors flex items-center gap-1.5 shadow-md disabled:opacity-60 disabled:cursor-not-allowed text-sm md:text-base"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
                 {usingTemplate ? 'Creating...' : 'Use This Template'}
@@ -389,18 +389,19 @@ export default function RecipientViewPage({ params }: { params: Promise<{ id: st
             ) : (
               <button
                 onClick={() => window.print()}
-                className="no-print px-4 py-2 bg-white hover:bg-[#E8F5F4] text-[#2CB1A6] border-2 border-[#2CB1A6] rounded-lg font-medium transition-colors flex items-center gap-2"
+                className="no-print w-9 h-9 md:w-auto md:h-auto md:px-4 md:py-2 bg-white hover:bg-[#E8F5F4] text-[#2CB1A6] border-2 border-[#2CB1A6] rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                title="Print / Save PDF"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                 </svg>
-                Print / Save PDF
+                <span className="hidden md:inline">Print / Save PDF</span>
               </button>
             )}
 
             {board && isDelivered && (
-              <div className="no-print px-4 py-2 bg-green-100 text-green-800 rounded-full font-semibold text-sm flex items-center gap-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="no-print px-2 py-1.5 md:px-4 md:py-2 bg-green-100 text-green-800 rounded-full font-semibold text-xs md:text-sm flex items-center gap-1.5">
+                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 Delivered
@@ -408,6 +409,15 @@ export default function RecipientViewPage({ params }: { params: Promise<{ id: st
             )}
           </div>
         </div>
+
+        {/* Mobile recipient sub-row */}
+        {recipients.length > 0 && (
+          <div className="md:hidden border-t border-[#E5EAF0] px-4 py-1.5 text-center">
+            <span className="text-sm font-bold text-[#2CB1A6]">
+              For: {recipients.map(r => r.name).join(', ')}
+            </span>
+          </div>
+        )}
       </header>
 
       {/* Board Header with Background */}

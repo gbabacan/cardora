@@ -22,6 +22,7 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
   const { id: cardShortId } = use(params);
   const router = useRouter();
 
+  const [envelopeScale, setEnvelopeScale] = useState(1);
   const [board, setBoard] = useState<Board | null>(null);
   const [usingTemplate, setUsingTemplate] = useState(false);
   const [recipients, setRecipients] = useState<Recipient[]>([]);
@@ -50,6 +51,19 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
   useEffect(() => {
     loadCardData();
   }, [cardShortId]);
+
+  // Scale envelope to fit mobile screens
+  useEffect(() => {
+    const updateScale = () => {
+      // 750px envelope + ~64px toggle button + ~48px gap + padding = ~920px total
+      const containerWidth = 920;
+      const scale = Math.min(1, window.innerWidth / containerWidth);
+      setEnvelopeScale(scale);
+    };
+    updateScale();
+    window.addEventListener('resize', updateScale);
+    return () => window.removeEventListener('resize', updateScale);
+  }, []);
 
   // Load Google Fonts dynamically when card is loaded
   useEffect(() => {
@@ -357,77 +371,67 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
   }
 
   return (
-    <>
+    <div className="overflow-x-hidden">
       {/* Logo and Company Name - Upper Left */}
       {envelopeOpened && (
-        <Link href="/" className="no-print fixed top-8 left-8 z-50 flex items-center gap-3 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all cursor-pointer opacity-0 animate-[fadeIn_0.5s_ease-in-out_0.5s_forwards]">
+        <Link href="/" className="no-print fixed top-4 md:top-8 left-5 md:left-8 z-50 flex items-center gap-2 md:gap-3 bg-white/90 backdrop-blur-sm px-3 md:px-4 py-1.5 md:py-2 rounded-full shadow-lg hover:shadow-xl transition-all cursor-pointer opacity-0 animate-[fadeIn_0.5s_ease-in-out_0.5s_forwards]">
           <Image
             src="/cardoraLogo.png"
             alt="Cardora Logo"
             width={40}
             height={40}
-            className="object-contain"
+            className="w-5 h-5 md:w-8 md:h-8 object-contain"
           />
-          <span className="text-2xl font-bold text-[#2CB1A6]">Cardora</span>
+          <span className="text-sm md:text-2xl font-bold text-[#2CB1A6]">Cardora</span>
         </Link>
       )}
 
       {/* Action Buttons - Upper Right */}
       {envelopeOpened && (
-        <div className="fixed top-8 right-8 z-50 flex items-center gap-4">
+        <div className="fixed top-4 md:top-8 right-5 md:right-8 z-50 flex items-center gap-2 md:gap-4">
           {/* Print Button or Use This Template */}
           {board?.is_template ? (
             <button
               onClick={handleUseTemplate}
               disabled={usingTemplate}
-              className="no-print flex items-center gap-3 bg-[#2CB1A6] hover:bg-[#1F8F86] px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all cursor-pointer opacity-0 animate-[fadeIn_0.5s_ease-in-out_0.5s_forwards] disabled:opacity-60 disabled:cursor-not-allowed"
+              className="no-print flex items-center gap-1.5 md:gap-3 bg-[#2CB1A6] hover:bg-[#1F8F86] px-3 md:px-6 py-1.5 md:py-3 rounded-full shadow-lg hover:shadow-xl transition-all cursor-pointer opacity-0 animate-[fadeIn_0.5s_ease-in-out_0.5s_forwards] disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 md:w-6 md:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              <span className="text-xl font-bold text-white">
-                {usingTemplate ? 'Creating...' : 'Use This Template'}
+              <span className="text-sm md:text-xl font-bold text-white">
+                {usingTemplate ? 'Creating...' : 'Use Template'}
               </span>
             </button>
           ) : (
             <button
               onClick={() => window.print()}
-              className="no-print flex items-center gap-3 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all cursor-pointer opacity-0 animate-[fadeIn_0.5s_ease-in-out_0.5s_forwards]"
+              className="no-print flex items-center gap-1.5 md:gap-3 bg-white/90 backdrop-blur-sm px-3 md:px-4 py-1.5 md:py-2 rounded-full shadow-lg hover:shadow-xl transition-all cursor-pointer opacity-0 animate-[fadeIn_0.5s_ease-in-out_0.5s_forwards]"
               title="Print / Save as PDF"
             >
-              <svg className="w-10 h-10 text-[#2CB1A6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 md:w-10 md:h-10 text-[#2CB1A6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
               </svg>
-              <span className="text-2xl font-bold text-[#2CB1A6]">Print</span>
+              <span className="hidden md:inline text-2xl font-bold text-[#2CB1A6]">Print</span>
             </button>
           )}
 
           {/* Replay Button */}
           <button
             onClick={handleReplayAnimation}
-            className="no-print flex items-center gap-3 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all cursor-pointer opacity-0 animate-[fadeIn_0.5s_ease-in-out_0.5s_forwards]"
+            className="no-print flex items-center gap-1.5 md:gap-3 bg-white/90 backdrop-blur-sm px-3 md:px-4 py-1.5 md:py-2 rounded-full shadow-lg hover:shadow-xl transition-all cursor-pointer opacity-0 animate-[fadeIn_0.5s_ease-in-out_0.5s_forwards]"
             title="Replay Animation"
           >
-            <svg
-              className="w-10 h-10 text-[#2CB1A6]"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-              />
+            <svg className="w-5 h-5 md:w-10 md:h-10 text-[#2CB1A6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
-            <span className="text-2xl font-bold text-[#2CB1A6]">Replay</span>
+            <span className="hidden md:inline text-2xl font-bold text-[#2CB1A6]">Replay</span>
           </button>
         </div>
       )}
 
       {/* Main Content - Start directly with envelope */}
-      <div className="interactive-card-view min-h-screen relative flex items-center justify-center p-8">
+      <div className="interactive-card-view min-h-screen relative flex items-center justify-center p-8 overflow-x-hidden">
         {/* Background Layer - Blurred when envelope is closed */}
         <div
           className="fixed inset-0 z-0"
@@ -461,7 +465,10 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
         {showEffects && board.effect_data && <EffectOverlay effect={board.effect_data} />}
 
         {/* Envelope or Card Container - Always sharp */}
-        <div className="relative z-10 flex flex-col items-center justify-center gap-8">
+        <div
+          className="relative z-10 flex flex-col items-center justify-center gap-8"
+          style={envelopeScale < 1 ? { zoom: envelopeScale } : undefined}
+        >
           <div className="flex items-center justify-center gap-12">
             {/* Toggle Button - Left of envelope */}
             {cardFullyEmerged && (
@@ -1056,6 +1063,6 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create the message
-    const { message, contributorId, error: messageError } = await createMessage({
+    const { message, contributorId, editToken, error: messageError } = await createMessage({
       board_id,
       contributor_name,
       contributor_email: contributor_email || undefined,
@@ -88,7 +88,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Message posted successfully',
-      data: message
+      data: message,
+      editToken
     });
 
   } catch (error: any) {

@@ -31,10 +31,84 @@ export default function BoardViewPage({ params }: { params: Promise<{ id: string
   const [selectedLottieAnimation, setSelectedLottieAnimation] = useState<any>(null);
   const [background, setBackground] = useState<Background | null>(null);
 
+  // Edit/delete state
+  const [ownedTokens, setOwnedTokens] = useState<Record<string, string>>({}); // { messageId: editToken }
+  const [editingMessage, setEditingMessage] = useState<{ id: string; content: string } | null>(null);
+  const [editContent, setEditContent] = useState('');
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [deletingMessageId, setDeletingMessageId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+
   useEffect(() => {
     loadBoardData();
     loadLottieAnimation();
+    // Load owned message tokens from localStorage
+    try {
+      const stored = localStorage.getItem(`cardora_tokens_${boardShortId}`);
+      if (stored) setOwnedTokens(JSON.parse(stored));
+    } catch {}
   }, [boardShortId]);
+
+  const saveToken = (messageId: string, token: string) => {
+    const updated = { ...ownedTokens, [messageId]: token };
+    setOwnedTokens(updated);
+    try {
+      localStorage.setItem(`cardora_tokens_${boardShortId}`, JSON.stringify(updated));
+    } catch {}
+  };
+
+  const handleEditMessage = async () => {
+    if (!editingMessage || !editContent.trim()) return;
+    const token = ownedTokens[editingMessage.id];
+    if (!token) return;
+    setSavingEdit(true);
+    try {
+      const res = await fetch('/api/messages/edit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message_id: editingMessage.id, edit_token: token, content: editContent }),
+      });
+      if (res.ok) {
+        setMessages(prev => prev.map(m => m.id === editingMessage.id ? { ...m, content: editContent } : m));
+        setToast({ message: 'Message updated!', type: 'success' });
+        setEditingMessage(null);
+      } else {
+        setToast({ message: 'Failed to update message', type: 'error' });
+      }
+    } catch {
+      setToast({ message: 'Failed to update message', type: 'error' });
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  const handleDeleteMessage = async (messageId: string) => {
+    const token = ownedTokens[messageId];
+    if (!token) return;
+    setDeletingMessageId(messageId);
+    try {
+      const res = await fetch('/api/messages/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message_id: messageId, edit_token: token }),
+      });
+      if (res.ok) {
+        setMessages(prev => prev.filter(m => m.id !== messageId));
+        const updated = { ...ownedTokens };
+        delete updated[messageId];
+        setOwnedTokens(updated);
+        try { localStorage.setItem(`cardora_tokens_${boardShortId}`, JSON.stringify(updated)); } catch {}
+        setToast({ message: 'Message deleted', type: 'success' });
+      } else {
+        setToast({ message: 'Failed to delete message', type: 'error' });
+      }
+    } catch {
+      setToast({ message: 'Failed to delete message', type: 'error' });
+    } finally {
+      setDeletingMessageId(null);
+      setConfirmDeleteId(null);
+    }
+  };
 
   // Load remote Lottie animation
   const loadLottieAnimation = async () => {
@@ -123,10 +197,11 @@ export default function BoardViewPage({ params }: { params: Promise<{ id: string
     setLoading(false);
   };
 
-  const handleMessageAdded = () => {
+  const handleMessageAdded = (messageId?: string, editToken?: string) => {
     setToast({ message: 'Message posted successfully! 🎉', type: 'success' });
     setShowAddMessageModal(false);
-    // Reload messages
+    // Save edit token to localStorage so user can edit/delete later
+    if (messageId && editToken) saveToken(messageId, editToken);
     loadBoardData();
   };
 
@@ -211,21 +286,21 @@ export default function BoardViewPage({ params }: { params: Promise<{ id: string
 
       {/* Header */}
       <header className="bg-white border-b border-[#E5EAF0] sticky top-0 z-50">
-        <div className="max-w-screen-2xl mx-auto px-8 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
+        <div className="max-w-screen-2xl mx-auto px-4 md:px-8 py-3 md:py-4 flex items-center justify-between gap-2">
+          <Link href="/" className="flex items-center gap-2 md:gap-3 flex-shrink-0">
             <Image
               src="/cardoraLogo.png"
               alt="Cardora"
               width={180}
               height={48}
-              className="h-12 w-auto"
+              className="h-9 md:h-12 w-auto"
             />
-            <span className="text-2xl font-bold text-[#2CB1A6]">Cardora</span>
+            <span className="text-xl md:text-2xl font-bold text-[#2CB1A6]">Cardora</span>
           </Link>
 
-          {/* Center - For Recipients */}
+          {/* Center - For Recipients (desktop only) */}
           {recipients.length > 0 && (
-            <div className="absolute left-1/2 transform -translate-x-1/2">
+            <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2">
               <span className="text-xl font-bold text-[#2CB1A6]">
                 For: {recipients.map(r => r.name).join(', ')}
               </span>
@@ -234,52 +309,54 @@ export default function BoardViewPage({ params }: { params: Promise<{ id: string
 
           {/* Right side - Action Buttons */}
           {board && (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               {isCard ? (
-                <div className="px-4 py-2 bg-blue-100 text-blue-800 rounded-full font-semibold text-sm flex items-center gap-2">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="px-3 py-1.5 md:px-4 md:py-2 bg-blue-100 text-blue-800 rounded-full font-semibold text-xs md:text-sm flex items-center gap-1.5">
+                  <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  Single Card (View Only)
+                  <span className="hidden sm:inline">Single Card (View Only)</span>
                 </div>
               ) : !isDelivered ? (
                 <>
-                  {/* View as Recipient Button */}
+                  {/* View as Recipient — icon only on mobile */}
                   <Link href={`/boards/${boardShortId}/view`} target="_blank">
-                    <button className="px-4 py-2 bg-white border-2 border-[#2CB1A6] text-[#2CB1A6] hover:bg-[#E8F5F4] font-semibold rounded-full transition-colors flex items-center gap-2">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <button className="w-9 h-9 md:w-auto md:h-auto md:px-4 md:py-2 bg-white border-2 border-[#2CB1A6] text-[#2CB1A6] hover:bg-[#E8F5F4] font-semibold rounded-full transition-colors flex items-center justify-center gap-2" title="View as Recipient">
+                      <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                       </svg>
-                      View as Recipient
+                      <span className="hidden md:inline">View as Recipient</span>
                     </button>
                   </Link>
 
-                  {/* Invite People Button */}
+                  {/* Invite People — icon only on mobile */}
                   <button
                     onClick={() => setShowInviteModal(true)}
-                    className="px-4 py-2 bg-white border-2 border-[#2CB1A6] text-[#2CB1A6] hover:bg-[#E8F5F4] font-semibold rounded-full transition-colors flex items-center gap-2"
+                    className="w-9 h-9 md:w-auto md:h-auto md:px-4 md:py-2 bg-white border-2 border-[#2CB1A6] text-[#2CB1A6] hover:bg-[#E8F5F4] font-semibold rounded-full transition-colors flex items-center justify-center gap-2"
+                    title="Invite People"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                     </svg>
-                    Invite People
+                    <span className="hidden md:inline">Invite People</span>
                   </button>
 
-                  {/* Add Your Message Button */}
+                  {/* Add Your Message — always shows text */}
                   <button
                     onClick={() => setShowAddMessageModal(true)}
-                    className="px-6 py-3 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white font-semibold rounded-full transition-colors shadow-lg flex items-center gap-2"
+                    className="px-3 py-2 md:px-6 md:py-3 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white font-semibold rounded-full transition-colors shadow-lg flex items-center gap-1.5 text-sm md:text-base"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                     </svg>
-                    Add Your Message
+                    <span className="hidden sm:inline">Add Your Message</span>
+                    <span className="sm:hidden">Add</span>
                   </button>
                 </>
               ) : (
-                <div className="px-4 py-2 bg-green-100 text-green-800 rounded-full font-semibold text-sm flex items-center gap-2">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="px-3 py-1.5 md:px-4 md:py-2 bg-green-100 text-green-800 rounded-full font-semibold text-xs md:text-sm flex items-center gap-1.5">
+                  <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   Delivered
@@ -288,6 +365,15 @@ export default function BoardViewPage({ params }: { params: Promise<{ id: string
             </div>
           )}
         </div>
+
+        {/* Mobile recipient row */}
+        {recipients.length > 0 && (
+          <div className="md:hidden border-t border-[#E5EAF0] px-4 py-1.5 text-center">
+            <span className="text-sm font-bold text-[#2CB1A6]">
+              For: {recipients.map(r => r.name).join(', ')}
+            </span>
+          </div>
+        )}
       </header>
 
       {/* Card Type Notice Banner */}
@@ -423,7 +509,32 @@ export default function BoardViewPage({ params }: { params: Promise<{ id: string
                     <span className="font-semibold">
                       — {message.contributor?.is_anonymous ? 'Anonymous' : message.contributor?.name}
                     </span>
-                    <span>{formatDate(message.created_at)}</span>
+                    <div className="flex items-center gap-2">
+                      <span>{formatDate(message.created_at)}</span>
+                      {/* Edit/Delete — only for messages the user owns */}
+                      {ownedTokens[message.id] && !isDelivered && (
+                        <div className="flex items-center gap-1 ml-2">
+                          <button
+                            onClick={() => { setEditingMessage({ id: message.id, content: message.content }); setEditContent(message.content); }}
+                            className="p-1 text-[#5B6B75] hover:text-[#2CB1A6] transition-colors"
+                            title="Edit message"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => setConfirmDeleteId(message.id)}
+                            className="p-1 text-[#5B6B75] hover:text-red-500 transition-colors"
+                            title="Delete message"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -456,6 +567,67 @@ export default function BoardViewPage({ params }: { params: Promise<{ id: string
           onError={handleMessageError}
           onSuccess={handleInviteSuccess}
         />
+      )}
+
+      {/* Edit Message Modal */}
+      {editingMessage && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6">
+            <h3 className="text-lg font-bold text-[#0B1F2A] mb-4">Edit Message</h3>
+            <textarea
+              value={editContent}
+              onChange={(e) => setEditContent(e.target.value)}
+              rows={5}
+              className="w-full px-4 py-3 border-2 border-[#E5EAF0] rounded-lg focus:border-[#2CB1A6] focus:outline-none resize-none mb-4"
+              placeholder="Edit your message..."
+            />
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setEditingMessage(null)}
+                className="px-4 py-2 text-[#5B6B75] hover:text-[#0B1F2A] font-medium transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleEditMessage}
+                disabled={savingEdit || !editContent.trim()}
+                className="px-6 py-2 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold transition-colors disabled:opacity-50"
+              >
+                {savingEdit ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {confirmDeleteId && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center">
+            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+              <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-bold text-[#0B1F2A] mb-2">Delete Message?</h3>
+            <p className="text-[#5B6B75] text-sm mb-6">This action cannot be undone.</p>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => setConfirmDeleteId(null)}
+                className="px-4 py-2 border-2 border-[#E5EAF0] text-[#5B6B75] rounded-lg font-medium hover:bg-[#F7FAFC] transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDeleteMessage(confirmDeleteId)}
+                disabled={deletingMessageId === confirmDeleteId}
+                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition-colors disabled:opacity-50"
+              >
+                {deletingMessageId === confirmDeleteId ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
       </div>
     </div>

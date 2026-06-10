@@ -42,6 +42,7 @@ function BoardEditorPageContent() {
 
   // Appearance panel state
   const [showAppearance, setShowAppearance] = useState(false);
+  const [mobilePanel, setMobilePanel] = useState<'customize' | 'preview'>('preview');
   const [headerColorEnabled, setHeaderColorEnabled] = useState(false);
   const [headerColorCode, setHeaderColorCode] = useState<string>('#2CB1A6');
   const [titleFont, setTitleFont] = useState('Inter');
@@ -740,77 +741,118 @@ function BoardEditorPageContent() {
 
       <div className="h-screen flex flex-col bg-white overflow-hidden">
       {/* Top Header */}
-      <header className="bg-white border-b border-[#E5EAF0] px-6 py-4 flex items-center justify-between flex-shrink-0">
-        <div className="flex items-center gap-4">
-          <Link href="/dashboard">
+      <header className="bg-white border-b border-[#E5EAF0] px-3 md:px-6 py-3 md:py-4 flex items-center justify-between flex-shrink-0 gap-2">
+        {/* Left side */}
+        <div className="flex items-center gap-2 md:gap-4 min-w-0">
+          <Link href="/dashboard" className="flex-shrink-0">
             <Image
               src="/cardoraLogo.png"
               alt="Cardora"
               width={120}
               height={32}
-              className="h-8 w-auto"
+              className="h-7 md:h-8 w-auto"
             />
           </Link>
-          <div className="h-6 w-px bg-[#E5EAF0]" />
-          <span className="text-sm text-[#5B6B75]">
+          <div className="hidden sm:block h-6 w-px bg-[#E5EAF0] flex-shrink-0" />
+          <span className="hidden sm:block text-sm text-[#5B6B75] truncate max-w-[120px] md:max-w-none">
             {isReadOnly ? 'Viewing' : 'Editing'}: <span className="font-medium text-[#0B1F2A]">{boardTitle}</span>
           </span>
           {recipients.length > 0 && (
-            <>
-              <div className="h-6 w-px bg-[#E5EAF0]" />
-              <span className="text-sm text-[#5B6B75]">
-                For: <span className="font-medium text-[#0B1F2A]">{recipients.join(', ')}</span>
-              </span>
-            </>
+            <span className="hidden md:block text-sm text-[#5B6B75] truncate max-w-[120px]">
+              For: <span className="font-medium text-[#0B1F2A]">{recipients.join(', ')}</span>
+            </span>
           )}
           {isReadOnly && (
-            <span className="px-3 py-1 bg-[#FFF4E6] text-[#92400E] text-xs font-semibold rounded-full border border-[#F59E0B]">
-              DELIVERED - READ ONLY
+            <span className="px-2 py-1 bg-[#FFF4E6] text-[#92400E] text-xs font-semibold rounded-full border border-[#F59E0B] flex-shrink-0">
+              <span className="hidden sm:inline">DELIVERED - </span>READ ONLY
             </span>
           )}
         </div>
 
-        <div className="flex items-center gap-3">
+        {/* Right side */}
+        <div className="flex items-center gap-1.5 md:gap-3 flex-shrink-0">
           <Link href="/dashboard">
-            <button className="px-4 py-2 text-[#5B6B75] hover:text-[#0B1F2A] transition-colors font-medium">
-              {isReadOnly ? 'Back to Dashboard' : 'Cancel'}
+            <button className="flex items-center gap-1 px-2 md:px-4 py-2 text-[#5B6B75] hover:text-[#0B1F2A] transition-colors font-medium" title={isReadOnly ? 'Back to Dashboard' : 'Cancel'}>
+              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              <span className="hidden md:inline">{isReadOnly ? 'Back to Dashboard' : 'Cancel'}</span>
             </button>
           </Link>
           {!isReadOnly && (
             <>
+              {/* View as Contributor — icon only on mobile */}
               <Link href={`/boards/${boardData?.short_id}`} target="_blank">
-                <button className="px-4 py-2 border-2 border-[#2CB1A6] text-[#2CB1A6] hover:bg-[#E8F5F4] rounded-lg font-medium transition-colors flex items-center gap-2">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button className="p-2 md:px-4 md:py-2 border-2 border-[#2CB1A6] text-[#2CB1A6] hover:bg-[#E8F5F4] rounded-lg font-medium transition-colors flex items-center gap-2" title="View as Contributor">
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
                   </svg>
-                  View as Contributor
+                  <span className="hidden md:inline">View as Contributor</span>
                 </button>
               </Link>
+              {/* View as Recipient — icon only on mobile */}
               <Link href={`/boards/${boardData?.short_id}/view`} target="_blank">
-                <button className="px-4 py-2 border-2 border-[#2CB1A6] text-[#2CB1A6] hover:bg-[#E8F5F4] rounded-lg font-medium transition-colors flex items-center gap-2">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button className="p-2 md:px-4 md:py-2 border-2 border-[#2CB1A6] text-[#2CB1A6] hover:bg-[#E8F5F4] rounded-lg font-medium transition-colors flex items-center gap-2" title="View as Recipient">
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                   </svg>
-                  View as Recipient
+                  <span className="hidden md:inline">View as Recipient</span>
                 </button>
               </Link>
+              {/* Save button */}
               <button
                 onClick={handleSaveBoard}
                 disabled={saving}
-                className="px-6 py-2 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-medium transition-colors shadow-sm disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="px-3 md:px-6 py-2 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-medium transition-colors shadow-sm disabled:bg-gray-400 disabled:cursor-not-allowed text-sm md:text-base"
               >
-                {saving ? 'Saving...' : 'Save & Publish'}
+                {saving ? 'Saving...' : <><span className="hidden md:inline">Save & Publish</span><span className="md:hidden">Save</span></>}
               </button>
             </>
           )}
         </div>
       </header>
 
+      {/* Mobile sub-row: board title + recipients */}
+      <div className="sm:hidden bg-white border-b border-[#E5EAF0] px-4 py-1.5 flex items-center justify-between gap-2 text-xs text-[#5B6B75] flex-shrink-0">
+        <span className="truncate">
+          {isReadOnly ? 'Viewing' : 'Editing'}: <span className="font-medium text-[#0B1F2A]">{boardTitle}</span>
+        </span>
+        {recipients.length > 0 && (
+          <span className="truncate text-right">
+            For: <span className="font-medium text-[#0B1F2A]">{recipients.join(', ')}</span>
+          </span>
+        )}
+      </div>
+
+      {/* Mobile Tab Switcher */}
+      <div className="md:hidden flex border-b border-[#E5EAF0] bg-white flex-shrink-0">
+        <button
+          onClick={() => setMobilePanel('customize')}
+          className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${
+            mobilePanel === 'customize'
+              ? 'text-[#2CB1A6] border-b-2 border-[#2CB1A6]'
+              : 'text-[#5B6B75]'
+          }`}
+        >
+          Customize
+        </button>
+        <button
+          onClick={() => setMobilePanel('preview')}
+          className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${
+            mobilePanel === 'preview'
+              ? 'text-[#2CB1A6] border-b-2 border-[#2CB1A6]'
+              : 'text-[#5B6B75]'
+          }`}
+        >
+          Preview
+        </button>
+      </div>
+
       {/* Main Editor Area */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left Panel - 30% - Utilities */}
-        <div className="w-[30%] bg-white border-r border-[#E5EAF0] overflow-y-auto flex-shrink-0">
+        <div className={`${mobilePanel === 'customize' ? 'flex' : 'hidden'} md:flex w-full md:w-[30%] bg-white border-r border-[#E5EAF0] overflow-y-auto flex-shrink-0 flex-col`}>
           {/* Utilities Header */}
           <div className="p-6 border-b border-[#E5EAF0]">
             <h3 className="text-xl font-bold text-[#0B1F2A]">
@@ -1773,7 +1815,7 @@ function BoardEditorPageContent() {
 
         {/* Right Panel - 70% - Preview */}
         <div
-          className="flex-1 overflow-y-auto relative"
+          className={`${mobilePanel === 'preview' ? 'flex' : 'hidden'} md:flex flex-1 overflow-y-auto relative flex-col`}
           style={{
             ...(selectedBackground?.type === 'SOLID' && selectedBackground.color
               ? { backgroundColor: selectedBackground.color }

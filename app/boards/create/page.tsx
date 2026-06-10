@@ -141,19 +141,19 @@ function CreateBoardPageContent() {
 
       {/* Header */}
       <header className="border-b border-[#E5EAF0] bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-6 py-4">
+        <div className="container mx-auto px-4 md:px-6 py-3 md:py-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-4">
+            <Link href="/" className="flex items-center gap-2 md:gap-4">
               <Image
                 src="/cardoraLogo.png"
                 alt="Cardora"
                 width={240}
                 height={64}
-                className="h-16 w-auto"
+                className="h-9 md:h-16 w-auto"
                 priority
               />
-              <span className="text-3xl font-bold text-[#2CB1A6]">Cardora</span>
+              <span className="text-xl md:text-3xl font-bold text-[#2CB1A6]">Cardora</span>
             </Link>
 
             {/* Back Link */}
@@ -314,7 +314,7 @@ function CreateBoardPageContent() {
                       {occasions.find(o => o.short_id === selectedOccasion)?.name}
                     </h2>
                     <p className="text-[#5B6B75]">
-                      Create a beautiful group card for this special occasion
+                      Create a beautiful card for this special occasion
                     </p>
                   </>
                 )}
@@ -427,24 +427,24 @@ function CreateBoardPageContent() {
               </div>
 
               {/* Panel Content */}
-              <div className="flex-1 overflow-y-auto px-8 pb-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 mt-4">
+              <div className="flex-1 px-6 pb-4 flex items-center">
+                <div className="grid grid-cols-2 gap-4 w-full mt-2">
                   {/* Board Option */}
                   <button
                     onClick={() => setSelectedFormat('board')}
-                    className={`p-6 rounded-xl border-4 transition-all hover:scale-105 ${
+                    className={`p-4 rounded-xl border-4 transition-all hover:scale-105 ${
                       selectedFormat === 'board'
                         ? 'border-[#2CB1A6] bg-[#E8F5F4]'
                         : 'border-[#E5EAF0] bg-white'
                     }`}
                   >
-                    <div className="w-20 h-20 mx-auto mb-4 bg-white rounded-lg p-3 flex items-center justify-center">
+                    <div className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-3 bg-white rounded-lg p-2 flex items-center justify-center">
                       <svg className="w-full h-full text-[#2CB1A6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h4a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM14 13a1 1 0 011-1h4a1 1 0 011 1v6a1 1 0 01-1 1h-4a1 1 0 01-1-1v-6z" />
                       </svg>
                     </div>
-                    <h3 className="text-xl font-bold text-[#0B1F2A] mb-2">Board</h3>
-                    <p className="text-sm text-[#5B6B75]">
+                    <h3 className="text-base md:text-xl font-bold text-[#0B1F2A] mb-1">Board</h3>
+                    <p className="text-xs md:text-sm text-[#5B6B75]">
                       Invite <span className="font-bold">multiple</span> people to add content
                     </p>
                   </button>
@@ -452,19 +452,19 @@ function CreateBoardPageContent() {
                   {/* Card Option */}
                   <button
                     onClick={() => setSelectedFormat('card')}
-                    className={`p-6 rounded-xl border-4 transition-all hover:scale-105 ${
+                    className={`p-4 rounded-xl border-4 transition-all hover:scale-105 ${
                       selectedFormat === 'card'
                         ? 'border-[#2CB1A6] bg-[#E8F5F4]'
                         : 'border-[#E5EAF0] bg-white'
                     }`}
                   >
-                    <div className="w-20 h-20 mx-auto mb-4 bg-white rounded-lg p-3 flex items-center justify-center">
+                    <div className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-3 bg-white rounded-lg p-2 flex items-center justify-center">
                       <svg className="w-full h-full text-[#E91E63]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                       </svg>
                     </div>
-                    <h3 className="text-xl font-bold text-[#0B1F2A] mb-2">Card</h3>
-                    <p className="text-sm text-[#5B6B75]">
+                    <h3 className="text-base md:text-xl font-bold text-[#0B1F2A] mb-1">Card</h3>
+                    <p className="text-xs md:text-sm text-[#5B6B75]">
                       Perfect if you are the <span className="font-bold">only</span> contributor
                     </p>
                   </button>

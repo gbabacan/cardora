@@ -52,6 +52,7 @@ export default function Home() {
   const [isAnimating, setIsAnimating] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
   const [showFeaturesDropdown, setShowFeaturesDropdown] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [alternateText, setAlternateText] = useState<'together' | 'individually'>('together');
   const [currentHeroItem, setCurrentHeroItem] = useState(0);
   const [heroLottie1, setHeroLottie1] = useState<any>(null);
@@ -501,22 +502,22 @@ export default function Home() {
 
       {/* Header */}
       <header className="border-b border-[#E5EAF0] bg-white sticky top-0 z-50">
-        <div className="container mx-auto px-6 py-4">
+        <div className="container mx-auto px-4 md:px-6 py-3 md:py-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-4">
+            <Link href="/" className="flex items-center gap-2 md:gap-4">
               <Image
                 src="/cardoraLogo.png"
                 alt="Cardora"
                 width={240}
                 height={64}
-                className="h-16 w-auto"
+                className="h-9 md:h-16 w-auto"
                 priority
               />
-              <span className="text-3xl font-bold text-[#2CB1A6]">Cardora</span>
+              <span className="text-xl md:text-3xl font-bold text-[#2CB1A6]">Cardora</span>
             </Link>
 
-            {/* Navigation */}
+            {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-12">
               <div
                 className="relative"
@@ -624,47 +625,79 @@ export default function Home() {
               </Link>
             </nav>
 
-            {/* CTA Buttons / User Menu */}
-            <div className="flex items-center gap-3">
+            {/* Right: CTA + Hamburger */}
+            <div className="flex items-center gap-2 md:gap-3">
               {user ? (
-                <Link href="/dashboard" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-                  <div className="w-10 h-10 rounded-full bg-[#2CB1A6] text-white flex items-center justify-center font-bold">
+                <Link href="/dashboard" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                  <div className="w-9 h-9 rounded-full bg-[#2CB1A6] text-white flex items-center justify-center font-bold text-sm">
                     {user.user_metadata?.name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase()}
                   </div>
-                  <span className="text-[#0B1F2A] font-medium">
+                  <span className="hidden md:block text-[#0B1F2A] font-medium">
                     {user.user_metadata?.name || user.email}
                   </span>
                 </Link>
               ) : (
                 <>
-                  <Link href="/login?mode=signin">
+                  <Link href="/login?mode=signin" className="hidden md:block">
                     <button className="px-4 py-2 text-[#5B6B75] hover:text-[#0B1F2A] transition-colors font-medium">
                       Sign in
                     </button>
                   </Link>
                   <Link href="/login?mode=signup">
-                    <button className="px-6 py-2.5 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-medium transition-colors shadow-sm">
+                    <button className="px-4 md:px-6 py-2 md:py-2.5 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-medium transition-colors shadow-sm text-sm md:text-base">
                       Sign up free
                     </button>
                   </Link>
                 </>
               )}
+              {/* Hamburger — mobile only */}
+              <button
+                onClick={() => setShowMobileMenu(!showMobileMenu)}
+                className="md:hidden p-2 rounded-lg hover:bg-[#F7FAFC] transition-colors"
+                aria-label="Toggle menu"
+              >
+                {showMobileMenu ? (
+                  <svg className="w-6 h-6 text-[#0B1F2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                ) : (
+                  <svg className="w-6 h-6 text-[#0B1F2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                )}
+              </button>
             </div>
           </div>
+
+          {/* Mobile Menu */}
+          {showMobileMenu && (
+            <nav className="md:hidden border-t border-[#E5EAF0] pt-4 pb-2 mt-3 flex flex-col gap-1">
+              <Link href="/benefits/personal" onClick={() => setShowMobileMenu(false)} className="px-3 py-2.5 text-[#5B6B75] font-semibold hover:text-[#2CB1A6] hover:bg-[#F7FAFC] rounded-lg transition-colors">Features — Personal</Link>
+              <Link href="/benefits/corporate" onClick={() => setShowMobileMenu(false)} className="px-3 py-2.5 text-[#5B6B75] font-semibold hover:text-[#2CB1A6] hover:bg-[#F7FAFC] rounded-lg transition-colors">Features — Corporate</Link>
+              <Link href="/pricing" onClick={() => setShowMobileMenu(false)} className="px-3 py-2.5 text-[#5B6B75] font-semibold hover:text-[#2CB1A6] hover:bg-[#F7FAFC] rounded-lg transition-colors">Pricing</Link>
+              <Link href="/templates" onClick={() => setShowMobileMenu(false)} className="px-3 py-2.5 text-[#5B6B75] font-semibold hover:text-[#2CB1A6] hover:bg-[#F7FAFC] rounded-lg transition-colors">Templates</Link>
+              <Link href="/contact" onClick={() => setShowMobileMenu(false)} className="px-3 py-2.5 text-[#5B6B75] font-semibold hover:text-[#2CB1A6] hover:bg-[#F7FAFC] rounded-lg transition-colors">Contact Us</Link>
+              {user ? (
+                <Link href="/dashboard" onClick={() => setShowMobileMenu(false)} className="px-3 py-2.5 text-[#5B6B75] font-semibold hover:text-[#2CB1A6] hover:bg-[#F7FAFC] rounded-lg transition-colors">Dashboard</Link>
+              ) : (
+                <Link href="/login?mode=signin" onClick={() => setShowMobileMenu(false)} className="px-3 py-2.5 text-[#5B6B75] font-semibold hover:text-[#2CB1A6] hover:bg-[#F7FAFC] rounded-lg transition-colors">Sign in</Link>
+              )}
+            </nav>
+          )}
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="bg-[#F7FAFC] py-20 lg:py-24">
-        <div className="container mx-auto px-6">
-          <div className="grid lg:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
+      <section className="bg-[#F7FAFC] py-10 md:py-20 lg:py-24">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center max-w-7xl mx-auto">
             {/* Left Content */}
-            <div className="space-y-8">
+            <div className="space-y-6 md:space-y-8 text-center lg:text-left">
               <div className="space-y-4">
-                <h1 className="text-5xl lg:text-6xl font-bold text-[#0B1F2A] leading-tight flex flex-col">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[#0B1F2A] leading-tight flex flex-col">
                   <span>Send digital cards.</span>
-                  <span className="flex items-center gap-3">
-                    <span className="relative inline-block min-w-[280px]">
+                  <span className="flex items-center justify-center lg:justify-start gap-2 md:gap-3">
+                    <span className="relative inline-block min-w-[160px] sm:min-w-[220px] lg:min-w-[280px]">
                       <span
                         className={`absolute left-0 transition-all duration-500 ${
                           alternateText === 'together'
@@ -690,62 +723,80 @@ export default function Home() {
                       alt="heart"
                       width={80}
                       height={80}
-                      className="inline-block"
+                      className="inline-block w-10 h-10 md:w-16 md:h-16 lg:w-20 lg:h-20"
                       unoptimized
                     />
                   </span>
                 </h1>
-                <p className="text-lg text-[#5B6B75] leading-relaxed max-w-lg">
+                <p className="text-base md:text-lg text-[#5B6B75] leading-relaxed max-w-lg mx-auto lg:mx-0">
                   Create beautiful digital cards for birthdays, farewells, and celebrations. Send solo or collect heartfelt messages from everyone in one place.
                 </p>
               </div>
 
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-wrap justify-center lg:justify-start gap-3 md:gap-4">
                 <Link href="/boards/create">
-                  <button className="px-8 py-3.5 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl">
+                  <button className="px-6 md:px-8 py-3 md:py-3.5 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl">
                     Create a Cardora
                   </button>
                 </Link>
                 <Link href="/templates">
-                  <button className="px-8 py-3.5 bg-white hover:bg-[#F7FAFC] text-[#2CB1A6] border-2 border-[#2CB1A6] hover:border-[#1F8F86] rounded-lg font-semibold transition-all">
+                  <button className="px-6 md:px-8 py-3 md:py-3.5 bg-white hover:bg-[#F7FAFC] text-[#2CB1A6] border-2 border-[#2CB1A6] hover:border-[#1F8F86] rounded-lg font-semibold transition-all">
                     Explore templates
                   </button>
                 </Link>
               </div>
 
               {/* Feature Badges */}
-              <div className="flex gap-6 pt-6 flex-nowrap">
-                <div className="flex items-center gap-2 flex-shrink-0">
+              <div className="flex flex-wrap justify-center lg:justify-start gap-4 md:gap-6 pt-2">
+                <div className="flex items-center gap-2">
                   <div className="w-6 h-6 bg-[#2CB1A6] rounded-full flex items-center justify-center flex-shrink-0">
                     <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
-                  <span className="text-[#5B6B75] font-medium whitespace-nowrap">Free to get started</span>
+                  <span className="text-[#5B6B75] font-medium text-sm md:text-base">Free to get started</span>
                 </div>
 
-                <div className="flex items-center gap-2 flex-shrink-0">
+                <div className="flex items-center gap-2">
                   <div className="w-6 h-6 bg-[#2CB1A6] rounded-full flex items-center justify-center flex-shrink-0">
                     <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                   </div>
-                  <span className="text-[#5B6B75] font-medium whitespace-nowrap">Private and secure</span>
+                  <span className="text-[#5B6B75] font-medium text-sm md:text-base">Private and secure</span>
                 </div>
 
-                <div className="flex items-center gap-2 flex-shrink-0">
+                <div className="flex items-center gap-2">
                   <div className="w-6 h-6 bg-[#2CB1A6] rounded-full flex items-center justify-center flex-shrink-0">
                     <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
                   </div>
-                  <span className="text-[#5B6B75] font-medium whitespace-nowrap">Loved by teams worldwide</span>
+                  <span className="text-[#5B6B75] font-medium text-sm md:text-base">Loved by teams worldwide</span>
                 </div>
               </div>
             </div>
 
-            {/* Right Content - Rotating Demo Image and Lotties */}
-            <div className="relative overflow-visible">
+            {/* Mobile Lottie — shown only below md, cycles through hero lotties */}
+            <div className="lg:hidden flex items-center justify-center h-56 sm:h-72 relative">
+              {[heroLottie1, heroLottie2, heroLottie3, heroLottie4, heroLottie5].map((lottie, index) => (
+                lottie && (
+                  <div
+                    key={index}
+                    className={`absolute inset-0 transition-opacity duration-500 ${currentHeroItem === index + 1 ? 'opacity-100' : 'opacity-0'}`}
+                  >
+                    <Lottie animationData={lottie} loop={true} style={{ width: '100%', height: '100%' }} />
+                  </div>
+                )
+              ))}
+              {/* Show demo image when index 0 */}
+              <div className={`absolute inset-0 transition-opacity duration-500 ${currentHeroItem === 0 ? 'opacity-100' : 'opacity-0'} flex items-center justify-center`}>
+                <Image src="/cardoraDemo.png" alt="Cardora Demo" width={400} height={400} className="w-full h-auto max-h-full object-contain" unoptimized />
+              </div>
+            </div>
+
+            {/* Right Content - Rotating Demo Image and Lotties (hidden on mobile) */}
+            <div className="hidden lg:block relative overflow-visible">
               <div className="relative scale-125 origin-center">
                 {/* Invisible placeholder to maintain height */}
                 <div className="invisible">
@@ -896,75 +947,79 @@ export default function Home() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-10 bg-[#E8F5F4]">
-        <div className="w-4/5 mx-auto">
-          <div className="flex items-center gap-8 h-48">
-            {/* Profile Image */}
-            <div className="flex-shrink-0">
-              <div className={`w-28 h-28 rounded-full overflow-hidden transition-all duration-500 ${isAnimating ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
-                <img
-                  src={TESTIMONIALS[currentTestimonial].image}
-                  alt={TESTIMONIALS[currentTestimonial].name}
-                  className="w-full h-full object-cover"
-                />
+      <section className="py-8 md:py-10 bg-[#E8F5F4]">
+        <div className="w-11/12 md:w-4/5 mx-auto">
+          {/* Mobile: stacked layout */}
+          <div className="flex flex-col md:hidden gap-4">
+            {/* Profile + Quote */}
+            <div className={`flex items-start gap-4 transition-all duration-500 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}>
+              <div className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0">
+                <img src={TESTIMONIALS[currentTestimonial].image} alt={TESTIMONIALS[currentTestimonial].name} className="w-full h-full object-cover" />
+              </div>
+              <div className="flex-1">
+                <svg className="w-8 h-8 text-[#2CB1A6] mb-2" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z" />
+                </svg>
+                <p className="text-sm text-[#0B1F2A] leading-relaxed mb-3">
+                  {TESTIMONIALS[currentTestimonial].quote}
+                </p>
+                <p className="font-bold text-[#0B1F2A] text-sm">— {TESTIMONIALS[currentTestimonial].name}</p>
+                <p className="text-[#5B6B75] text-xs">{TESTIMONIALS[currentTestimonial].title}</p>
               </div>
             </div>
 
-            {/* Quote Content */}
+            {/* Navigation — centered below */}
+            <div className="flex items-center justify-center gap-4">
+              <button onClick={prevTestimonial} className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm border border-[#E5EAF0]" aria-label="Previous">
+                <svg className="w-5 h-5 text-[#5B6B75]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg>
+              </button>
+              <div className="flex gap-2">
+                {TESTIMONIALS.map((_, index) => (
+                  <button key={index} onClick={() => setCurrentTestimonial(index)}
+                    className={`w-2.5 h-2.5 rounded-full transition-colors ${index === currentTestimonial ? 'bg-[#2CB1A6]' : 'bg-[#E5EAF0]'}`}
+                    aria-label={`Go to testimonial ${index + 1}`} />
+                ))}
+              </div>
+              <button onClick={nextTestimonial} className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm border border-[#E5EAF0]" aria-label="Next">
+                <svg className="w-5 h-5 text-[#5B6B75]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" /></svg>
+              </button>
+            </div>
+          </div>
+
+          {/* Desktop: original horizontal layout */}
+          <div className="hidden md:flex items-center gap-8 h-48">
+            <div className="flex-shrink-0">
+              <div className={`w-28 h-28 rounded-full overflow-hidden transition-all duration-500 ${isAnimating ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
+                <img src={TESTIMONIALS[currentTestimonial].image} alt={TESTIMONIALS[currentTestimonial].name} className="w-full h-full object-cover" />
+              </div>
+            </div>
+
             <div className={`flex-1 h-full flex flex-col justify-center transition-all duration-500 ${isAnimating ? 'opacity-0 translate-x-4' : 'opacity-100 translate-x-0'}`}>
-              {/* Quote Mark */}
               <svg className="w-14 h-14 text-[#2CB1A6] mb-3" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z" />
               </svg>
-
-              {/* Quote Text */}
               <p className="text-lg text-[#0B1F2A] leading-relaxed mb-4">
                 {TESTIMONIALS[currentTestimonial].quote}
               </p>
-
-              {/* Author */}
               <div>
                 <p className="font-bold text-[#0B1F2A]">— {TESTIMONIALS[currentTestimonial].name}</p>
                 <p className="text-[#5B6B75]">{TESTIMONIALS[currentTestimonial].title}</p>
               </div>
             </div>
 
-            {/* Navigation */}
             <div className="flex-shrink-0 flex items-center gap-6">
-              {/* Previous Button */}
-              <button
-                onClick={prevTestimonial}
-                className="w-12 h-12 rounded-full bg-white hover:bg-[#F7FAFC] flex items-center justify-center transition-colors shadow-sm border border-[#E5EAF0]"
-                aria-label="Previous testimonial"
-              >
-                <svg className="w-6 h-6 text-[#5B6B75]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
-                </svg>
+              <button onClick={prevTestimonial} className="w-12 h-12 rounded-full bg-white hover:bg-[#F7FAFC] flex items-center justify-center transition-colors shadow-sm border border-[#E5EAF0]" aria-label="Previous testimonial">
+                <svg className="w-6 h-6 text-[#5B6B75]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg>
               </button>
-
-              {/* Dots Indicator */}
               <div className="flex gap-2">
                 {TESTIMONIALS.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentTestimonial(index)}
-                    className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                      index === currentTestimonial ? 'bg-[#2CB1A6]' : 'bg-[#E5EAF0]'
-                    }`}
-                    aria-label={`Go to testimonial ${index + 1}`}
-                  />
+                  <button key={index} onClick={() => setCurrentTestimonial(index)}
+                    className={`w-2.5 h-2.5 rounded-full transition-colors ${index === currentTestimonial ? 'bg-[#2CB1A6]' : 'bg-[#E5EAF0]'}`}
+                    aria-label={`Go to testimonial ${index + 1}`} />
                 ))}
               </div>
-
-              {/* Next Button */}
-              <button
-                onClick={nextTestimonial}
-                className="w-12 h-12 rounded-full bg-white hover:bg-[#F7FAFC] flex items-center justify-center transition-colors shadow-sm border border-[#E5EAF0]"
-                aria-label="Next testimonial"
-              >
-                <svg className="w-6 h-6 text-[#5B6B75]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-                </svg>
+              <button onClick={nextTestimonial} className="w-12 h-12 rounded-full bg-white hover:bg-[#F7FAFC] flex items-center justify-center transition-colors shadow-sm border border-[#E5EAF0]" aria-label="Next testimonial">
+                <svg className="w-6 h-6 text-[#5B6B75]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" /></svg>
               </button>
             </div>
           </div>
@@ -1041,66 +1096,43 @@ export default function Home() {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-20 bg-white relative overflow-hidden">
-        {/* Decorative Lotties around the section */}
-        {/* Top Left */}
+      <section className="py-12 md:py-20 bg-white relative overflow-hidden">
+        {/* Decorative Lotties — desktop only */}
         {howItWorksLottie1 && (
-          <div className="absolute top-16 left-16 w-64 h-64 opacity-30">
-            <Lottie
-              animationData={howItWorksLottie1}
-              loop={true}
-              style={{ width: '100%', height: '100%' }}
-            />
+          <div className="hidden md:block absolute top-16 left-16 w-64 h-64 opacity-30">
+            <Lottie animationData={howItWorksLottie1} loop={true} style={{ width: '100%', height: '100%' }} />
           </div>
         )}
-
-        {/* Top Right */}
         {howItWorksLottie2 && (
-          <div className="absolute top-16 right-16 w-64 h-64 opacity-30">
-            <Lottie
-              animationData={howItWorksLottie2}
-              loop={true}
-              style={{ width: '100%', height: '100%' }}
-            />
+          <div className="hidden md:block absolute top-16 right-16 w-64 h-64 opacity-30">
+            <Lottie animationData={howItWorksLottie2} loop={true} style={{ width: '100%', height: '100%' }} />
           </div>
         )}
-
-        {/* Bottom Left */}
         {howItWorksLottie3 && (
-          <div className="absolute bottom-16 left-16 w-64 h-64 opacity-30">
-            <Lottie
-              animationData={howItWorksLottie3}
-              loop={true}
-              style={{ width: '100%', height: '100%' }}
-            />
+          <div className="hidden md:block absolute bottom-16 left-16 w-64 h-64 opacity-30">
+            <Lottie animationData={howItWorksLottie3} loop={true} style={{ width: '100%', height: '100%' }} />
           </div>
         )}
-
-        {/* Bottom Right */}
         {howItWorksLottie4 && (
-          <div className="absolute bottom-16 right-16 w-64 h-64 opacity-30">
-            <Lottie
-              animationData={howItWorksLottie4}
-              loop={true}
-              style={{ width: '100%', height: '100%' }}
-            />
+          <div className="hidden md:block absolute bottom-16 right-16 w-64 h-64 opacity-30">
+            <Lottie animationData={howItWorksLottie4} loop={true} style={{ width: '100%', height: '100%' }} />
           </div>
         )}
 
-        <div className="container mx-auto px-6 relative z-10">
+        <div className="container mx-auto px-4 md:px-6 relative z-10">
           <div className="max-w-7xl mx-auto">
             {/* Section Title */}
-            <h2 className="text-4xl lg:text-5xl font-bold text-[#0B1F2A] text-center mb-12">
+            <h2 className="text-2xl sm:text-3xl lg:text-5xl font-bold text-[#0B1F2A] text-center mb-8 md:mb-12">
               Make Celebrations Effortless
             </h2>
 
             {/* Tab Buttons */}
-            <div className="flex justify-center gap-4 mb-16 max-w-3xl mx-auto">
+            <div className="flex justify-center gap-2 md:gap-4 mb-8 md:mb-16 max-w-3xl mx-auto">
               {['Create', 'Invite', 'Share', 'Celebrate'].map((step, index) => (
                 <button
                   key={step}
                   onClick={() => setActiveStep(index)}
-                  className={`flex-1 px-10 py-3 rounded-full font-semibold transition-all ${
+                  className={`flex-1 px-3 md:px-10 py-2 md:py-3 rounded-full font-semibold transition-all text-sm md:text-base ${
                     activeStep === index
                       ? 'bg-[#1F8F86] text-white'
                       : 'bg-white text-[#5B6B75] border-2 border-[#E5EAF0] hover:border-[#2CB1A6]'
@@ -1112,63 +1144,60 @@ export default function Home() {
             </div>
 
             {/* Step Content */}
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="grid lg:grid-cols-2 gap-8 md:gap-12 items-center">
               {/* Left Content */}
               <div>
                 {activeStep === 0 && (
-                  <div className="space-y-6">
+                  <div className="space-y-4 md:space-y-6 text-center lg:text-left">
                     <p className="text-sm font-semibold text-[#5B6B75] uppercase tracking-wide">CREATE</p>
-                    <h3 className="text-4xl font-bold text-[#0B1F2A]">Pick your occasion</h3>
-                    <p className="text-lg text-[#5B6B75] leading-relaxed">
+                    <h3 className="text-2xl md:text-4xl font-bold text-[#0B1F2A]">Pick your occasion</h3>
+                    <p className="text-base md:text-lg text-[#5B6B75] leading-relaxed">
                       From birthdays to farewells, choose the perfect moment to celebrate. Customize with photos, videos, and heartfelt messages in just a few clicks.
                     </p>
                     <Link href="/boards/create">
-                      <button className="px-8 py-4 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold transition-colors text-lg">
+                      <button className="px-6 md:px-8 py-3 md:py-4 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold transition-colors text-base md:text-lg">
                         Create a Cardora
                       </button>
                     </Link>
                   </div>
                 )}
-
                 {activeStep === 1 && (
-                  <div className="space-y-6">
+                  <div className="space-y-4 md:space-y-6 text-center lg:text-left">
                     <p className="text-sm font-semibold text-[#5B6B75] uppercase tracking-wide">INVITE</p>
-                    <h3 className="text-4xl font-bold text-[#0B1F2A]">Get everyone involved</h3>
-                    <p className="text-lg text-[#5B6B75] leading-relaxed">
+                    <h3 className="text-2xl md:text-4xl font-bold text-[#0B1F2A]">Get everyone involved</h3>
+                    <p className="text-base md:text-lg text-[#5B6B75] leading-relaxed">
                       Choose the Board format to send a simple link to friends, family, or coworkers. They can contribute messages and memories instantly, without signing up.
                     </p>
                     <Link href="/boards/create">
-                      <button className="px-8 py-4 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold transition-colors text-lg">
+                      <button className="px-6 md:px-8 py-3 md:py-4 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold transition-colors text-base md:text-lg">
                         Create a Cardora
                       </button>
                     </Link>
                   </div>
                 )}
-
                 {activeStep === 2 && (
-                  <div className="space-y-6">
+                  <div className="space-y-4 md:space-y-6 text-center lg:text-left">
                     <p className="text-sm font-semibold text-[#5B6B75] uppercase tracking-wide">SHARE</p>
-                    <h3 className="text-4xl font-bold text-[#0B1F2A]">Make the moment unforgettable</h3>
-                    <p className="text-lg text-[#5B6B75] leading-relaxed">
+                    <h3 className="text-2xl md:text-4xl font-bold text-[#0B1F2A]">Make the moment unforgettable</h3>
+                    <p className="text-base md:text-lg text-[#5B6B75] leading-relaxed">
                       Send your card instantly or schedule it for the perfect surprise. Share digitally, print it, or present it live—creating memories that last.
                     </p>
                     <Link href="/boards/create">
-                      <button className="px-8 py-4 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold transition-colors text-lg">
+                      <button className="px-6 md:px-8 py-3 md:py-4 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold transition-colors text-base md:text-lg">
                         Create a Cardora
                       </button>
                     </Link>
                   </div>
                 )}
-
                 {activeStep === 3 && (
-                  <div className="space-y-6">
+                  <div className="space-y-4 md:space-y-6 text-center lg:text-left">
                     <p className="text-sm font-semibold text-[#5B6B75] uppercase tracking-wide">CELEBRATE</p>
-                    <h3 className="text-4xl font-bold text-[#0B1F2A]">Create memories that last</h3>
-                    <p className="text-lg text-[#5B6B75] leading-relaxed">
+                    <h3 className="text-2xl md:text-4xl font-bold text-[#0B1F2A]">Create memories that last</h3>
+                    <p className="text-base md:text-lg text-[#5B6B75] leading-relaxed">
                       Your recipient receives a heartfelt card filled with messages, photos, and love—whether from you alone or from everyone together. A keepsake they can treasure and revisit forever.
                     </p>
                     <Link href="/boards/create">
-                      <button className="px-8 py-4 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold transition-colors text-lg">
+                      <button className="px-6 md:px-8 py-3 md:py-4 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold transition-colors text-base md:text-lg">
                         Create a Cardora
                       </button>
                     </Link>
@@ -1177,7 +1206,7 @@ export default function Home() {
               </div>
 
               {/* Right Visual */}
-              <div className="bg-[#F7FAFC] rounded-2xl p-8 min-h-[500px] flex items-center justify-center">
+              <div className="bg-[#F7FAFC] rounded-2xl p-4 md:p-8 min-h-[280px] md:min-h-[500px] flex items-center justify-center">
                 {activeStep === 0 && (
                   <div className="w-full">
                     <div className="bg-white rounded-xl p-6 shadow-lg">

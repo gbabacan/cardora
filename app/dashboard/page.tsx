@@ -319,28 +319,28 @@ export default function DashboardPage() {
 
       {/* Header */}
       <header className="bg-white border-b border-[#E5EAF0]">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-3 md:py-4 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2 md:gap-3">
             <Image
               src="/cardoraLogo.png"
               alt="Cardora"
               width={180}
               height={48}
-              className="h-12 w-auto"
+              className="h-9 md:h-12 w-auto"
             />
-            <span className="text-2xl font-bold text-[#2CB1A6]">Cardora</span>
+            <span className="text-xl md:text-2xl font-bold text-[#2CB1A6]">Cardora</span>
           </Link>
 
           {/* User Menu */}
           <div className="relative">
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
-              className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+              className="flex items-center gap-2 md:gap-3 hover:opacity-80 transition-opacity"
             >
-              <div className="w-10 h-10 rounded-full bg-[#2CB1A6] text-white flex items-center justify-center font-bold">
+              <div className="w-9 h-9 rounded-full bg-[#2CB1A6] text-white flex items-center justify-center font-bold text-sm">
                 {user.user_metadata?.name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase()}
               </div>
-              <span className="text-[#0B1F2A] font-medium">
+              <span className="hidden sm:block text-[#0B1F2A] font-medium">
                 {user.user_metadata?.name || user.email}
               </span>
             </button>
@@ -678,15 +678,6 @@ export default function DashboardPage() {
                       </div>
                     )}
 
-                    {/* Short Link */}
-                    <div className="flex items-center gap-2 text-sm text-[#5B6B75]">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                      </svg>
-                      <code className="text-xs bg-[#F7FAFC] px-2 py-1 rounded">
-                        cardora-livid.vercel.app/{board.format_type === 'card' ? 'cards' : 'boards'}/{board.short_id}
-                      </code>
-                    </div>
                   </div>
 
                   {/* Card Actions */}

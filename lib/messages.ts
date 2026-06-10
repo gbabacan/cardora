@@ -81,6 +81,9 @@ export async function createMessage(data: {
       contributorId = newContributor.id;
     }
 
+    // Generate a unique edit token for anonymous editing/deleting
+    const editToken = crypto.randomUUID();
+
     // Create the message
     const { data: message, error: messageError } = await supabase
       .from('messages')
@@ -88,17 +91,18 @@ export async function createMessage(data: {
         board_id: data.board_id,
         contributor_id: contributorId,
         content: data.content,
-        is_approved: true // Auto-approve for now
+        is_approved: true, // Auto-approve for now
+        edit_token: editToken
       })
       .select()
       .single();
 
     if (messageError) throw messageError;
 
-    return { message, contributorId, error: null };
+    return { message, contributorId, editToken, error: null };
   } catch (error: any) {
     console.error('Error creating message:', error);
-    return { message: null, contributorId: null, error: error.message };
+    return { message: null, contributorId: null, editToken: null, error: error.message };
   }
 }
 

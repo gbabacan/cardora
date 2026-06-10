@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 export default function PricingPage() {
   const { user } = useAuth();
   const [showFeaturesDropdown, setShowFeaturesDropdown] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [animationData, setAnimationData] = useState<any>(null);
   const [loveAnimation, setLoveAnimation] = useState<any>(null);
   const [thankYouAnimation, setThankYouAnimation] = useState<any>(null);
@@ -73,22 +74,22 @@ export default function PricingPage() {
     <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="border-b border-[#E5EAF0] bg-white sticky top-0 z-50">
-        <div className="container mx-auto px-6 py-4">
+        <div className="container mx-auto px-4 md:px-6 py-3 md:py-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-4">
+            <Link href="/" className="flex items-center gap-2 md:gap-4">
               <Image
                 src="/cardoraLogo.png"
                 alt="Cardora"
                 width={240}
                 height={64}
-                className="h-16 w-auto"
+                className="h-9 md:h-16 w-auto"
                 priority
               />
-              <span className="text-3xl font-bold text-[#2CB1A6]">Cardora</span>
+              <span className="text-xl md:text-3xl font-bold text-[#2CB1A6]">Cardora</span>
             </Link>
 
-            {/* Navigation */}
+            {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-12">
               <div
                 className="relative"
@@ -196,60 +197,115 @@ export default function PricingPage() {
               </Link>
             </nav>
 
-            {/* CTA Buttons / User Menu */}
-            <div className="flex items-center gap-3">
+            {/* Right side: CTA + Hamburger */}
+            <div className="flex items-center gap-2 md:gap-3">
               {user ? (
-                <Link href="/dashboard" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-                  <div className="w-10 h-10 rounded-full bg-[#2CB1A6] text-white flex items-center justify-center font-bold">
+                <Link href="/dashboard" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                  <div className="w-9 h-9 rounded-full bg-[#2CB1A6] text-white flex items-center justify-center font-bold text-sm">
                     {user.user_metadata?.name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase()}
                   </div>
-                  <span className="text-[#0B1F2A] font-medium">
+                  <span className="hidden md:block text-[#0B1F2A] font-medium">
                     {user.user_metadata?.name || user.email}
                   </span>
                 </Link>
               ) : (
                 <>
-                  <Link href="/login?mode=signin">
+                  <Link href="/login?mode=signin" className="hidden md:block">
                     <button className="px-4 py-2 text-[#5B6B75] hover:text-[#0B1F2A] transition-colors font-medium">
                       Sign in
                     </button>
                   </Link>
                   <Link href="/login?mode=signup">
-                    <button className="px-6 py-2.5 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-medium transition-colors shadow-sm">
+                    <button className="px-4 md:px-6 py-2 md:py-2.5 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-medium transition-colors shadow-sm text-sm md:text-base">
                       Sign up free
                     </button>
                   </Link>
                 </>
               )}
+
+              {/* Hamburger — mobile only */}
+              <button
+                onClick={() => setShowMobileMenu(!showMobileMenu)}
+                className="md:hidden p-2 rounded-lg hover:bg-[#F7FAFC] transition-colors"
+                aria-label="Toggle menu"
+              >
+                {showMobileMenu ? (
+                  <svg className="w-6 h-6 text-[#0B1F2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                ) : (
+                  <svg className="w-6 h-6 text-[#0B1F2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                )}
+              </button>
             </div>
           </div>
+
+          {/* Mobile Menu */}
+          {showMobileMenu && (
+            <nav className="md:hidden border-t border-[#E5EAF0] pt-4 pb-2 mt-3 flex flex-col gap-1">
+              <Link href="/benefits/personal" onClick={() => setShowMobileMenu(false)}
+                className="px-3 py-2.5 text-[#5B6B75] font-semibold hover:text-[#2CB1A6] hover:bg-[#F7FAFC] rounded-lg transition-colors">
+                Features — Personal
+              </Link>
+              <Link href="/benefits/corporate" onClick={() => setShowMobileMenu(false)}
+                className="px-3 py-2.5 text-[#5B6B75] font-semibold hover:text-[#2CB1A6] hover:bg-[#F7FAFC] rounded-lg transition-colors">
+                Features — Corporate
+              </Link>
+              <Link href="/pricing" onClick={() => setShowMobileMenu(false)}
+                className="px-3 py-2.5 text-[#2CB1A6] font-semibold hover:bg-[#F7FAFC] rounded-lg transition-colors">
+                Pricing
+              </Link>
+              <Link href="/templates" onClick={() => setShowMobileMenu(false)}
+                className="px-3 py-2.5 text-[#5B6B75] font-semibold hover:text-[#2CB1A6] hover:bg-[#F7FAFC] rounded-lg transition-colors">
+                Templates
+              </Link>
+              <Link href="/contact" onClick={() => setShowMobileMenu(false)}
+                className="px-3 py-2.5 text-[#5B6B75] font-semibold hover:text-[#2CB1A6] hover:bg-[#F7FAFC] rounded-lg transition-colors">
+                Contact Us
+              </Link>
+              {user && (
+                <Link href="/dashboard" onClick={() => setShowMobileMenu(false)}
+                  className="px-3 py-2.5 text-[#5B6B75] font-semibold hover:text-[#2CB1A6] hover:bg-[#F7FAFC] rounded-lg transition-colors">
+                  Dashboard
+                </Link>
+              )}
+              {!user && (
+                <Link href="/login?mode=signin" onClick={() => setShowMobileMenu(false)}
+                  className="px-3 py-2.5 text-[#5B6B75] font-semibold hover:text-[#2CB1A6] hover:bg-[#F7FAFC] rounded-lg transition-colors">
+                  Sign in
+                </Link>
+              )}
+            </nav>
+          )}
         </div>
       </header>
 
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-[#F7FAFC] to-[#E8F5F4] py-8 relative overflow-hidden">
         <div className="container mx-auto px-6">
-          <div className="max-w-7xl mx-auto relative">
-            <div className="grid lg:grid-cols-2 items-center">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex flex-col lg:grid lg:grid-cols-2 items-center">
               {/* Left Content */}
-              <div className="relative z-10 py-8">
+              <div className="relative z-10 py-8 text-center lg:text-left">
                 {/* Limited Time Badge */}
-                <div className="inline-flex items-center gap-2 bg-[#2CB1A6] text-white px-6 py-3 rounded-full mb-4 shadow-lg">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="inline-flex items-center gap-2 bg-[#2CB1A6] text-white px-5 py-2.5 rounded-full mb-4 shadow-lg">
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                   </svg>
-                  <span className="font-bold">Limited Time Offer</span>
+                  <span className="font-bold text-sm">Limited Time Offer</span>
                 </div>
 
-                <h1 className="text-5xl lg:text-6xl font-bold text-[#0B1F2A] mb-4">
+                <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-[#0B1F2A] mb-4 leading-tight">
                   Cardora is Free for a Short Time
                 </h1>
-                <p className="text-xl text-[#5B6B75] mb-6 leading-relaxed">
+                <p className="text-base sm:text-lg lg:text-xl text-[#5B6B75] mb-6 leading-relaxed max-w-lg mx-auto lg:mx-0">
                   Create unlimited cards individually or as a group, invite unlimited contributors, and celebrate every moment — completely free for a limited time. No credit card required.
                 </p>
 
                 <Link href="/boards/create">
-                  <button className="px-10 py-4 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white text-lg rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl">
+                  <button className="px-8 py-4 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white text-base lg:text-lg rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl">
                     Create a Cardora Now
                   </button>
                 </Link>
@@ -257,7 +313,7 @@ export default function PricingPage() {
 
               {/* Right Content - Lottie Animation */}
               {animationData && (
-                <div className="absolute right-0 top-0 w-[700px] h-[700px] -mr-32 -mt-16">
+                <div className="w-full max-w-xs sm:max-w-sm lg:max-w-none mx-auto lg:mx-0 h-64 sm:h-80 lg:h-[500px] relative lg:absolute lg:right-0 lg:top-1/2 lg:-translate-y-1/2 lg:w-[600px] lg:-mr-16">
                   <Lottie
                     animationData={animationData}
                     loop={true}
@@ -274,7 +330,7 @@ export default function PricingPage() {
       <section className="py-20 bg-white relative overflow-hidden">
         {/* Background Lottie Animations */}
         {loveAnimation && (
-          <div className="absolute top-10 left-10 w-64 h-64 opacity-20 pointer-events-none">
+          <div className="hidden md:block absolute top-10 left-10 w-64 h-64 opacity-20 pointer-events-none">
             <Lottie
               animationData={loveAnimation}
               loop={true}
@@ -283,7 +339,7 @@ export default function PricingPage() {
           </div>
         )}
         {thankYouAnimation && (
-          <div className="absolute top-20 right-10 w-72 h-72 opacity-20 pointer-events-none">
+          <div className="hidden md:block absolute top-20 right-10 w-72 h-72 opacity-20 pointer-events-none">
             <Lottie
               animationData={thankYouAnimation}
               loop={true}
@@ -292,7 +348,7 @@ export default function PricingPage() {
           </div>
         )}
         {welcomeAnimation && (
-          <div className="absolute bottom-10 left-10 w-64 h-64 opacity-20 pointer-events-none">
+          <div className="hidden md:block absolute bottom-10 left-10 w-64 h-64 opacity-20 pointer-events-none">
             <Lottie
               animationData={welcomeAnimation}
               loop={true}
@@ -301,7 +357,7 @@ export default function PricingPage() {
           </div>
         )}
         {weddingAnimation && (
-          <div className="absolute bottom-20 right-20 w-64 h-64 opacity-20 pointer-events-none">
+          <div className="hidden md:block absolute bottom-20 right-20 w-64 h-64 opacity-20 pointer-events-none">
             <Lottie
               animationData={weddingAnimation}
               loop={true}
@@ -435,7 +491,7 @@ export default function PricingPage() {
       <section className="py-20 bg-white relative overflow-hidden">
         {/* Background Lottie Animations for FAQ */}
         {faqAnimation1 && (
-          <div className="absolute top-10 left-10 w-64 h-64 opacity-15 pointer-events-none">
+          <div className="hidden md:block absolute top-10 left-10 w-64 h-64 opacity-15 pointer-events-none">
             <Lottie
               animationData={faqAnimation1}
               loop={true}
@@ -444,7 +500,7 @@ export default function PricingPage() {
           </div>
         )}
         {faqAnimation2 && (
-          <div className="absolute top-10 right-10 w-64 h-64 opacity-15 pointer-events-none">
+          <div className="hidden md:block absolute top-10 right-10 w-64 h-64 opacity-15 pointer-events-none">
             <Lottie
               animationData={faqAnimation2}
               loop={true}
@@ -453,7 +509,7 @@ export default function PricingPage() {
           </div>
         )}
         {faqAnimation3 && (
-          <div className="absolute bottom-10 left-10 w-64 h-64 opacity-15 pointer-events-none">
+          <div className="hidden md:block absolute bottom-10 left-10 w-64 h-64 opacity-15 pointer-events-none">
             <Lottie
               animationData={faqAnimation3}
               loop={true}
@@ -462,7 +518,7 @@ export default function PricingPage() {
           </div>
         )}
         {faqAnimation4 && (
-          <div className="absolute bottom-10 right-10 w-64 h-64 opacity-15 pointer-events-none">
+          <div className="hidden md:block absolute bottom-10 right-10 w-64 h-64 opacity-15 pointer-events-none">
             <Lottie
               animationData={faqAnimation4}
               loop={true}
