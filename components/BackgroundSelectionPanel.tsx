@@ -450,21 +450,21 @@ export default function BackgroundSelectionPanel({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex overflow-hidden" style={{ minWidth: '1200px' }}>
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-2 md:p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[95vh] md:max-h-[90vh] flex overflow-hidden">
         {/* Main Panel */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col overflow-hidden min-w-0">
           {/* Header */}
-          <div className="px-8 py-6 border-b border-[#E5EAF0] flex items-center justify-between bg-white">
+          <div className="px-4 md:px-8 py-4 md:py-6 border-b border-[#E5EAF0] flex items-center justify-between bg-white">
             <div>
-              <h2 className="text-2xl font-bold text-[#0B1F2A]">Select Background</h2>
-              <p className="text-sm text-[#5B6B75] mt-1">Choose a proper background from our libraries</p>
+              <h2 className="text-lg md:text-2xl font-bold text-[#0B1F2A]">Select Background</h2>
+              <p className="text-xs md:text-sm text-[#5B6B75] mt-1 hidden sm:block">Choose a proper background from our libraries</p>
             </div>
             <button
               onClick={onClose}
-              className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#F7FAFC] transition-colors"
+              className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-full hover:bg-[#F7FAFC] transition-colors flex-shrink-0"
             >
-              <svg className="w-6 h-6 text-[#0B1F2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 md:w-6 md:h-6 text-[#0B1F2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -472,11 +472,11 @@ export default function BackgroundSelectionPanel({
 
           {/* Tabs */}
           <div className="border-b border-[#E5EAF0] bg-white">
-            <div className="px-8 flex gap-1">
+            <div className="px-3 md:px-8 flex gap-0 md:gap-1">
               {!hideAnimations && (
                 <button
                   onClick={() => setActiveTab('animation')}
-                  className={`px-6 py-3 font-semibold transition-all ${
+                  className={`flex-1 md:flex-none px-3 md:px-6 py-2.5 md:py-3 text-sm md:text-base font-semibold transition-all ${
                     activeTab === 'animation'
                       ? 'text-[#2CB1A6] border-b-2 border-[#2CB1A6]'
                       : 'text-[#5B6B75] hover:text-[#0B1F2A]'
@@ -489,7 +489,7 @@ export default function BackgroundSelectionPanel({
                 <>
                   <button
                     onClick={() => setActiveTab('pattern')}
-                    className={`px-6 py-3 font-semibold transition-all ${
+                    className={`flex-1 md:flex-none px-3 md:px-6 py-2.5 md:py-3 text-sm md:text-base font-semibold transition-all ${
                       activeTab === 'pattern'
                         ? 'text-[#2CB1A6] border-b-2 border-[#2CB1A6]'
                         : 'text-[#5B6B75] hover:text-[#0B1F2A]'
@@ -499,7 +499,7 @@ export default function BackgroundSelectionPanel({
                   </button>
                   <button
                     onClick={() => setActiveTab('solid')}
-                    className={`px-6 py-3 font-semibold transition-all ${
+                    className={`flex-1 md:flex-none px-3 md:px-6 py-2.5 md:py-3 text-sm md:text-base font-semibold transition-all ${
                       activeTab === 'solid'
                         ? 'text-[#2CB1A6] border-b-2 border-[#2CB1A6]'
                         : 'text-[#5B6B75] hover:text-[#0B1F2A]'
@@ -514,7 +514,7 @@ export default function BackgroundSelectionPanel({
 
           {/* Occasion Filter - Fixed Section (Only for Animation Tab) */}
           {!loading && activeTab === 'animation' && (
-            <div className="px-8 py-4 border-b border-[#E5EAF0] bg-white">
+            <div className="px-4 md:px-8 py-3 md:py-4 border-b border-[#E5EAF0] bg-white">
               <label className="block text-sm font-semibold text-[#0B1F2A] mb-2">Filter by Occasion</label>
               <select
                 value={selectedOccasionFilter}
@@ -535,7 +535,7 @@ export default function BackgroundSelectionPanel({
           )}
 
           {/* Content - Scrollable */}
-          <div className="flex-1 overflow-y-auto px-8 py-6" id="animations-scroll-container">
+          <div className="flex-1 overflow-y-auto px-4 md:px-8 py-4 md:py-6" id="animations-scroll-container">
             {loading ? (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center">
@@ -547,7 +547,7 @@ export default function BackgroundSelectionPanel({
               <>
                 {/* Solid Color Tab */}
                 {activeTab === 'solid' && (
-                  <div className="grid grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3">
+                  <div className="grid grid-cols-5 md:grid-cols-8 lg:grid-cols-10 gap-2 md:gap-3">
                     {SOLID_COLORS.map((color) => (
                       <button
                         key={color}
@@ -595,7 +595,7 @@ export default function BackgroundSelectionPanel({
                   <div>
                     {patterns.length > 0 ? (
                       <>
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
                           {patterns.slice(0, visiblePatternsCount).map((pattern) => (
                             <button
                               key={pattern.id}
@@ -738,8 +738,8 @@ export default function BackgroundSelectionPanel({
           </div>
         </div>
 
-        {/* Right Panel - Preview */}
-        <div className="w-[500px] bg-[#F7FAFC] border-l border-[#E5EAF0] flex flex-col flex-shrink-0">
+        {/* Right Panel - Preview (hidden on mobile) */}
+        <div className="hidden md:flex w-[500px] bg-[#F7FAFC] border-l border-[#E5EAF0] flex-col flex-shrink-0">
           <div className="p-6 border-b border-[#E5EAF0]">
             <h3 className="font-bold text-[#0B1F2A]">Preview</h3>
           </div>

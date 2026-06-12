@@ -10,6 +10,12 @@ interface AddMessageModalProps {
   onClose: () => void;
   onSuccess: (messageId?: string, editToken?: string) => void;
   onError?: (message: string) => void;
+  // Edit mode props
+  editMode?: boolean;
+  editMessageId?: string;
+  editToken?: string;
+  initialContent?: string;
+  initialMedia?: { file_url: string; file_type: string } | null;
 }
 
 export default function AddMessageModal({
@@ -18,13 +24,19 @@ export default function AddMessageModal({
   isOpen,
   onClose,
   onSuccess,
-  onError
+  onError,
+  editMode = false,
+  editMessageId,
+  editToken,
+  initialContent = '',
+  initialMedia = null,
 }: AddMessageModalProps) {
   const [contributorName, setContributorName] = useState('');
   const [contributorEmail, setContributorEmail] = useState('');
-  const [messageContent, setMessageContent] = useState('');
+  const [messageContent, setMessageContent] = useState(initialContent);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [mediaTab, setMediaTab] = useState<'none' | 'image' | 'gif' | 'video' | 'audio'>('none');
+  const [keepExistingMedia, setKeepExistingMedia] = useState(true); // for edit mode
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
@@ -278,7 +290,11 @@ export default function AddMessageModal({
 
   // Initialize editor content only once when modal opens
   const editorRef = (element: HTMLDivElement | null) => {
-    if (element && !messageContent) {
+    if (!element) return;
+    if (editMode && initialContent) {
+      // Pre-fill with existing message content in edit mode
+      element.innerHTML = initialContent;
+    } else if (!messageContent) {
       element.innerHTML = '';
     }
   };
@@ -415,38 +431,74 @@ export default function AddMessageModal({
     setIsSubmitting(true);
 
     try {
-      // Create FormData for multipart upload
       const formData = new FormData();
-      formData.append('board_id', boardId);
-      formData.append('contributor_name', contributorName);
-      if (contributorEmail) {
-        formData.append('contributor_email', contributorEmail);
-      }
-      formData.append('content', messageContent);
-      formData.append('is_anonymous', 'false');
 
-      // Add media if selected
-      if (imageFile && mediaTab === 'image') {
-        formData.append('media_file', imageFile);
-        formData.append('media_type', 'image');
-      } else if (selectedUnsplash && mediaTab === 'image') {
-        formData.append('unsplash_url', selectedUnsplash.url);
-        formData.append('unsplash_author', selectedUnsplash.author);
-        formData.append('unsplash_author_url', selectedUnsplash.authorUrl);
-        formData.append('media_type', 'image');
-      } else if (gifFile && mediaTab === 'gif') {
-        formData.append('media_file', gifFile);
-        formData.append('media_type', 'gif');
-      } else if (selectedGif && mediaTab === 'gif') {
-        formData.append('gif_url', selectedGif);
-        formData.append('media_type', 'gif');
-      } else if (videoFile && mediaTab === 'video') {
-        formData.append('media_file', videoFile);
-        formData.append('media_type', 'video');
-      } else if (audioFile && mediaTab === 'audio') {
-        formData.append('media_file', audioFile);
-        formData.append('media_type', 'audio');
-      }
+      if (editMode && editMessageId && editToken) {
+        // --- EDIT MODE ---
+        formData.append('message_id', editMessageId);
+        formData.append('edit_token', editToken);
+        formData.append('content', messageContent);
+
+        // If user selected new media, replace existing
+        if (imageFile && mediaTab === 'image') {
+          formData.append('media_file', imageFile);
+          formData.append('media_type', 'image');
+        } else if (selectedUnsplash && mediaTab === 'image') {
+          formData.append('unsplash_url', selectedUnsplash.url);
+          formData.append('unsplash_author', selectedUnsplash.author);
+          formData.append('unsplash_author_url', selectedUnsplash.authorUrl);
+          formData.append('media_type', 'image');
+        } else if (gifFile && mediaTab === 'gif') {
+          formData.append('media_file', gifFile);
+          formData.append('media_type', 'gif');
+        } else if (selectedGif && mediaTab === 'gif') {
+          formData.append('gif_url', selectedGif);
+          formData.append('media_type', 'gif');
+        } else if (videoFile && mediaTab === 'video') {
+          formData.append('media_file', videoFile);
+          formData.append('media_type', 'video');
+        } else if (audioFile && mediaTab === 'audio') {
+          formData.append('media_file', audioFile);
+          formData.append('media_type', 'audio');
+        } else if (!keepExistingMedia) {
+          // User explicitly removed media
+          formData.append('remove_media', 'true');
+        }
+
+        const response = await fetch('/api/messages/edit', { method: 'POST', body: formData });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Failed to update message');
+
+        onSuccess(editMessageId, editToken);
+      } else {
+        // --- CREATE MODE ---
+        formData.append('board_id', boardId);
+        formData.append('contributor_name', contributorName);
+        if (contributorEmail) formData.append('contributor_email', contributorEmail);
+        formData.append('content', messageContent);
+        formData.append('is_anonymous', 'false');
+
+        if (imageFile && mediaTab === 'image') {
+          formData.append('media_file', imageFile);
+          formData.append('media_type', 'image');
+        } else if (selectedUnsplash && mediaTab === 'image') {
+          formData.append('unsplash_url', selectedUnsplash.url);
+          formData.append('unsplash_author', selectedUnsplash.author);
+          formData.append('unsplash_author_url', selectedUnsplash.authorUrl);
+          formData.append('media_type', 'image');
+        } else if (gifFile && mediaTab === 'gif') {
+          formData.append('media_file', gifFile);
+          formData.append('media_type', 'gif');
+        } else if (selectedGif && mediaTab === 'gif') {
+          formData.append('gif_url', selectedGif);
+          formData.append('media_type', 'gif');
+        } else if (videoFile && mediaTab === 'video') {
+          formData.append('media_file', videoFile);
+          formData.append('media_type', 'video');
+        } else if (audioFile && mediaTab === 'audio') {
+          formData.append('media_file', audioFile);
+          formData.append('media_type', 'audio');
+        }
 
       const response = await fetch('/api/messages/create', {
         method: 'POST',
@@ -490,6 +542,7 @@ export default function AddMessageModal({
 
       // Call success callback with token for edit/delete capability
       onSuccess(result.data?.id, result.editToken);
+      } // end else (create mode)
 
     } catch (error: any) {
       console.error('Error posting message:', error);
@@ -516,7 +569,7 @@ export default function AddMessageModal({
         <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-100">
           {/* Header */}
           <div className="p-6 border-b border-[#E5EAF0] flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-[#0B1F2A]">✍️ Add Your Message</h2>
+            <h2 className="text-2xl font-bold text-[#0B1F2A]">{editMode ? '✏️ Edit Your Message' : '✍️ Add Your Message'}</h2>
             <button
               onClick={onClose}
               className="text-[#5B6B75] hover:text-[#0B1F2A] text-3xl leading-none"
@@ -527,37 +580,39 @@ export default function AddMessageModal({
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
-            {/* Your Name */}
-            <div>
-              <label className="block text-sm font-semibold text-[#0B1F2A] mb-2">
-                Your Name <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                placeholder="Enter your name"
-                value={contributorName}
-                onChange={(e) => setContributorName(e.target.value)}
-                required
-                className="w-full px-4 py-3 border-2 border-[#E5EAF0] rounded-lg focus:border-[#2CB1A6] focus:outline-none transition-colors"
-              />
-            </div>
-
-            {/* Your Email (Optional) */}
-            <div>
-              <label className="block text-sm font-semibold text-[#0B1F2A] mb-2">
-                Your Email <span className="text-[#5B6B75] font-normal">(Optional)</span>
-              </label>
-              <input
-                type="email"
-                placeholder="your.email@example.com"
-                value={contributorEmail}
-                onChange={(e) => setContributorEmail(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-[#E5EAF0] rounded-lg focus:border-[#2CB1A6] focus:outline-none transition-colors"
-              />
-              <p className="text-xs text-[#5B6B75] mt-1">
-                We'll use this to notify you when the board is delivered
-              </p>
-            </div>
+            {/* Your Name & Email — hidden in edit mode */}
+            {!editMode && (
+              <>
+                <div>
+                  <label className="block text-sm font-semibold text-[#0B1F2A] mb-2">
+                    Your Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Enter your name"
+                    value={contributorName}
+                    onChange={(e) => setContributorName(e.target.value)}
+                    required
+                    className="w-full px-4 py-3 border-2 border-[#E5EAF0] rounded-lg focus:border-[#2CB1A6] focus:outline-none transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-[#0B1F2A] mb-2">
+                    Your Email <span className="text-[#5B6B75] font-normal">(Optional)</span>
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="your.email@example.com"
+                    value={contributorEmail}
+                    onChange={(e) => setContributorEmail(e.target.value)}
+                    className="w-full px-4 py-3 border-2 border-[#E5EAF0] rounded-lg focus:border-[#2CB1A6] focus:outline-none transition-colors"
+                  />
+                  <p className="text-xs text-[#5B6B75] mt-1">
+                    We&apos;ll use this to notify you when the board is delivered
+                  </p>
+                </div>
+              </>
+            )}
 
             {/* Your Message */}
             <div>
@@ -644,10 +699,33 @@ export default function AddMessageModal({
               </p>
             </div>
 
+            {/* Existing media preview (edit mode only) */}
+            {editMode && initialMedia && keepExistingMedia && mediaTab === 'none' && (
+              <div className="mb-4">
+                <label className="block text-sm font-semibold text-[#0B1F2A] mb-2">Current Media</label>
+                <div className="relative inline-block">
+                  {initialMedia.file_type === 'image' || initialMedia.file_type === 'gif' ? (
+                    <img src={initialMedia.file_url} alt="Current media" className="max-h-40 rounded-lg border border-[#E5EAF0]" />
+                  ) : initialMedia.file_type === 'video' ? (
+                    <video src={initialMedia.file_url} className="max-h-40 rounded-lg border border-[#E5EAF0]" controls />
+                  ) : initialMedia.file_type === 'audio' ? (
+                    <audio src={initialMedia.file_url} controls className="w-full" />
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={() => setKeepExistingMedia(false)}
+                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs font-bold transition-colors"
+                    title="Remove media"
+                  >✕</button>
+                </div>
+                <p className="text-xs text-[#5B6B75] mt-1">Click ✕ to remove, or select a new media below to replace it.</p>
+              </div>
+            )}
+
             {/* Media Tabs */}
             <div>
               <label className="block text-sm font-semibold text-[#0B1F2A] mb-3">
-                Add Media <span className="text-[#5B6B75] font-normal">(Optional)</span>
+                {editMode ? 'Replace Media' : 'Add Media'} <span className="text-[#5B6B75] font-normal">(Optional)</span>
               </label>
               <div className="flex gap-2 mb-4">
                 <button
@@ -866,7 +944,7 @@ export default function AddMessageModal({
 
                           {/* Unsplash Results Grid */}
                           {unsplashResults.length > 0 ? (
-                            <div className="grid grid-cols-2 gap-2 max-h-96 overflow-y-auto">
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-60 md:max-h-96 overflow-y-auto min-w-0">
                               {unsplashResults.map((photo) => (
                                 <button
                                   key={photo.id}
@@ -1037,7 +1115,7 @@ export default function AddMessageModal({
 
                       {/* GIF Results Grid */}
                       {gifResults.length > 0 ? (
-                        <div className="grid grid-cols-2 gap-2 max-h-96 overflow-y-auto">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-60 md:max-h-96 overflow-y-auto min-w-0">
                           {gifResults.map((gif) => (
                             <button
                               key={gif.id}
@@ -1220,7 +1298,7 @@ export default function AddMessageModal({
               </button>
               <button
                 type="submit"
-                disabled={isSubmitting || !contributorName.trim() || !messageContent.trim()}
+                disabled={isSubmitting || (!editMode && !contributorName.trim()) || !messageContent.trim()}
                 className="flex-1 px-6 py-3 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold transition-colors shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isSubmitting ? (
@@ -1236,7 +1314,7 @@ export default function AddMessageModal({
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                     </svg>
-                    Post Message
+                    {editMode ? 'Save Changes' : 'Post Message'}
                   </>
                 )}
               </button>

@@ -206,8 +206,10 @@ function BoardEditorPageContent() {
         setPreviewScale(1);
         return;
       }
-      // 750px envelope + offsets
-      const scale = Math.min(1, window.innerWidth / 900);
+      // Account for p-2 padding (16px total) on mobile instead of p-8 (64px total)
+      const availableWidth = window.innerWidth - 16;
+      // 750px envelope + ~160px card offset = ~910px total content width
+      const scale = Math.min(1, availableWidth / 910);
       setPreviewScale(scale);
     };
     updateScale();
@@ -2119,7 +2121,7 @@ function BoardEditorPageContent() {
 
         {/* Right Panel - 70% - Card/Envelope Preview */}
         <div
-          className={`${mobilePanel === 'preview' ? 'flex' : 'hidden'} md:flex flex-1 overflow-y-auto relative flex-col`}
+          className={`${mobilePanel === 'preview' ? 'flex' : 'hidden'} md:flex flex-1 overflow-hidden relative flex-col min-h-0`}
           style={
             pageBackground
               ? pageBackground.type === 'PATTERN'
@@ -2133,7 +2135,7 @@ function BoardEditorPageContent() {
           }
         >
           {/* Content wrapper */}
-          <div className="flex-1 flex items-center justify-center p-8 overflow-hidden">
+          <div className="flex-1 flex items-center justify-center p-2 md:p-8 overflow-hidden min-h-0">
             <div
               className="w-full h-full flex items-center justify-center relative"
               style={previewScale < 1 ? { zoom: previewScale } : undefined}
@@ -2480,7 +2482,7 @@ function BoardEditorPageContent() {
                         </div>
 
                         {/* Bottom Section - Message */}
-                        <div className="h-1/2 flex flex-col p-8 relative overflow-visible">
+                        <div className="h-1/2 flex flex-col p-4 relative overflow-visible">
                           {/* T Button for editing */}
                           {viewMode === 'card' && cardView === 'inside' && !isReadOnly && (
                             <button

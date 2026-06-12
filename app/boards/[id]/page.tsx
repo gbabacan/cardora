@@ -33,9 +33,7 @@ export default function BoardViewPage({ params }: { params: Promise<{ id: string
 
   // Edit/delete state
   const [ownedTokens, setOwnedTokens] = useState<Record<string, string>>({}); // { messageId: editToken }
-  const [editingMessage, setEditingMessage] = useState<{ id: string; content: string } | null>(null);
-  const [editContent, setEditContent] = useState('');
-  const [savingEdit, setSavingEdit] = useState(false);
+  const [editingMessage, setEditingMessage] = useState<{ id: string; content: string; media?: { file_url: string; file_type: string } | null } | null>(null);
   const [deletingMessageId, setDeletingMessageId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
@@ -57,29 +55,10 @@ export default function BoardViewPage({ params }: { params: Promise<{ id: string
     } catch {}
   };
 
-  const handleEditMessage = async () => {
-    if (!editingMessage || !editContent.trim()) return;
-    const token = ownedTokens[editingMessage.id];
-    if (!token) return;
-    setSavingEdit(true);
-    try {
-      const res = await fetch('/api/messages/edit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message_id: editingMessage.id, edit_token: token, content: editContent }),
-      });
-      if (res.ok) {
-        setMessages(prev => prev.map(m => m.id === editingMessage.id ? { ...m, content: editContent } : m));
-        setToast({ message: 'Message updated!', type: 'success' });
-        setEditingMessage(null);
-      } else {
-        setToast({ message: 'Failed to update message', type: 'error' });
-      }
-    } catch {
-      setToast({ message: 'Failed to update message', type: 'error' });
-    } finally {
-      setSavingEdit(false);
-    }
+  const handleEditSuccess = () => {
+    setToast({ message: 'Message updated! 🎉', type: 'success' });
+    setEditingMessage(null);
+    loadBoardData();
   };
 
   const handleDeleteMessage = async (messageId: string) => {
@@ -515,7 +494,7 @@ export default function BoardViewPage({ params }: { params: Promise<{ id: string
                       {ownedTokens[message.id] && !isDelivered && (
                         <div className="flex items-center gap-1 ml-2">
                           <button
-                            onClick={() => { setEditingMessage({ id: message.id, content: message.content }); setEditContent(message.content); }}
+                            onClick={() => setEditingMessage({ id: message.id, content: message.content, media: message.media?.[0] || null })}
                             className="p-1 text-[#5B6B75] hover:text-[#2CB1A6] transition-colors"
                             title="Edit message"
                           >
@@ -560,7 +539,7 @@ export default function BoardViewPage({ params }: { params: Promise<{ id: string
         <InviteModal
           isOpen={showInviteModal}
           onClose={() => setShowInviteModal(false)}
-          boardLink={`localhost:3000/boards/${boardShortId}`}
+          boardLink={`${process.env.NEXT_PUBLIC_APP_URL || 'https://cardora-livid.vercel.app'}/boards/${boardShortId}`}
           boardTitle={board.title}
           boardId={board.id}
           recipientNames={recipients.map(r => r.name)}
@@ -569,35 +548,21 @@ export default function BoardViewPage({ params }: { params: Promise<{ id: string
         />
       )}
 
-      {/* Edit Message Modal */}
+      {/* Edit Message Modal — reuses AddMessageModal in edit mode */}
       {editingMessage && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6">
-            <h3 className="text-lg font-bold text-[#0B1F2A] mb-4">Edit Message</h3>
-            <textarea
-              value={editContent}
-              onChange={(e) => setEditContent(e.target.value)}
-              rows={5}
-              className="w-full px-4 py-3 border-2 border-[#E5EAF0] rounded-lg focus:border-[#2CB1A6] focus:outline-none resize-none mb-4"
-              placeholder="Edit your message..."
-            />
-            <div className="flex gap-3 justify-end">
-              <button
-                onClick={() => setEditingMessage(null)}
-                className="px-4 py-2 text-[#5B6B75] hover:text-[#0B1F2A] font-medium transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleEditMessage}
-                disabled={savingEdit || !editContent.trim()}
-                className="px-6 py-2 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold transition-colors disabled:opacity-50"
-              >
-                {savingEdit ? 'Saving...' : 'Save Changes'}
-              </button>
-            </div>
-          </div>
-        </div>
+        <AddMessageModal
+          boardId={board.id}
+          boardShortId={boardShortId}
+          isOpen={!!editingMessage}
+          onClose={() => setEditingMessage(null)}
+          onSuccess={handleEditSuccess}
+          onError={(err) => setToast({ message: err, type: 'error' })}
+          editMode={true}
+          editMessageId={editingMessage.id}
+          editToken={ownedTokens[editingMessage.id]}
+          initialContent={editingMessage.content}
+          initialMedia={editingMessage.media}
+        />
       )}
 
       {/* Delete Confirmation Modal */}

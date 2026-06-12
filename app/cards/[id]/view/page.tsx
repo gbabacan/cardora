@@ -585,7 +585,7 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
                   }}
                 >
                 {/* Stamp */}
-                <div className="absolute top-8 right-8 flex items-center">
+                <div className="absolute top-[6%] right-[3%] flex items-center">
                   {/* Postmark SVG */}
                   <div className="relative w-32 h-32 -mr-4 z-10">
                     <svg viewBox="0 0 200 200" className="w-full h-full">
@@ -652,9 +652,9 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
                 </div>
 
                 {/* From Section in upper left */}
-                <div className="absolute top-8 left-8">
+                <div className="absolute top-[6%] left-[3%]">
                   <div
-                    className="space-y-2"
+                    className="space-y-1"
                     style={{
                       fontFamily: board.title_font,
                       color: isLightColor(board.title_font_color || '#8B4513') ? '#1F2937' : '#FFFFFF'
