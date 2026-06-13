@@ -74,6 +74,19 @@ export async function getLottieAnimationById(id: string) {
   }
 }
 
+/** Sentinel shape returned for .lottie binary files so renderers can use DotLottieReact */
+export interface LottieFileSentinel {
+  __lottieFileSrc: string;
+}
+
+export function isLottieFileSentinel(data: any): data is LottieFileSentinel {
+  return data !== null && typeof data === 'object' && '__lottieFileSrc' in data;
+}
+
+export function isLottieFile(path: string): boolean {
+  return path.toLowerCase().endsWith('.lottie');
+}
+
 /**
  * Get the animation data URL (local or remote)
  */
@@ -86,28 +99,29 @@ export function getLottieAnimationUrl(animation: LottieAnimation): string {
 }
 
 /**
- * Load Lottie animation data (handles both local and remote)
+ * Load Lottie animation data (handles both local and remote, both .json and .lottie).
+ * For .lottie binary files returns a LottieFileSentinel — pass it directly to
+ * <LottieAnimation animationData={...} /> which will route to DotLottieReact.
  */
 export async function loadLottieAnimationData(animation: LottieAnimation) {
   try {
-    if (animation.source_type === 'local') {
-      // For local files, we'll import them dynamically
-      // This requires the JSON file to exist in the public folder
-      const response = await fetch(animation.file_path || '');
-      if (!response.ok) {
-        console.error(`Failed to load local Lottie file: ${animation.file_path} (${response.status} ${response.statusText})`);
-        throw new Error(`Failed to load local Lottie file: ${animation.file_path}`);
-      }
-      return await response.json();
-    } else {
-      // For remote URLs, fetch from the CDN
-      const response = await fetch(animation.remote_url || '');
-      if (!response.ok) {
-        console.error(`Failed to load remote Lottie file: ${animation.remote_url} (${response.status} ${response.statusText})`);
-        throw new Error(`Failed to load remote Lottie file: ${animation.remote_url}`);
-      }
-      return await response.json();
+    const url = animation.source_type === 'local'
+      ? (animation.file_path || '')
+      : (animation.remote_url || '');
+
+    if (!url) return null;
+
+    // .lottie files are binary (zip) — cannot be parsed as JSON
+    if (isLottieFile(url)) {
+      return { __lottieFileSrc: url } satisfies LottieFileSentinel;
     }
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      console.error(`Failed to load Lottie file: ${url} (${response.status} ${response.statusText})`);
+      return null;
+    }
+    return await response.json();
   } catch (error: any) {
     console.error('Error loading Lottie animation data:', error.message || error);
     return null;

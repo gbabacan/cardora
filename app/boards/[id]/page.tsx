@@ -4,7 +4,7 @@ import { use, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import Lottie from "lottie-react";
+import LottieAnimation from "@/components/LottieAnimation";
 import { getBoardByShortId } from "@/lib/boards";
 import { getBoardMessages } from "@/lib/messages";
 import type { Board, Recipient } from "@/lib/boards";
@@ -244,7 +244,7 @@ export default function BoardViewPage({ params }: { params: Promise<{ id: string
       {/* Lottie Background Animation - Only show if ANIMATION type or no background selected */}
       {(background?.type === 'ANIMATION' && selectedLottieAnimation) || (!background && lottieAnimation) ? (
         <div className="fixed inset-0 z-0 pointer-events-none">
-          <Lottie
+          <LottieAnimation
             animationData={background?.type === 'ANIMATION' ? selectedLottieAnimation : lottieAnimation}
             loop={true}
             style={{ width: '100%', height: '100%' }}

@@ -3,7 +3,7 @@
 import { use, useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import Lottie from "lottie-react";
+import LottieAnimation from "@/components/LottieAnimation";
 import { useRouter } from "next/navigation";
 import { getBoardByShortId } from "@/lib/boards";
 import { getBoardMessages } from "@/lib/messages";
@@ -776,7 +776,7 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
                 {/* Card Theme Animation */}
                 {cardThemeAnimation ? (
                   <div className="absolute inset-0 z-0">
-                    <Lottie
+                    <LottieAnimation
                       animationData={cardThemeAnimation}
                       loop={true}
                       style={{ width: '100%', height: '100%' }}

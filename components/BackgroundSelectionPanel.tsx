@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useRef } from "react";
-import Lottie from "lottie-react";
+import LottieAnimation from "@/components/LottieAnimation";
 import { getAllLottieAnimations, groupAnimationsByOccasion, loadLottieAnimationData } from "@/lib/lotties";
 import { getAllPatterns } from "@/lib/backgrounds";
 import { createSolidBackground, createPatternBackground, createAnimationBackground } from "@/lib/backgrounds";
@@ -232,7 +232,7 @@ function AnimationCard({
         </div>
       ) : animationData ? (
         <div className="absolute inset-0 p-2">
-          <Lottie
+          <LottieAnimation
             animationData={animationData}
             loop={true}
             style={{ width: '100%', height: '100%' }}
@@ -782,7 +782,7 @@ export default function BackgroundSelectionPanel({
 
             {activeTab === 'animation' && previewAnimation ? (
               <div className="w-full aspect-square">
-                <Lottie
+                <LottieAnimation
                   animationData={previewAnimation}
                   loop={true}
                   style={{ width: '100%', height: '100%' }}

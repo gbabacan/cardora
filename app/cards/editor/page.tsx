@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import Lottie from "lottie-react";
+import LottieAnimation from "@/components/LottieAnimation";
 import { useAuth } from "@/hooks/useAuth";
 import { getBoardById, updateBoard, updateBoardRecipients, addContributors, getBoardMessageCount, getBoardContributors } from "@/lib/boards";
 import { getBoardMessages, createMessage, updateMessage, uploadMessageMedia, addGifToMessage, addUnsplashToMessage, deleteMessageMedia } from "@/lib/messages";
@@ -1207,7 +1208,7 @@ function BoardEditorPageContent() {
                       {/* Lottie Animation Preview */}
                       {selectedBackground?.type === 'ANIMATION' && selectedLottieAnimation && (
                         <div className="absolute inset-0">
-                          <Lottie
+                          <LottieAnimation
                             animationData={selectedLottieAnimation}
                             loop={true}
                             style={{ width: '100%', height: '100%' }}
@@ -2401,7 +2402,7 @@ function BoardEditorPageContent() {
                       {/* Theme Animation */}
                       {selectedBackground?.type === 'ANIMATION' && selectedLottieAnimation && (
                         <div className="absolute inset-0">
-                          <Lottie
+                          <LottieAnimation
                             animationData={selectedLottieAnimation}
                             loop={true}
                             style={{ width: '100%', height: '100%' }}
