@@ -6,7 +6,7 @@ import { getAllLottieAnimations, groupAnimationsByOccasion, loadLottieAnimationD
 import { getAllPatterns } from "@/lib/backgrounds";
 import { createSolidBackground, createPatternBackground, createAnimationBackground } from "@/lib/backgrounds";
 import { getOccasions } from "@/lib/occasions";
-import type { LottieAnimation } from "@/lib/lotties";
+import type { LottieAnimation as LottieAnimationData } from "@/lib/lotties";
 import type { Background, Pattern } from "@/lib/backgrounds";
 import type { Occasion } from "@/lib/occasions";
 
@@ -157,7 +157,7 @@ function AnimationCard({
   onSelect,
   onHover
 }: {
-  animation: LottieAnimation;
+  animation: LottieAnimationData;
   isSelected: boolean;
   onSelect: () => void;
   onHover: () => void;
@@ -290,9 +290,9 @@ export default function BackgroundSelectionPanel({
   const PATTERNS_PER_PAGE = 20;
 
   // Animation state
-  const [animations, setAnimations] = useState<LottieAnimation[]>([]);
-  const [groupedAnimations, setGroupedAnimations] = useState<Record<string, LottieAnimation[]>>({});
-  const [selectedAnimation, setSelectedAnimation] = useState<LottieAnimation | null>(null);
+  const [animations, setAnimations] = useState<LottieAnimationData[]>([]);
+  const [groupedAnimations, setGroupedAnimations] = useState<Record<string, LottieAnimationData[]>>({});
+  const [selectedAnimation, setSelectedAnimation] = useState<LottieAnimationData | null>(null);
   const [previewAnimation, setPreviewAnimation] = useState<any>(null);
   const [occasions, setOccasions] = useState<Occasion[]>([]);
   const [selectedOccasionFilter, setSelectedOccasionFilter] = useState<string>('ALL');
@@ -370,7 +370,7 @@ export default function BackgroundSelectionPanel({
     }
   };
 
-  const handleAnimationSelect = async (animation: LottieAnimation) => {
+  const handleAnimationSelect = async (animation: LottieAnimationData) => {
     setSelectedAnimation(animation);
 
     // Create animation background and notify parent
@@ -381,7 +381,7 @@ export default function BackgroundSelectionPanel({
     }
   };
 
-  const handleAnimationPreview = async (animation: LottieAnimation) => {
+  const handleAnimationPreview = async (animation: LottieAnimationData) => {
     const animData = await loadLottieAnimationData(animation);
     setPreviewAnimation(animData);
   };
