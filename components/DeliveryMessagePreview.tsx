@@ -32,8 +32,8 @@ export default function DeliveryMessagePreview({
       />
 
       {/* Modal */}
-      <div className="fixed inset-0 flex items-center justify-center z-[60] p-4">
-        <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden transform transition-all duration-300 scale-100">
+      <div className="fixed inset-0 flex items-start justify-center overflow-y-auto z-[60] p-4">
+        <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden transform transition-all duration-300 scale-100 my-auto">
           {/* Header */}
           <div className="bg-[#F7FAFC] border-b border-[#E5EAF0] px-6 py-4 flex items-center justify-between">
             <div>

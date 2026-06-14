@@ -450,8 +450,8 @@ export default function BackgroundSelectionPanel({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-2 md:p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[95vh] md:max-h-[90vh] flex overflow-hidden">
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center overflow-y-auto p-2 md:p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[95vh] md:max-h-[90vh] flex overflow-hidden my-auto">
         {/* Main Panel */}
         <div className="flex-1 flex flex-col overflow-hidden min-w-0">
           {/* Header */}
