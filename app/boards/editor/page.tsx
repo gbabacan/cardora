@@ -1285,7 +1285,7 @@ function BoardEditorPageContent() {
                       <button
                         onClick={() => {
                           navigator.clipboard.writeText(`https://${boardLink}`);
-                          alert('Link copied to clipboard!');
+                          setToast({ message: 'Link Copied To Clipboard', type: 'success' });
                         }}
                         className="px-6 py-3 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-medium transition-colors flex items-center gap-2 whitespace-nowrap"
                       >
