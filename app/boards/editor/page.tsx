@@ -1641,7 +1641,7 @@ function BoardEditorPageContent() {
                       </button>
                     )}
                   </div>
-                  <div className="grid grid-cols-2 gap-3 mb-3">
+                  <div className="grid grid-cols-2 gap-2 md:gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-medium text-[#5B6B75] mb-2">Date</label>
                       <input
@@ -1649,7 +1649,7 @@ function BoardEditorPageContent() {
                         value={scheduledDate}
                         min={new Date().toISOString().split('T')[0]}
                         onChange={(e) => setScheduledDate(e.target.value)}
-                        className="w-full px-4 py-3 bg-white border-2 border-[#E5EAF0] rounded-lg focus:border-[#2CB1A6] focus:outline-none transition-colors"
+                        className="w-full px-2 py-2.5 md:px-4 md:py-3 bg-white border-2 border-[#E5EAF0] rounded-lg focus:border-[#2CB1A6] focus:outline-none transition-colors text-sm"
                       />
                     </div>
                     <div>
@@ -1658,7 +1658,7 @@ function BoardEditorPageContent() {
                         type="time"
                         value={scheduledTime}
                         onChange={(e) => setScheduledTime(e.target.value)}
-                        className="w-full px-4 py-3 bg-white border-2 border-[#E5EAF0] rounded-lg focus:border-[#2CB1A6] focus:outline-none transition-colors"
+                        className="w-full px-2 py-2.5 md:px-4 md:py-3 bg-white border-2 border-[#E5EAF0] rounded-lg focus:border-[#2CB1A6] focus:outline-none transition-colors text-sm"
                       />
                     </div>
                   </div>
