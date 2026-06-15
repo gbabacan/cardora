@@ -944,21 +944,23 @@ export default function AddMessageModal({
 
                           {/* Unsplash Results Grid */}
                           {unsplashResults.length > 0 ? (
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-60 md:max-h-96 overflow-y-auto min-w-0">
+                            <div className="max-h-60 md:max-h-96 overflow-y-auto">
+                              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 w-full">
                               {unsplashResults.map((photo) => (
                                 <button
                                   key={photo.id}
                                   type="button"
                                   onClick={() => handleSelectUnsplash(photo)}
-                                  className="relative aspect-square overflow-hidden rounded-lg hover:ring-2 hover:ring-[#2CB1A6] transition-all"
+                                  className="relative aspect-square overflow-hidden rounded-lg hover:ring-2 hover:ring-[#2CB1A6] transition-all w-full"
                                 >
                                   <img
                                     src={photo.urls.small}
                                     alt={photo.alt_description || 'Unsplash photo'}
-                                    className="w-full h-full object-cover"
+                                    className="absolute inset-0 w-full h-full object-cover"
                                   />
                                 </button>
                               ))}
+                              </div>
                             </div>
                           ) : unsplashSearchQuery && !isSearchingUnsplash ? (
                             <div className="text-center py-8 text-[#5B6B75]">
@@ -1115,21 +1117,23 @@ export default function AddMessageModal({
 
                       {/* GIF Results Grid */}
                       {gifResults.length > 0 ? (
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-60 md:max-h-96 overflow-y-auto min-w-0">
+                        <div className="max-h-60 md:max-h-96 overflow-y-auto">
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 w-full">
                           {gifResults.map((gif) => (
                             <button
                               key={gif.id}
                               type="button"
                               onClick={() => handleSelectGif(gif.images.fixed_height.url)}
-                              className="relative aspect-square overflow-hidden rounded-lg hover:ring-2 hover:ring-[#2CB1A6] transition-all"
+                              className="relative aspect-square overflow-hidden rounded-lg hover:ring-2 hover:ring-[#2CB1A6] transition-all w-full"
                             >
                               <img
                                 src={gif.images.fixed_height_small.url}
                                 alt={gif.title}
-                                className="w-full h-full object-cover"
+                                className="absolute inset-0 w-full h-full object-cover"
                               />
                             </button>
                           ))}
+                          </div>
                         </div>
                       ) : gifSearchQuery && !isSearchingGifs ? (
                         <div className="text-center py-8 text-[#5B6B75]">
