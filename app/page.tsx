@@ -695,7 +695,7 @@ export default function Home() {
             <div className="space-y-6 md:space-y-8 text-center lg:text-left">
               <div className="space-y-4">
                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[#0B1F2A] leading-tight flex flex-col">
-                  <span>Send digital cards.</span>
+                  <span>Send digital cards.<span className="sr-only"> — Digital Greeting Cards Online</span></span>
                   <span className="flex items-center justify-center lg:justify-start gap-2 md:gap-3">
                     <span className="relative inline-block min-w-[160px] sm:min-w-[220px] lg:min-w-[280px]">
                       <span
@@ -1832,8 +1832,6 @@ export default function Home() {
               <div>
                 <h4 className="font-semibold text-white mb-4">Resources</h4>
                 <ul className="space-y-2">
-                  <li><a href="#" className="text-white opacity-80 hover:opacity-100 transition-opacity">Blog</a></li>
-                  <li><a href="#" className="text-white opacity-80 hover:opacity-100 transition-opacity">Help Center</a></li>
                   <li><Link href="/contact" className="text-white opacity-80 hover:opacity-100 transition-opacity">Contact Us</Link></li>
                 </ul>
               </div>
