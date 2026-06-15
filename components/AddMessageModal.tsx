@@ -565,8 +565,8 @@ export default function AddMessageModal({
       />
 
       {/* Modal */}
-      <div className="fixed inset-0 flex items-center justify-center z-[60] p-4">
-        <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-100">
+      <div className="fixed inset-0 flex items-start justify-center overflow-y-auto z-[60] p-4">
+        <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-100 my-auto">
           {/* Header */}
           <div className="p-6 border-b border-[#E5EAF0] flex items-center justify-between">
             <h2 className="text-2xl font-bold text-[#0B1F2A]">{editMode ? '✏️ Edit Your Message' : '✍️ Add Your Message'}</h2>
