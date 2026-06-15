@@ -9,6 +9,7 @@ import { supabase } from "@/lib/supabase";
 import { getOccasionsWithLottieData, OccasionWithLottieData } from "@/lib/occasions";
 import HomeNav from "./HomeNav";
 import HomeTestimonials from "./HomeTestimonials";
+import HomeOccasions from "./HomeOccasions";
 
 const TESTIMONIALS = [
   {
@@ -1031,7 +1032,8 @@ export default function Home() {
       </section>}
 
       {/* Occasions Section */}
-      <section className="py-20 bg-gradient-to-br from-[#2CB1A6] to-[#1F8F86]">
+      <HomeOccasions />
+      {false && <section className="py-20 bg-gradient-to-br from-[#2CB1A6] to-[#1F8F86]">
         <div className="container mx-auto px-6">
           <div className="text-center mb-12">
             <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4">
@@ -1097,7 +1099,7 @@ export default function Home() {
             </Link>
           </div>
         </div>
-      </section>
+      </section>}
 
       {/* How It Works Section */}
       <section className="py-12 md:py-20 bg-white relative overflow-hidden">
