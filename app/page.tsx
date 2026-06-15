@@ -7,6 +7,7 @@ import Lottie from "lottie-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/lib/supabase";
 import { getOccasionsWithLottieData, OccasionWithLottieData } from "@/lib/occasions";
+import HomeNav from "./HomeNav";
 
 const TESTIMONIALS = [
   {
@@ -501,7 +502,8 @@ export default function Home() {
       )}
 
       {/* Header */}
-      <header className="border-b border-[#E5EAF0] bg-white sticky top-0 z-50">
+      <HomeNav />
+      {false && <header className="border-b border-[#E5EAF0] bg-white sticky top-0 z-50">
         <div className="container mx-auto px-4 md:px-6 py-3 md:py-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
@@ -685,7 +687,7 @@ export default function Home() {
             </nav>
           )}
         </div>
-      </header>
+      </header>}
 
       {/* Hero Section */}
       <section className="bg-[#F7FAFC] py-10 md:py-20 lg:py-24">
