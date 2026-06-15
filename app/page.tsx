@@ -10,6 +10,7 @@ import { getOccasionsWithLottieData, OccasionWithLottieData } from "@/lib/occasi
 import HomeNav from "./HomeNav";
 import HomeTestimonials from "./HomeTestimonials";
 import HomeOccasions from "./HomeOccasions";
+import HomeHero from "./HomeHero";
 
 const TESTIMONIALS = [
   {
@@ -692,7 +693,8 @@ export default function Home() {
       </header>}
 
       {/* Hero Section */}
-      <section className="bg-[#F7FAFC] py-10 md:py-20 lg:py-24">
+      <HomeHero />
+      {false && <section className="bg-[#F7FAFC] py-10 md:py-20 lg:py-24">
         <div className="container mx-auto px-4 md:px-6">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center max-w-7xl mx-auto">
             {/* Left Content */}
@@ -888,7 +890,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </section>
+      </section>}
 
       {/* Features Section */}
       <section className="py-8 bg-white">
