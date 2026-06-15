@@ -509,7 +509,8 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
             {/* Envelope - Always visible */}
             <div
               className="relative w-[750px]"
-              onClick={() => {
+              onClick={(e) => {
+                if ((e.target as HTMLElement).closest('button, a, audio, video, input')) return;
                 if (!envelopeOpening && !envelopeOpened) {
                   handleOpenEnvelope();
                 } else if (envelopeOpened && viewMode === 'envelope') {
@@ -735,7 +736,10 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
             {envelopeOpened && (
               <div
                 className="absolute cursor-pointer"
-                onClick={() => viewMode === 'card' && handleFlipCard()}
+                onClick={(e) => {
+                  if ((e.target as HTMLElement).closest('button, a, audio, video, input')) return;
+                  if (viewMode === 'card' && cardFullyEmerged) handleFlipCard();
+                }}
                 style={{
                   perspective: '1500px',
                   transformStyle: 'preserve-3d',
