@@ -261,25 +261,24 @@ export default function RecipientViewPage({ params }: { params: Promise<{ id: st
               animation: floatAnimation 3s ease-in-out infinite;
             }
           `}</style>
-          <div className="bg-[#2CB1A6] rounded-3xl shadow-2xl px-20 py-16 max-w-4xl w-full mx-4 text-center float-animation" style={{ opacity: 1 }}>
+          <div className="bg-[#2CB1A6] rounded-3xl shadow-2xl px-6 py-8 md:px-20 md:py-16 max-w-4xl w-full mx-4 text-center float-animation" style={{ opacity: 1 }}>
             {/* Cardora Logo/Name */}
-            <div className="mb-8 flex items-center justify-center gap-4">
+            <div className="mb-4 md:mb-8 flex items-center justify-center gap-2 md:gap-4">
               <Image
                 src="/cardoraLogo.png"
                 alt="Cardora"
                 width={180}
                 height={48}
-                className="h-12 w-auto"
+                className="h-7 md:h-12 w-auto"
               />
-              <span className="text-3xl font-bold text-white">Cardora</span>
+              <span className="text-xl md:text-3xl font-bold text-white">Cardora</span>
             </div>
 
             {/* Board Title */}
             <h1
-              className="text-white font-bold mb-12"
+              className="text-white font-bold mb-6 md:mb-12 text-3xl md:text-5xl lg:text-[56px]"
               style={{
                 fontFamily: board?.title_font || 'Inter',
-                fontSize: '56px',
                 lineHeight: '1.2'
               }}
             >
@@ -289,7 +288,7 @@ export default function RecipientViewPage({ params }: { params: Promise<{ id: st
             {/* Open Button */}
             <button
               onClick={() => setShowIntro(false)}
-              className="bg-white text-[#0B1F2A] px-12 py-5 rounded-full font-bold text-xl hover:scale-105 transform transition-all shadow-lg"
+              className="bg-white text-[#0B1F2A] px-6 py-3 md:px-12 md:py-5 rounded-full font-bold text-base md:text-xl hover:scale-105 transform transition-all shadow-lg"
             >
               Open Your Cardora
             </button>
