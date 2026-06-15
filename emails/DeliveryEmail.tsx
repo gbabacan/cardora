@@ -30,9 +30,8 @@ export default function DeliveryEmail({
   formatType = 'board',
   senderName,
 }: DeliveryEmailProps) {
-  // Convert board link to recipient view link
-  // boardLink format: "localhost:3000/boards/[shortId]"
-  // We want: "localhost:3000/boards/[shortId]/view"
+  // Ensure the link points to the recipient view page
+  // boardLink format: "cardora.cards/boards/[shortId]"
   const recipientViewLink = boardLink.includes('/view') ? boardLink : `${boardLink}/view`;
 
   return (
