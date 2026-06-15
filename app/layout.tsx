@@ -32,6 +32,14 @@ export const metadata: Metadata = {
     default: "Cardora – Free Online Group Greeting Cards",
     template: "%s | Cardora",
   },
+  icons: {
+    icon: [
+      { url: "/icon.png", type: "image/png", sizes: "512x512" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    apple: { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
+    shortcut: "/icon.png",
+  },
   description:
     "Create collaborative group greeting cards for birthdays, farewells, weddings, thank-yous, and every celebration. Invite your whole team or friend group. Free with no credit card required.",
   openGraph: {
