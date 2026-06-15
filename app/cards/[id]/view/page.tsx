@@ -467,7 +467,7 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
         {/* Envelope or Card Container - Always sharp */}
         <div
           className="relative z-10 flex flex-col items-center justify-center gap-8"
-          style={envelopeScale < 1 ? { zoom: envelopeScale } : undefined}
+          style={envelopeScale < 1 ? { transform: `scale(${envelopeScale})`, transformOrigin: 'center center' } : undefined}
         >
           <div className="flex items-center justify-center gap-12">
             {/* Toggle Button - Left of envelope */}
