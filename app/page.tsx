@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/lib/supabase";
 import { getOccasionsWithLottieData, OccasionWithLottieData } from "@/lib/occasions";
 import HomeNav from "./HomeNav";
+import HomeTestimonials from "./HomeTestimonials";
 
 const TESTIMONIALS = [
   {
@@ -949,7 +950,8 @@ export default function Home() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-8 md:py-10 bg-[#E8F5F4]">
+      <HomeTestimonials />
+      {false && <section className="py-8 md:py-10 bg-[#E8F5F4]">
         <div className="w-11/12 md:w-4/5 mx-auto">
           {/* Mobile: stacked layout */}
           <div className="flex flex-col md:hidden gap-4">
@@ -1026,7 +1028,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </section>
+      </section>}
 
       {/* Occasions Section */}
       <section className="py-20 bg-gradient-to-br from-[#2CB1A6] to-[#1F8F86]">
