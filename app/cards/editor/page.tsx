@@ -2136,7 +2136,7 @@ function BoardEditorPageContent() {
           }
         >
           {/* Content wrapper */}
-          <div className="flex-1 flex items-center justify-center p-2 md:p-8 overflow-hidden min-h-0">
+          <div className="flex-1 flex items-center justify-center p-2 md:p-8 pb-0 md:pb-8 overflow-hidden min-h-0">
             <div
               className={previewScale < 1
                 ? 'relative flex-shrink-0'
@@ -2565,8 +2565,8 @@ function BoardEditorPageContent() {
             </div>
           </div>
 
-          {/* Toggle Buttons at bottom — hidden on mobile (shown as floating overlay instead) */}
-          <div className="hidden md:flex p-6 justify-center gap-4">
+          {/* Flip button — always visible at bottom, in flex flow so it never disappears */}
+          <div className="flex-shrink-0 py-3 md:py-6 flex justify-center gap-4">
             <button
               onClick={() => {
                 setIsFlipping(true);
@@ -2579,9 +2579,9 @@ function BoardEditorPageContent() {
                 }, 250);
                 setTimeout(() => setIsFlipping(false), 600);
               }}
-              className="px-6 py-3 rounded-full bg-white shadow-xl flex items-center gap-2 hover:scale-105 transition-transform border-2 border-gray-300"
+              className="px-5 py-2.5 md:px-6 md:py-3 rounded-full bg-white shadow-xl flex items-center gap-2 hover:scale-105 active:scale-95 transition-transform border-2 border-gray-300"
             >
-              <svg className="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 md:w-5 md:h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
               </svg>
               <span className="text-sm font-semibold text-gray-800">
@@ -2589,29 +2589,6 @@ function BoardEditorPageContent() {
               </span>
             </button>
           </div>
-
-          {/* Floating Flip button — mobile only, always visible over the preview */}
-          <button
-            onClick={() => {
-              setIsFlipping(true);
-              setTimeout(() => {
-                if (viewMode === 'envelope') {
-                  setEnvelopeView(prev => prev === 'front' ? 'back' : 'front');
-                } else {
-                  setCardView(prev => prev === 'front' ? 'inside' : 'front');
-                }
-              }, 250);
-              setTimeout(() => setIsFlipping(false), 600);
-            }}
-            className="md:hidden absolute bottom-4 left-1/2 -translate-x-1/2 z-30 px-5 py-2.5 rounded-full bg-white shadow-xl flex items-center gap-2 border-2 border-gray-300 active:scale-95 transition-transform"
-          >
-            <svg className="w-4 h-4 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-            </svg>
-            <span className="text-sm font-semibold text-gray-800">
-              Flip {viewMode === 'envelope' ? 'Envelope' : 'Card'}
-            </span>
-          </button>
         </div>
 
         {/* End of right panel */}
