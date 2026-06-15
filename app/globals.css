@@ -123,6 +123,22 @@ a:hover, button:hover {
   cursor: pointer;
 }
 
+/* Prevent dark-mode foreground color from making input text invisible
+   against light input backgrounds on iOS Safari and dark-mode systems. */
+input:not([type="color"]):not([type="range"]):not([type="checkbox"]):not([type="radio"]),
+textarea,
+select {
+  color: #0B1F2A;
+  -webkit-text-fill-color: #0B1F2A;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #9CA3AF;
+  -webkit-text-fill-color: #9CA3AF;
+  opacity: 1;
+}
+
 /* Toast animations */
 @keyframes slide-in-right {
   from {
