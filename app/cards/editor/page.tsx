@@ -2139,7 +2139,7 @@ function BoardEditorPageContent() {
           <div className="flex-1 flex items-center justify-center p-2 md:p-8 overflow-hidden min-h-0">
             <div
               className="w-full h-full flex items-center justify-center relative"
-              style={previewScale < 1 ? { transform: `scale(${previewScale})`, transformOrigin: 'center center' } : undefined}
+              style={previewScale < 1 ? { transform: `scale(${previewScale})`, transformOrigin: 'top left' } : undefined}
             >
 
               {/* ENVELOPE - Always visible */}
@@ -2171,9 +2171,9 @@ function BoardEditorPageContent() {
                       }}
                     >
                       {/* Stamp */}
-                      <div className="absolute top-3 right-3 md:top-8 md:right-8 flex items-center">
+                      <div className="absolute top-8 right-8 flex items-center">
                         {/* Postmark SVG */}
-                        <div className="relative w-16 h-16 md:w-32 md:h-32 -mr-2 md:-mr-4 z-10">
+                        <div className="relative w-32 h-32 -mr-4 z-10">
                           <svg viewBox="0 0 200 200" className="w-full h-full">
                             {/* Outer circle */}
                             <circle
@@ -2256,7 +2256,7 @@ function BoardEditorPageContent() {
                         </div>
 
                         {/* Cardora Stamp Text */}
-                        <div className="w-14 h-10 md:w-28 md:h-20 transform rotate-2">
+                        <div className="w-28 h-20 transform rotate-2">
                           <div className="relative w-full h-full bg-white shadow-lg" style={{
                             clipPath: `polygon(
                               0 3px, 3px 3px, 3px 0, 6px 0, 6px 3px, 9px 3px, 9px 0, 12px 0, 12px 3px, 15px 3px, 15px 0, 18px 0, 18px 3px, 21px 3px, 21px 0, 24px 0, 24px 3px, 27px 3px, 27px 0, 30px 0, 30px 3px, 33px 3px, 33px 0, 36px 0, 36px 3px, 39px 3px, 39px 0, 42px 0, 42px 3px, 45px 3px, 45px 0, 48px 0, 48px 3px, 51px 3px, 51px 0, 54px 0, 54px 3px, 57px 3px, 57px 0, 60px 0, 60px 3px, 63px 3px, 63px 0, 66px 0, 66px 3px, 69px 3px, 69px 0, 72px 0, 72px 3px, 75px 3px, 75px 0, 78px 0, 78px 3px, 81px 3px, 81px 0, 84px 0, 84px 3px, 87px 3px, 87px 0, 90px 0, 90px 3px, 93px 3px, 93px 0, 96px 0, 96px 3px, 99px 3px, 99px 0, 102px 0, 102px 3px, 105px 3px, 105px 0, 108px 0, 108px 3px, 111px 3px, 111px 0, 112px 0,
@@ -2273,18 +2273,18 @@ function BoardEditorPageContent() {
                       </div>
 
                       {/* From Section in upper left */}
-                      <div className="absolute top-3 left-3 md:top-8 md:left-8">
+                      <div className="absolute top-8 left-8">
                         <div
-                          className="space-y-1 md:space-y-2"
+                          className="space-y-2"
                           style={{
                             fontFamily: titleFont,
                             color: isLightColor(envelopeColor || '#8B4513') ? '#1F2937' : '#FFFFFF'
                           }}
                         >
-                          <p className="text-xs md:text-xl">
+                          <p className="text-xl">
                             <span className="font-semibold">From:</span> {user?.user_metadata?.name || user?.email || 'Sender'}
                           </p>
-                          <p className="text-xs md:text-xl">
+                          <p className="text-xl">
                             <span className="font-semibold">To:</span> {recipients.filter(r => r.trim()).join(', ') || 'Recipients'}
                           </p>
                         </div>
