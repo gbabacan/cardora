@@ -2156,7 +2156,8 @@ function BoardEditorPageContent() {
                     ? 'scale-100 opacity-100 z-20 left-16'
                     : 'scale-85 opacity-80 z-10 left-8'
                 }`}
-                onClick={() => {
+                onClick={(e) => {
+                  if ((e.target as HTMLElement).closest('input, textarea, button, a, [contenteditable]')) return;
                   if (viewMode === 'envelope') {
                     setIsFlipping(true);
                     setTimeout(() => setEnvelopeView(prev => prev === 'front' ? 'back' : 'front'), 250);
@@ -2390,7 +2391,8 @@ function BoardEditorPageContent() {
                     ? 'scale-100 opacity-100 z-20 right-1/4'
                     : 'scale-85 opacity-80 z-10 right-8'
                 }`}
-                onClick={() => {
+                onClick={(e) => {
+                  if ((e.target as HTMLElement).closest('input, textarea, button, a, [contenteditable]')) return;
                   if (viewMode === 'card') {
                     setIsFlipping(true);
                     setTimeout(() => setCardView(prev => prev === 'front' ? 'inside' : 'front'), 250);
