@@ -2138,8 +2138,15 @@ function BoardEditorPageContent() {
           {/* Content wrapper */}
           <div className="flex-1 flex items-center justify-center p-2 md:p-8 overflow-hidden min-h-0">
             <div
-              className="w-full h-full flex items-center justify-center relative"
-              style={previewScale < 1 ? { transform: `scale(${previewScale})`, transformOrigin: 'top left' } : undefined}
+              className={previewScale < 1
+                ? 'relative flex-shrink-0'
+                : 'w-full h-full flex items-center justify-center relative'}
+              style={previewScale < 1 ? {
+                width: '910px',
+                height: '600px',
+                transform: `scale(${previewScale})`,
+                transformOrigin: 'center center',
+              } : undefined}
             >
 
               {/* ENVELOPE - Always visible */}
