@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Open_Sans } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 const openSans = Open_Sans({
@@ -81,6 +82,19 @@ export default function RootLayout({
       className="h-full antialiased"
     >
       <body className={`${openSans.className} min-h-full flex flex-col`}>
+        {/* Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-V4C48609B9"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-V4C48609B9');
+          `}
+        </Script>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
