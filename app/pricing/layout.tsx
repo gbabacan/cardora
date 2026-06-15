@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     title: "Pricing – Free Group Cards | Cardora",
     description:
       "Cardora is free for a limited time. Create unlimited group cards, invite unlimited contributors, and celebrate every occasion with no credit card required.",
-    url: "https://cardora.com/pricing",
+    url: "https://cardora.cards/pricing",
     images: [
       {
         url: "/cardoraMainDemo.png",
@@ -65,7 +65,7 @@ export const metadata: Metadata = {
     images: ["/cardoraMainDemo.png"],
   },
   alternates: {
-    canonical: "https://cardora.com/pricing",
+    canonical: "https://cardora.cards/pricing",
   },
 };
 

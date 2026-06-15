@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     title: "Contact Us | Cardora",
     description:
       "Get in touch with the Cardora team. We're here to help with questions, feedback, and support.",
-    url: "https://cardora.com/contact",
+    url: "https://cardora.cards/contact",
     images: [
       {
         url: "/cardoraMainDemo.png",
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     images: ["/cardoraMainDemo.png"],
   },
   alternates: {
-    canonical: "https://cardora.com/contact",
+    canonical: "https://cardora.cards/contact",
   },
 };
 

@@ -16,6 +16,6 @@ export default function robots(): MetadataRoute.Robots {
         "/cards/",
       ],
     },
-    sitemap: "https://cardora.com/sitemap.xml",
+    sitemap: "https://cardora.cards/sitemap.xml",
   };
 }

@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const BASE_URL = "https://cardora.com";
+const BASE_URL = "https://cardora.cards";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [

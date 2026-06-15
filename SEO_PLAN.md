@@ -99,7 +99,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "...",
     description: "...",
-    url: "https://cardora.com/pricing",
+    url: "https://cardora.cards/pricing",
     siteName: "Cardora",
     images: [{ url: "/og-image.png", width: 1200, height: 630 }],
     type: "website",
@@ -111,7 +111,7 @@ export const metadata: Metadata = {
     images: ["/og-image.png"],
   },
   alternates: {
-    canonical: "https://cardora.com/pricing",
+    canonical: "https://cardora.cards/pricing",
   },
 };
 ```

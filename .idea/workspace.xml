@@ -5,18 +5,159 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="aa30951b-73c0-48e8-8800-a7352bb053c9" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/public/404.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/contactus.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/free.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/apology/apology1.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/appreciation/appreciation1.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/christmas/christmas1.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/christmas/christmas2.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/christmas/christmas3.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/christmas/christmas4.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/christmas/christmas5.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/competition/competition1.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/competition/competition2.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/competition/competition3.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/competition/competition4.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/competition/competition5.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/competition/competition6.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/congratulations/congratulations1.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/congratulations/congratulations2.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/congratulations/congratulations3.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/congratulations/congratulations4.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/congratulations/congratulations5.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/farewell/farewell1.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/farewell/farewell2.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/farewell/farewell3.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/farewell/farewell4.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/farewell/farewell5.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/fathersday/fathers1.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/getwellsoon/getWell1.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/getwellsoon/getWell2.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/getwellsoon/getWell3.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/getwellsoon/getWell4.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/graduation/graduation1.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/holidays/holidays1.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/holidays/holidays2.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/holidays/holidays3.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/holidays/holidays4.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/holidays/holidays5.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/housewarming/housewarming1.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/housewarming/housewarming2.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/love/love1.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/love/love10.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/love/love2.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/love/love3.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/love/love4.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/love/love5.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/love/love6.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/love/love7.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/love/love8.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/love/love9.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/mothersday/mothers1.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/mothersday/mothers2.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/newbaby/baby1.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/newbaby/baby2.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/newbaby/baby3.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/newbaby/baby4.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/newbaby/baby5.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/newyear/newYear1.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/newyear/newYear2.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/newyear/newYear3.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/promotion/promotion1.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/promotion/promotion2.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/retirement/retirement1.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/retirement/retirement2.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/sympathy/sympathy1.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/sympathy/sympathy2.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/teamcelebration/teamCelebration1.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/teamcelebration/teamCelebration2.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/thankyou/thankYou1.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/thankyou/thankYou2.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/thankyou/thankYou3.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/thankyou/thankYou4.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/thankyou/thankYou5.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/valentinesday/valentine1.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/valentinesday/valentine2.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/valentinesday/valentine3.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/valentinesday/valentine4.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/valentinesday/valentine5.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/wedding/wedding1.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/wedding/wedding2.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/wedding/wedding3.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/wedding/wedding4.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/wedding/wedding5.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/welcome/welcome1.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/welcome/welcome2.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/welcome/welcome3.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/welcome/welcome4.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/welcome/welcome5.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/lotties/workanniversary/workAnniversary1.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.npmrc" beforeDir="false" afterPath="$PROJECT_DIR$/.npmrc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/send-delivery/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/send-delivery/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/benefits/corporate/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/benefits/corporate/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/benefits/personal/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/benefits/personal/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/boards/[id]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/boards/[id]/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/boards/[id]/view/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/boards/[id]/view/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/boards/create/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/boards/create/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/boards/editor/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/boards/editor/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/cards/[id]/view/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/cards/[id]/view/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/cards/create/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/cards/editor/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/cards/editor/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/dashboard/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/dashboard/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/app/globals.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/pricing/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/pricing/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/components/BackgroundSelectionPanel.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/BackgroundSelectionPanel.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/DeliveryMessagePreview.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/DeliveryMessagePreview.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/emails/DeliveryEmail.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/emails/DeliveryEmail.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/backgrounds.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/backgrounds.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/boards.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/boards.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/lotties.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/lotties.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/messages.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/messages.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern1.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern1.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern101.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern101.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern104.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern104.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern106.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern106.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern111.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern111.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern112.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern112.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern119.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern119.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern120.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern120.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern124.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern124.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern13.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern13.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern131.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern131.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern134.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern134.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern135.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern135.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern137.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern137.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern138.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern138.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern140.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern140.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern145.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern145.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern149.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern149.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern150.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern150.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern151.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern151.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern153.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern153.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern157.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern157.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern159.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern159.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern16.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern16.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern160.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern160.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern161.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern161.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern162.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern162.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern165.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern165.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern172.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern172.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern173.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern173.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern180.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern180.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern183.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern183.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern192.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern192.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern197.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern197.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern200.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern200.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern33.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern33.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern40.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern40.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern44.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern44.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern49.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern49.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern51.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern51.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern53.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern53.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern68.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern68.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern70.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern70.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/patterns/pattern9.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/public/patterns/pattern9.jpg" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -72,10 +213,11 @@
       <recent name="$PROJECT_DIR$" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/public/lotties/birthday" />
-      <recent name="$PROJECT_DIR$/public/lotties" />
-      <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/public" />
+      <recent name="$PROJECT_DIR$/public/lotties/holidays" />
+      <recent name="$PROJECT_DIR$/public/lotties/newyear" />
+      <recent name="$PROJECT_DIR$/public/lotties/promotion" />
+      <recent name="$PROJECT_DIR$/public/lotties/housewarming" />
     </key>
   </component>
   <component name="RunManager" selected="npm.Next.js: server-side">
@@ -113,7 +255,7 @@
       <workItem from="1779216698496" duration="1001000" />
       <workItem from="1779217715958" duration="1054000" />
       <workItem from="1779218807442" duration="151000" />
-      <workItem from="1779219054882" duration="29427000" />
+      <workItem from="1779219054882" duration="130762000" />
     </task>
     <servers />
   </component>

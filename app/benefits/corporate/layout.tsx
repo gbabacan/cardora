@@ -8,13 +8,13 @@ const breadcrumbSchema = {
       "@type": "ListItem",
       position: 1,
       name: "Home",
-      item: "https://cardora.com",
+      item: "https://cardora.cards",
     },
     {
       "@type": "ListItem",
       position: 2,
       name: "Corporate Group Cards",
-      item: "https://cardora.com/benefits/corporate",
+      item: "https://cardora.cards/benefits/corporate",
     },
   ],
 };
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     title: "Corporate Group Cards & Team Recognition | Cardora",
     description:
       "Celebrate your team with group cards for work anniversaries, employee appreciation, farewells, and team milestones. Built for remote and hybrid teams.",
-    url: "https://cardora.com/benefits/corporate",
+    url: "https://cardora.cards/benefits/corporate",
     images: [
       {
         url: "/cardoraMainDemo.png",
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
     images: ["/cardoraMainDemo.png"],
   },
   alternates: {
-    canonical: "https://cardora.com/benefits/corporate",
+    canonical: "https://cardora.cards/benefits/corporate",
   },
 };
 

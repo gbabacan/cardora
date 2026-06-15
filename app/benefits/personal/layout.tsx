@@ -8,13 +8,13 @@ const breadcrumbSchema = {
       "@type": "ListItem",
       position: 1,
       name: "Home",
-      item: "https://cardora.com",
+      item: "https://cardora.cards",
     },
     {
       "@type": "ListItem",
       position: 2,
       name: "Personal Group Cards",
-      item: "https://cardora.com/benefits/personal",
+      item: "https://cardora.cards/benefits/personal",
     },
   ],
 };
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     title: "Personal Group Cards for Every Occasion | Cardora",
     description:
       "Send heartfelt group greeting cards for birthdays, Valentine's Day, weddings, new babies, and more. Collect messages and photos from everyone.",
-    url: "https://cardora.com/benefits/personal",
+    url: "https://cardora.cards/benefits/personal",
     images: [
       {
         url: "/cardoraMainDemo.png",
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
     images: ["/cardoraMainDemo.png"],
   },
   alternates: {
-    canonical: "https://cardora.com/benefits/personal",
+    canonical: "https://cardora.cards/benefits/personal",
   },
 };
 

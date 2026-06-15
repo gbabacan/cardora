@@ -7,7 +7,7 @@ const openSans = Open_Sans({
   subsets: ["latin"],
 });
 
-const BASE_URL = "https://cardora.com";
+const BASE_URL = "https://cardora.cards";
 
 const organizationSchema = {
   "@context": "https://schema.org",

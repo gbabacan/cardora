@@ -539,7 +539,7 @@ export default function BoardViewPage({ params }: { params: Promise<{ id: string
         <InviteModal
           isOpen={showInviteModal}
           onClose={() => setShowInviteModal(false)}
-          boardLink={`${process.env.NEXT_PUBLIC_APP_URL || 'https://cardora-livid.vercel.app'}/boards/${boardShortId}`}
+          boardLink={`${process.env.NEXT_PUBLIC_APP_URL || 'https://cardora.cards'}/boards/${boardShortId}`}
           boardTitle={board.title}
           boardId={board.id}
           recipientNames={recipients.map(r => r.name)}

@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     title: "Group Card Templates – Birthdays, Farewells & More | Cardora",
     description:
       "Browse beautiful group greeting card templates for birthdays, farewells, weddings, baby showers, thank-yous, and every celebration.",
-    url: "https://cardora.com/templates",
+    url: "https://cardora.cards/templates",
     images: [
       {
         url: "/cardoraMainDemo.png",
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     images: ["/cardoraMainDemo.png"],
   },
   alternates: {
-    canonical: "https://cardora.com/templates",
+    canonical: "https://cardora.cards/templates",
   },
 };
 
