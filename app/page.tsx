@@ -11,6 +11,7 @@ import HomeNav from "./HomeNav";
 import HomeTestimonials from "./HomeTestimonials";
 import HomeOccasions from "./HomeOccasions";
 import HomeHero from "./HomeHero";
+import HomeHowItWorks from "./HomeHowItWorks";
 
 const TESTIMONIALS = [
   {
@@ -1104,7 +1105,8 @@ export default function Home() {
       </section>}
 
       {/* How It Works Section */}
-      <section className="py-12 md:py-20 bg-white relative overflow-hidden">
+      <HomeHowItWorks />
+      {false && <section className="py-12 md:py-20 bg-white relative overflow-hidden">
         {/* Decorative Lotties — desktop only */}
         {howItWorksLottie1 && (
           <div className="hidden md:block absolute top-16 left-16 w-64 h-64 opacity-30">
@@ -1391,7 +1393,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </section>
+      </section>}
 
       {/* Examples Section */}
       <section id="templates" className="py-20 bg-[#F7FAFC]">
