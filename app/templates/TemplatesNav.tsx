@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
+import MobileMenuContent from "../MobileMenuContent";
 import OccasionsDropdown from "../OccasionsDropdown";
 
 export default function TemplatesNav() {
@@ -98,20 +99,7 @@ export default function TemplatesNav() {
           </div>
         </div>
 
-        {showMobileMenu && (
-          <nav className="md:hidden border-t border-[#E5EAF0] pt-4 pb-2 mt-3 flex flex-col gap-1">
-            <Link href="/benefits/personal" onClick={() => setShowMobileMenu(false)} className="px-3 py-2.5 text-[#5B6B75] font-semibold hover:text-[#2CB1A6] hover:bg-[#F7FAFC] rounded-lg transition-colors">Features — Personal</Link>
-            <Link href="/benefits/corporate" onClick={() => setShowMobileMenu(false)} className="px-3 py-2.5 text-[#5B6B75] font-semibold hover:text-[#2CB1A6] hover:bg-[#F7FAFC] rounded-lg transition-colors">Features — Corporate</Link>
-            <Link href="/pricing" onClick={() => setShowMobileMenu(false)} className="px-3 py-2.5 text-[#5B6B75] font-semibold hover:text-[#2CB1A6] hover:bg-[#F7FAFC] rounded-lg transition-colors">Pricing</Link>
-            <Link href="/templates" onClick={() => setShowMobileMenu(false)} className="px-3 py-2.5 text-[#2CB1A6] font-semibold hover:bg-[#F7FAFC] rounded-lg transition-colors">Templates</Link>
-            <Link href="/contact" onClick={() => setShowMobileMenu(false)} className="px-3 py-2.5 text-[#5B6B75] font-semibold hover:text-[#2CB1A6] hover:bg-[#F7FAFC] rounded-lg transition-colors">Contact Us</Link>
-            {user ? (
-              <Link href="/dashboard" onClick={() => setShowMobileMenu(false)} className="px-3 py-2.5 text-[#5B6B75] font-semibold hover:text-[#2CB1A6] hover:bg-[#F7FAFC] rounded-lg transition-colors">Dashboard</Link>
-            ) : (
-              <Link href="/login?mode=signin" onClick={() => setShowMobileMenu(false)} className="px-3 py-2.5 text-[#5B6B75] font-semibold hover:text-[#2CB1A6] hover:bg-[#F7FAFC] rounded-lg transition-colors">Sign in</Link>
-            )}
-          </nav>
-        )}
+        {showMobileMenu && <MobileMenuContent user={user} onClose={() => setShowMobileMenu(false)} />}
       </div>
     </header>
   );
