@@ -382,6 +382,18 @@ function BoardEditorPageContent() {
       return;
     }
 
+    // Validation 6b: For card format, ensure the card body has written content
+    if (formatType === 'card') {
+      const { messages: cardMessages } = await getBoardMessages(boardId);
+      const hasContent = cardMessages?.some((msg: Message) =>
+        msg.content?.replace(/<[^>]*>/g, '').trim()
+      );
+      if (!hasContent) {
+        setToast({ message: 'Please write a message inside your card before delivering.', type: 'error' });
+        return;
+      }
+    }
+
     // Validation 7: Check if board has at least one message
     // TEMPORARILY DISABLED FOR TESTING
     // const { count: messageCount, error: countError } = await getBoardMessageCount(boardId);
@@ -612,6 +624,18 @@ function BoardEditorPageContent() {
   // Mark as delivered handler
   const handleMarkAsDelivered = async () => {
     if (!boardId) return;
+
+    // For card format, ensure card body has written content before marking delivered
+    if (formatType === 'card') {
+      const { messages: cardMessages } = await getBoardMessages(boardId);
+      const hasContent = cardMessages?.some((msg: Message) =>
+        msg.content?.replace(/<[^>]*>/g, '').trim()
+      );
+      if (!hasContent) {
+        setToast({ message: 'Please write a message inside your card before marking it as delivered.', type: 'error' });
+        return;
+      }
+    }
 
     setMarkingDelivered(true);
 

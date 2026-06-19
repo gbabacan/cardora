@@ -778,6 +778,15 @@ function BoardEditorPageContent() {
   const handleMarkAsDelivered = async () => {
     if (!boardId) return;
 
+    // For card format, ensure a message has been written
+    if (formatType === 'card') {
+      const msgText = deliveryMessage.replace(/<[^>]*>/g, '').trim();
+      if (!msgText) {
+        setToast({ message: 'Please write a message inside your card before marking it as delivered.', type: 'error' });
+        return;
+      }
+    }
+
     setMarkingDelivered(true);
 
     try {
