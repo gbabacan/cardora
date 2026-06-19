@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { isLottieFile } from "@/lib/lotties";
 import LottieAnimation from "@/components/LottieAnimation";
+import HorizontalScrollRow from "../HorizontalScrollRow";
 import { useAuth } from "@/hooks/useAuth";
 import { signOut } from "@/lib/auth";
 import { getUserBoards, deleteBoard, getBoardMessageCount } from "@/lib/boards";
@@ -854,14 +855,15 @@ export default function DashboardPage() {
                   return (
                     <div key={occasionType}>
                       <h3 className="text-lg font-bold text-[#0B1F2A] mb-4 capitalize">{occasionLabel}</h3>
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                      <HorizontalScrollRow>
                         {occasionTemplates.map((template) => (
                           <Link
                             key={template.id}
                             href={`/${template.format_type === 'card' ? 'cards' : 'boards'}/${template.short_id}/view`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="group bg-white rounded-xl border-2 border-[#E5EAF0] hover:border-[#2CB1A6] hover:shadow-lg transition-all overflow-hidden"
+                            className="group bg-white rounded-xl border-2 border-[#E5EAF0] hover:border-[#2CB1A6] hover:shadow-lg transition-all overflow-hidden flex-shrink-0 w-36 md:w-44"
+                            style={{ scrollSnapAlign: "start" }}
                           >
                             <div className="aspect-square bg-gradient-to-br from-[#E8F5F4] to-[#F7FAFC] flex items-center justify-center p-2">
                               {template.lottieData ? (
@@ -884,7 +886,7 @@ export default function DashboardPage() {
                             </div>
                           </Link>
                         ))}
-                      </div>
+                      </HorizontalScrollRow>
                     </div>
                   );
                 })}

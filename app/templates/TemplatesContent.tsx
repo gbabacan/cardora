@@ -5,6 +5,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { isLottieFile } from "@/lib/lotties";
 import LottieAnimation from "@/components/LottieAnimation";
+import HorizontalScrollRow from "../HorizontalScrollRow";
 import type { Board } from "@/lib/boards";
 
 interface TemplateWithLottie extends Board {
@@ -134,14 +135,15 @@ export default function TemplatesContent() {
                     {occasionTemplates.length} template{occasionTemplates.length !== 1 ? "s" : ""}
                   </span>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                <HorizontalScrollRow>
                   {occasionTemplates.map((template) => (
                     <Link
                       key={template.id}
                       href={`/${template.format_type === "card" ? "cards" : "boards"}/${template.short_id}/view`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group bg-white rounded-xl border-2 border-[#E5EAF0] hover:border-[#2CB1A6] hover:shadow-lg transition-all overflow-hidden"
+                      className="group bg-white rounded-xl border-2 border-[#E5EAF0] hover:border-[#2CB1A6] hover:shadow-lg transition-all overflow-hidden flex-shrink-0 w-36 md:w-44"
+                      style={{ scrollSnapAlign: "start" }}
                     >
                       <div className="aspect-square bg-gradient-to-br from-[#E8F5F4] to-[#F7FAFC] flex items-center justify-center p-2">
                         {template.lottieData ? (
@@ -164,7 +166,7 @@ export default function TemplatesContent() {
                       </div>
                     </Link>
                   ))}
-                </div>
+                </HorizontalScrollRow>
               </div>
             );
           })}
