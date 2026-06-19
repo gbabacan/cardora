@@ -773,6 +773,18 @@ function BoardEditorPageContent() {
     }
   };
 
+  // Auto-save schedule to DB without requiring full save
+  const autoSaveSchedule = async (date: string, time: string) => {
+    if (!boardId) return;
+    const isScheduled = !!(date && time);
+    await updateBoard(boardId, {
+      delivery_type: isScheduled ? 'SCHEDULED' : 'ON_DEMAND',
+      scheduled_delivery: isScheduled
+        ? new Date(`${date}T${time}:00`).toISOString()
+        : null,
+    });
+  };
+
   // Save board handler
   // Mark as delivered handler
   const handleMarkAsDelivered = async () => {
@@ -1964,7 +1976,7 @@ function BoardEditorPageContent() {
                     <label className="block text-sm font-bold text-[#0B1F2A]">Schedule for later</label>
                     {scheduledDate && scheduledTime && (
                       <button
-                        onClick={() => { setScheduledDate(''); setScheduledTime(''); }}
+                        onClick={async () => { setScheduledDate(''); setScheduledTime(''); setScheduleConfirmed(false); await autoSaveSchedule('', ''); setToast({ message: 'Schedule cleared', type: 'info' }); }}
                         className="text-xs text-red-500 hover:text-red-700 font-medium flex items-center gap-1 transition-colors"
                       >
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2075,7 +2087,7 @@ function BoardEditorPageContent() {
                             Go Back
                           </button>
                           <button
-                            onClick={() => { setScheduleConfirmed(true); setShowScheduleModal(false); setToast({ message: 'Schedule confirmed! Click Deliver to save.', type: 'success' }); }}
+                            onClick={async () => { await autoSaveSchedule(scheduledDate, scheduledTime); setScheduleConfirmed(true); setShowScheduleModal(false); setToast({ message: 'Schedule saved! Your card will be delivered automatically.', type: 'success' }); }}
                             className="flex-1 py-2.5 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold text-sm transition-colors"
                           >
                             Confirm Schedule
