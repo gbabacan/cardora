@@ -4,7 +4,8 @@ import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import Lottie from "lottie-react";
+import { isLottieFile } from "@/lib/lotties";
+import LottieAnimation from "@/components/LottieAnimation";
 import { useAuth } from "@/hooks/useAuth";
 import { signOut } from "@/lib/auth";
 import { getUserBoards, deleteBoard, getBoardMessageCount } from "@/lib/boards";
@@ -144,9 +145,13 @@ export default function DashboardPage() {
           const cacheKey = lottieAnim.id;
           if (!lottieCache[cacheKey]) {
             try {
-              const res = await fetch(lottieAnim.file_path);
-              if (res.ok) {
-                lottieCache[cacheKey] = await res.json();
+              if (isLottieFile(lottieAnim.file_path)) {
+                lottieCache[cacheKey] = { __lottieFileSrc: lottieAnim.file_path };
+              } else {
+                const res = await fetch(lottieAnim.file_path);
+                if (res.ok) {
+                  lottieCache[cacheKey] = await res.json();
+                }
               }
             } catch (err) {
               console.error('Error loading lottie:', lottieAnim.file_path, err);
@@ -860,7 +865,7 @@ export default function DashboardPage() {
                           >
                             <div className="aspect-square bg-gradient-to-br from-[#E8F5F4] to-[#F7FAFC] flex items-center justify-center p-2">
                               {template.lottieData ? (
-                                <Lottie animationData={template.lottieData} loop={true} style={{ width: '100%', height: '100%' }} />
+                                <LottieAnimation animationData={template.lottieData} loop={true} style={{ width: '100%', height: '100%' }} />
                               ) : (
                                 <div className="w-12 h-12 rounded-full bg-[#A7E8E2] flex items-center justify-center">
                                   <svg className="w-6 h-6 text-[#2CB1A6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">

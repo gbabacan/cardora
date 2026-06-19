@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
+import OccasionsDropdown from "../OccasionsDropdown";
 
 export default function TemplatesNav() {
   const [user, setUser] = useState<any>(null);
@@ -63,6 +64,7 @@ export default function TemplatesNav() {
                 </div>
               )}
             </div>
+            <OccasionsDropdown />
             <Link href="/pricing" className="text-[#5B6B75] hover:text-[#0B1F2A] transition-colors font-bold">Pricing</Link>
             <Link href="/templates" className="text-[#2CB1A6] font-bold">Templates</Link>
             <Link href="/contact" className="text-[#5B6B75] hover:text-[#0B1F2A] transition-colors font-bold">Contact Us</Link>

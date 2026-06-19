@@ -104,6 +104,7 @@ function BoardEditorPageContent() {
 
   // Settings panel state
   const [showSettings, setShowSettings] = useState(false);
+  const [senderName, setSenderName] = useState('');
 
   // Delivery panel state
   const [showDelivery, setShowDelivery] = useState(false);
@@ -113,6 +114,8 @@ function BoardEditorPageContent() {
   const [notifyContributors, setNotifyContributors] = useState(true);
   const [scheduledDate, setScheduledDate] = useState('');
   const [scheduledTime, setScheduledTime] = useState('');
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [scheduleConfirmed, setScheduleConfirmed] = useState(false);
   const [deliveringNow, setDeliveringNow] = useState(false);
 
   // Saving state
@@ -198,6 +201,13 @@ function BoardEditorPageContent() {
     fonts.forEach(font => loadFont(font.name));
     loadLottieAnimation();
   }, []);
+
+  // Initialize sender name from user profile (only on first load)
+  useEffect(() => {
+    if (user && !senderName) {
+      setSenderName(user.user_metadata?.name || user.email || '');
+    }
+  }, [user]);
 
   // Scale preview to fit mobile screens
   useEffect(() => {
@@ -463,9 +473,10 @@ function BoardEditorPageContent() {
       return;
     }
 
-    // Validation 6: Check if delivery message exists
-    if (!deliveryMessage.trim()) {
-      setToast({ message: 'Please add a message to recipients', type: 'error' });
+    // Validation 6: Check if the card has an actual written message
+    const messageText = deliveryMessage.replace(/<[^>]*>/g, '').trim();
+    if (!messageText) {
+      setToast({ message: 'Please write a message inside your card before delivering. Open the card and add your message in the inside view.', type: 'error' });
       return;
     }
 
@@ -610,7 +621,7 @@ function BoardEditorPageContent() {
             boardLink: `cardora.cards/${formatType === 'board' ? 'boards' : 'cards'}/${boardData?.short_id}/view`,
             deliveryMessage: recipientMessage || undefined,
             formatType: formatType,
-            senderName: user?.user_metadata?.name || user?.email || 'Sender'
+            senderName: senderName || user?.user_metadata?.name || user?.email || 'Sender'
           })
         });
 
@@ -733,7 +744,7 @@ function BoardEditorPageContent() {
           recipientNames: recipients.filter(r => r.trim()),
           boardLink: boardLink,
           customMessage: inviteMessage,
-          creatorName: user?.user_metadata?.name || user?.email || 'Someone',
+          creatorName: senderName || user?.user_metadata?.name || user?.email || 'Someone',
         }),
       });
 
@@ -807,6 +818,13 @@ function BoardEditorPageContent() {
       const recipientsWithoutEmails = recipients.filter((_, index) => !recipientEmails[index]?.trim());
       if (recipientsWithoutEmails.length > 0) {
         setToast({ message: 'All recipients must have email addresses for scheduled delivery', type: 'error' });
+        return;
+      }
+
+      // Validate card has a written message before scheduling delivery
+      const scheduledMessageText = deliveryMessage.replace(/<[^>]*>/g, '').trim();
+      if (!scheduledMessageText) {
+        setToast({ message: 'Please write a message inside your card before scheduling delivery. Open the card and add your message in the inside view.', type: 'error' });
         return;
       }
     }
@@ -1013,7 +1031,7 @@ function BoardEditorPageContent() {
         deliveryMessage={recipientMessage}
         boardLink={`cardora.cards/${formatType === 'board' ? 'boards' : 'cards'}/${boardData?.short_id}/view`}
         formatType={formatType}
-        senderName={user?.user_metadata?.name || user?.email || 'Sender'}
+        senderName={senderName || user?.user_metadata?.name || user?.email || 'Sender'}
       />
 
       <div className="h-screen flex flex-col bg-white overflow-hidden">
@@ -1954,7 +1972,7 @@ function BoardEditorPageContent() {
                         type="date"
                         value={scheduledDate}
                         min={new Date().toISOString().split('T')[0]}
-                        onChange={(e) => setScheduledDate(e.target.value)}
+                        onChange={(e) => { setScheduledDate(e.target.value); setScheduleConfirmed(false); }}
                         className="w-full px-4 py-3 bg-white border-2 border-[#E5EAF0] rounded-lg focus:border-[#2CB1A6] focus:outline-none transition-colors"
                       />
                     </div>
@@ -1963,7 +1981,7 @@ function BoardEditorPageContent() {
                       <input
                         type="time"
                         value={scheduledTime}
-                        onChange={(e) => setScheduledTime(e.target.value)}
+                        onChange={(e) => { setScheduledTime(e.target.value); setScheduleConfirmed(false); }}
                         className="w-full px-4 py-3 bg-white border-2 border-[#E5EAF0] rounded-lg focus:border-[#2CB1A6] focus:outline-none transition-colors"
                       />
                     </div>
@@ -1977,25 +1995,85 @@ function BoardEditorPageContent() {
                           <svg className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                           </svg>
-                          <p className="text-sm text-red-700 font-medium">
-                            This date is in the past. Please select a future date and time.
-                          </p>
+                          <p className="text-sm text-red-700 font-medium">This date is in the past. Please select a future date and time.</p>
                         </div>
-                      ) : (
+                      ) : scheduleConfirmed ? (
                         <div className="bg-[#E8F5F4] border border-[#2CB1A6] rounded-lg p-3 flex items-start gap-2">
                           <svg className="w-5 h-5 text-[#2CB1A6] mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
-                          <p className="text-sm text-[#0B1F2A] font-medium">
-                            Scheduled for {scheduledDT.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} at {scheduledTime}. Save to confirm.
-                          </p>
+                          <div>
+                            <p className="text-sm text-[#0B1F2A] font-semibold">Schedule confirmed ✓</p>
+                            <p className="text-xs text-[#5B6B75] mt-0.5">{scheduledDT.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })} at {scheduledTime}</p>
+                          </div>
                         </div>
+                      ) : (
+                        <button
+                          onClick={() => setShowScheduleModal(true)}
+                          className="w-full py-2.5 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold text-sm transition-colors"
+                        >
+                          Confirm This Schedule
+                        </button>
                       );
                     })()
                   ) : (
                     <p className="text-xs text-[#5B6B75]">
                       Select date and time to schedule delivery. Recipients must have email addresses.
                     </p>
+                  )}
+
+                  {/* Schedule Confirmation Modal */}
+                  {showScheduleModal && scheduledDate && scheduledTime && (
+                    <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center overflow-y-auto p-4">
+                      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 my-auto">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="w-10 h-10 bg-[#E8F5F4] rounded-full flex items-center justify-center flex-shrink-0">
+                            <svg className="w-5 h-5 text-[#2CB1A6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                          </div>
+                          <h3 className="text-lg font-bold text-[#0B1F2A]">Confirm Scheduled Delivery</h3>
+                        </div>
+
+                        <div className="bg-[#F7FAFC] rounded-xl p-4 mb-4">
+                          <p className="text-xs font-semibold text-[#5B6B75] uppercase tracking-wide mb-1">Delivery scheduled for</p>
+                          <p className="text-base font-bold text-[#0B1F2A]">
+                            {new Date(`${scheduledDate}T${scheduledTime}:00`).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+                          </p>
+                          <p className="text-sm text-[#2CB1A6] font-semibold">at {scheduledTime}</p>
+                        </div>
+
+                        <div className="space-y-2 mb-5">
+                          <div className="flex items-start gap-2">
+                            <svg className="w-4 h-4 text-[#2CB1A6] mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                            <p className="text-sm text-[#5B6B75]">Your card will be automatically sent to all recipients at this exact date and time.</p>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <svg className="w-4 h-4 text-[#2CB1A6] mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                            <p className="text-sm text-[#5B6B75]">You and contributors can still add or edit messages until the delivery time.</p>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <svg className="w-4 h-4 text-[#2CB1A6] mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                            <p className="text-sm text-[#5B6B75]">You can cancel the schedule at any time before delivery by clicking &quot;Clear schedule&quot;.</p>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-3">
+                          <button
+                            onClick={() => setShowScheduleModal(false)}
+                            className="flex-1 py-2.5 border-2 border-[#E5EAF0] text-[#5B6B75] rounded-lg font-semibold text-sm hover:bg-[#F7FAFC] transition-colors"
+                          >
+                            Go Back
+                          </button>
+                          <button
+                            onClick={() => { setScheduleConfirmed(true); setShowScheduleModal(false); setToast({ message: 'Schedule confirmed! Click Deliver to save.', type: 'success' }); }}
+                            className="flex-1 py-2.5 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold text-sm transition-colors"
+                          >
+                            Confirm Schedule
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   )}
                 </div>
 
@@ -2099,21 +2177,32 @@ function BoardEditorPageContent() {
             {/* Expanded Settings Panel */}
             {showSettings && (
               <div className="bg-[#F7FAFC] p-6 space-y-6">
-                {/* Creator Info */}
+                {/* Creator / Sender Name */}
                 <div>
-                  <label className="block text-sm font-bold text-[#0B1F2A] mb-2">Creator</label>
-                  <div className="bg-white border-2 border-[#E5EAF0] rounded-lg p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-[#2CB1A6] text-white flex items-center justify-center font-bold flex-shrink-0">
-                        {user?.user_metadata?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase()}
-                      </div>
-                      <div>
-                        <p className="font-medium text-[#0B1F2A]">{user?.user_metadata?.name || user?.email}</p>
-                        <p className="text-sm text-[#5B6B75]">{user?.email}</p>
-                      </div>
+                  <label className="block text-sm font-bold text-[#0B1F2A] mb-2">Sender Name</label>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-full bg-[#2CB1A6] text-white flex items-center justify-center font-bold flex-shrink-0 text-sm">
+                      {senderName?.[0]?.toUpperCase() || user?.user_metadata?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <input
+                        type="text"
+                        value={senderName}
+                        onChange={(e) => setSenderName(e.target.value)}
+                        placeholder={user?.user_metadata?.name || user?.email || 'Your name'}
+                        className="w-full px-3 py-2 border-2 border-[#E5EAF0] rounded-lg focus:border-[#2CB1A6] focus:outline-none transition-colors text-sm"
+                      />
                     </div>
                   </div>
-                  <p className="text-xs text-[#5B6B75] mt-2">Board creator (name can be changed only from Account Settings)</p>
+                  <p className="text-xs text-[#5B6B75]">This name appears as the sender when the card is delivered to recipients.</p>
+                  {senderName !== (user?.user_metadata?.name || user?.email || '') && senderName && (
+                    <button
+                      onClick={() => setSenderName(user?.user_metadata?.name || user?.email || '')}
+                      className="text-xs text-[#2CB1A6] hover:text-[#1F8F86] mt-1 transition-colors"
+                    >
+                      Reset to account name
+                    </button>
+                  )}
                 </div>
               </div>
             )}
@@ -2298,7 +2387,7 @@ function BoardEditorPageContent() {
                           }}
                         >
                           <p className="text-xl">
-                            <span className="font-semibold">From:</span> {user?.user_metadata?.name || user?.email || 'Sender'}
+                            <span className="font-semibold">From:</span> {senderName || user?.user_metadata?.name || user?.email || 'Sender'}
                           </p>
                           <p className="text-xl">
                             <span className="font-semibold">To:</span> {recipients.filter(r => r.trim()).join(', ') || 'Recipients'}
@@ -2569,7 +2658,7 @@ function BoardEditorPageContent() {
                           ) : (
                             <div className="mt-4 text-left">
                               <p className="text-gray-600" style={{ fontFamily: bodyFont }}>
-                                From {user?.user_metadata?.name || user?.email || 'Sender'}
+                                From {senderName || user?.user_metadata?.name || user?.email || 'Sender'}
                               </p>
                             </div>
                           )}

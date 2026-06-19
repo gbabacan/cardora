@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Lottie from "lottie-react";
 import { supabase } from "@/lib/supabase";
+import { isLottieFile } from "@/lib/lotties";
+import LottieAnimation from "@/components/LottieAnimation";
 import type { Board } from "@/lib/boards";
 
 interface TemplateWithLottie extends Board {
@@ -50,8 +51,13 @@ export default function TemplatesContent() {
           const cacheKey = lottieAnim.id;
           if (!lottieCache[cacheKey]) {
             try {
-              const res = await fetch(lottieAnim.file_path);
-              if (res.ok) lottieCache[cacheKey] = await res.json();
+              if (isLottieFile(lottieAnim.file_path)) {
+                // .lottie binary — store sentinel so LottieAnimation uses DotLottieReact
+                lottieCache[cacheKey] = { __lottieFileSrc: lottieAnim.file_path };
+              } else {
+                const res = await fetch(lottieAnim.file_path);
+                if (res.ok) lottieCache[cacheKey] = await res.json();
+              }
             } catch {}
           }
           return { ...template, lottieData: lottieCache[cacheKey] || null };
@@ -139,7 +145,7 @@ export default function TemplatesContent() {
                     >
                       <div className="aspect-square bg-gradient-to-br from-[#E8F5F4] to-[#F7FAFC] flex items-center justify-center p-2">
                         {template.lottieData ? (
-                          <Lottie animationData={template.lottieData} loop={true} style={{ width: "100%", height: "100%" }} />
+                          <LottieAnimation animationData={template.lottieData} loop={true} style={{ width: "100%", height: "100%" }} />
                         ) : (
                           <div className="w-12 h-12 rounded-full bg-[#A7E8E2] flex items-center justify-center">
                             <svg className="w-6 h-6 text-[#2CB1A6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
