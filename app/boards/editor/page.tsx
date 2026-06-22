@@ -629,7 +629,7 @@ function BoardEditorPageContent() {
       delivery_type: isScheduled ? 'SCHEDULED' : 'ON_DEMAND',
       scheduled_delivery: isScheduled
         ? new Date(`${date}T${time}:00`).toISOString()
-        : null,
+        : undefined,
     });
   };
 
