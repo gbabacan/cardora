@@ -428,7 +428,7 @@ function BoardEditorPageContent() {
         recipient_message: deliveryMessage,
         notify_contributors: notifyContributors,
         delivery_type: 'ON_DEMAND',
-        effect_id: selectedEffect?.id || undefined,
+        effect_id: selectedEffect?.id ?? null,
         background_id: isAnimationBackground ? undefined : (selectedBackground?.id || undefined),
         card_background_id: isAnimationBackground ? (selectedBackground?.id || undefined) : undefined
       });
@@ -710,7 +710,7 @@ function BoardEditorPageContent() {
         title_font_color: titleFontColor,
         body_font: bodyFont,
         intro_animation: true,
-        effect_id: selectedEffect?.id || undefined,
+        effect_id: selectedEffect?.id ?? null,
         background: backgroundImage,
         background_id: isAnimationBackground ? undefined : (selectedBackground?.id || undefined),
         card_background_id: isAnimationBackground ? (selectedBackground?.id || undefined) : undefined,

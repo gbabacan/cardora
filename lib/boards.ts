@@ -37,7 +37,7 @@ export interface Board {
   body_font: string;
   intro_animation: boolean;
   effects: string;
-  effect_id?: string;
+  effect_id?: string | null;
   texture_id?: string;
   is_template?: boolean;
   created_at: string;

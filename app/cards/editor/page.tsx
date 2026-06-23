@@ -579,7 +579,7 @@ function BoardEditorPageContent() {
         recipient_message: recipientMessage,
         notify_contributors: notifyContributors,
         delivery_type: 'ON_DEMAND',
-        effect_id: selectedEffect?.id || undefined,
+        effect_id: selectedEffect?.id ?? null,
         texture_id: selectedTexture?.id || undefined
       });
 
@@ -976,7 +976,7 @@ function BoardEditorPageContent() {
         envelope_color: envelopeColor,
         body_font: bodyFont,
         intro_animation: true,
-        effect_id: selectedEffect?.id || undefined,
+        effect_id: selectedEffect?.id ?? null,
         background: backgroundImage,
         background_id: pageBackground?.id || undefined, // Page background (patterns/solid colors)
         card_background_id: formatType === 'card' ? selectedBackground?.id : undefined, // Card theme (lottie/animation)
