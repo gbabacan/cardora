@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import Lottie from "lottie-react";
+import LottieSafe from "@/components/LottieSafe";
 
 export default function HomeHero() {
   const [alternateText, setAlternateText] = useState<'together' | 'individually'>('together');
@@ -107,7 +107,7 @@ export default function HomeHero() {
             {[heroLottie1, heroLottie2, heroLottie3, heroLottie4, heroLottie5].map((lottie, index) => (
               lottie && (
                 <div key={index} className={`absolute inset-0 transition-opacity duration-500 ${currentHeroItem === index + 1 ? 'opacity-100' : 'opacity-0'}`}>
-                  <Lottie animationData={lottie} loop={true} style={{ width: '100%', height: '100%' }} />
+                  <LottieSafe animationData={lottie} loop={true} style={{ width: '100%', height: '100%' }} />
                 </div>
               )
             ))}
@@ -129,27 +129,27 @@ export default function HomeHero() {
 
               {heroLottie1 && (
                 <div className={`transition-opacity duration-500 absolute inset-0 ${currentHeroItem === 1 ? 'opacity-100' : 'opacity-0'}`}>
-                  <Lottie animationData={heroLottie1} loop={true} style={{ width: '100%', height: '100%' }} />
+                  <LottieSafe animationData={heroLottie1} loop={true} style={{ width: '100%', height: '100%' }} />
                 </div>
               )}
               {heroLottie2 && (
                 <div className={`transition-opacity duration-500 absolute inset-0 ${currentHeroItem === 2 ? 'opacity-100' : 'opacity-0'}`}>
-                  <Lottie animationData={heroLottie2} loop={true} style={{ width: '100%', height: '100%' }} />
+                  <LottieSafe animationData={heroLottie2} loop={true} style={{ width: '100%', height: '100%' }} />
                 </div>
               )}
               {heroLottie3 && (
                 <div className={`transition-opacity duration-500 absolute inset-0 ${currentHeroItem === 3 ? 'opacity-100' : 'opacity-0'}`}>
-                  <Lottie animationData={heroLottie3} loop={true} style={{ width: '100%', height: '100%' }} />
+                  <LottieSafe animationData={heroLottie3} loop={true} style={{ width: '100%', height: '100%' }} />
                 </div>
               )}
               {heroLottie4 && (
                 <div className={`transition-opacity duration-500 absolute inset-0 ${currentHeroItem === 4 ? 'opacity-100' : 'opacity-0'}`}>
-                  <Lottie animationData={heroLottie4} loop={true} style={{ width: '100%', height: '100%' }} />
+                  <LottieSafe animationData={heroLottie4} loop={true} style={{ width: '100%', height: '100%' }} />
                 </div>
               )}
               {heroLottie5 && (
                 <div className={`transition-opacity duration-500 absolute inset-0 ${currentHeroItem === 5 ? 'opacity-100' : 'opacity-0'}`}>
-                  <Lottie animationData={heroLottie5} loop={true} style={{ width: '100%', height: '100%' }} />
+                  <LottieSafe animationData={heroLottie5} loop={true} style={{ width: '100%', height: '100%' }} />
                 </div>
               )}
             </div>

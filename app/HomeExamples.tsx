@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Lottie from "lottie-react";
+import LottieSafe from "@/components/LottieSafe";
 
 function FormatModal({
   title,
@@ -159,7 +159,7 @@ export default function HomeExamples() {
                     <div className="absolute inset-0 flex items-center justify-center">
                       {lottie ? (
                         <div className="w-full h-full">
-                          <Lottie animationData={lottie} loop={true} style={{ width: '100%', height: '100%' }} />
+                          <LottieSafe animationData={lottie} loop={true} style={{ width: '100%', height: '100%' }} />
                         </div>
                       ) : (
                         <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center mx-auto shadow-xl">
