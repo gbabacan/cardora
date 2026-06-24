@@ -92,12 +92,12 @@ export async function updatePassword(newPassword: string) {
 }
 
 // Sign in with Google
-export async function signInWithGoogle() {
+export async function signInWithGoogle(options?: { redirectTo?: string }) {
   try {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/dashboard`,
+        redirectTo: options?.redirectTo ?? `${window.location.origin}/dashboard`,
       },
     });
 
@@ -109,12 +109,12 @@ export async function signInWithGoogle() {
 }
 
 // Sign in with Facebook
-export async function signInWithFacebook() {
+export async function signInWithFacebook(options?: { redirectTo?: string }) {
   try {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'facebook',
       options: {
-        redirectTo: `${window.location.origin}/dashboard`,
+        redirectTo: options?.redirectTo ?? `${window.location.origin}/dashboard`,
       },
     });
 
@@ -126,12 +126,12 @@ export async function signInWithFacebook() {
 }
 
 // Sign in with LinkedIn
-export async function signInWithLinkedIn() {
+export async function signInWithLinkedIn(options?: { redirectTo?: string }) {
   try {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'linkedin_oidc',
       options: {
-        redirectTo: `${window.location.origin}/dashboard`,
+        redirectTo: options?.redirectTo ?? `${window.location.origin}/dashboard`,
       },
     });
 

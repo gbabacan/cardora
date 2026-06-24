@@ -95,9 +95,10 @@ function CreateBoardPageContent() {
     sessionStorage.setItem('cardora_pending_board', JSON.stringify({
       cardTitle, selectedOccasion, selectedFormat, recipients,
     }));
-    if (provider === 'google') await signInWithGoogle();
-    else if (provider === 'facebook') await signInWithFacebook();
-    else await signInWithLinkedIn();
+    const redirectTo = window.location.origin + '/boards/create';
+    if (provider === 'google') await signInWithGoogle({ redirectTo });
+    else if (provider === 'facebook') await signInWithFacebook({ redirectTo });
+    else await signInWithLinkedIn({ redirectTo });
   };
 
   // Auto-select occasion from URL parameter

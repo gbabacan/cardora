@@ -9,6 +9,8 @@ import { signIn, signUp, resetPassword, signInWithGoogle, signInWithFacebook, si
 function LoginPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const rawRedirect = searchParams.get('redirect');
+  const safeRedirect = rawRedirect?.startsWith('/') ? rawRedirect : '/dashboard';
   const [isSignUp, setIsSignUp] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [showFeaturesDropdown, setShowFeaturesDropdown] = useState(false);
@@ -49,7 +51,7 @@ function LoginPageContent() {
       setError(error);
       setLoading(false);
     } else {
-      router.push('/dashboard');
+      router.push(safeRedirect);
     }
   };
 
@@ -92,34 +94,31 @@ function LoginPageContent() {
   const handleGoogleSignIn = async () => {
     setLoading(true);
     setError(null);
-    const { data, error } = await signInWithGoogle();
+    const { data, error } = await signInWithGoogle({ redirectTo: window.location.origin + safeRedirect });
     if (error) {
       setError(error);
       setLoading(false);
     }
-    // Redirect is handled by OAuth flow
   };
 
   const handleFacebookSignIn = async () => {
     setLoading(true);
     setError(null);
-    const { data, error } = await signInWithFacebook();
+    const { data, error } = await signInWithFacebook({ redirectTo: window.location.origin + safeRedirect });
     if (error) {
       setError(error);
       setLoading(false);
     }
-    // Redirect is handled by OAuth flow
   };
 
   const handleLinkedInSignIn = async () => {
     setLoading(true);
     setError(null);
-    const { data, error } = await signInWithLinkedIn();
+    const { data, error } = await signInWithLinkedIn({ redirectTo: window.location.origin + safeRedirect });
     if (error) {
       setError(error);
       setLoading(false);
     }
-    // Redirect is handled by OAuth flow
   };
 
   return (

@@ -302,7 +302,7 @@ function BoardEditorPageContent() {
   // Redirect if not logged in
   useEffect(() => {
     if (!loading && !user) {
-      router.push('/login');
+      router.push('/login?redirect=' + encodeURIComponent(window.location.pathname + window.location.search));
     }
   }, [user, loading, router]);
 
