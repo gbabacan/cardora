@@ -412,13 +412,13 @@ export default function BackgroundSelectionPanel({
       return orderA - orderB;
     });
 
-    // Pin the card's own occasion to the top when no filter is active
-    if (selectedOccasion && selectedOccasionFilter === 'ALL' && sorted.includes(selectedOccasion)) {
+    // Always pin the card's own occasion to the top
+    if (selectedOccasion && sorted.includes(selectedOccasion)) {
       return [selectedOccasion, ...sorted.filter(id => id !== selectedOccasion)];
     }
 
     return sorted;
-  }, [groupedAnimations, occasionMap, selectedOccasion, selectedOccasionFilter]);
+  }, [groupedAnimations, occasionMap, selectedOccasion]);
 
   // Handle occasion filter change and scroll
   const handleOccasionFilterChange = (occasionShortId: string) => {
