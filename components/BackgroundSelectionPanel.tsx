@@ -402,17 +402,23 @@ export default function BackgroundSelectionPanel({
     return map;
   }, [occasions]);
 
-  // Order occasions by the occasions table order field
+  // Order occasions by the occasions table order field, with the card's occasion pinned first
   const orderedOccasions = useMemo(() => {
     const occasionShortIds = Object.keys(groupedAnimations);
 
-    // Sort by order field from occasions table
-    return occasionShortIds.sort((a, b) => {
+    const sorted = occasionShortIds.sort((a, b) => {
       const orderA = occasionMap.get(a)?.order ?? 999;
       const orderB = occasionMap.get(b)?.order ?? 999;
       return orderA - orderB;
     });
-  }, [groupedAnimations, occasionMap]);
+
+    // Pin the card's own occasion to the top when no filter is active
+    if (selectedOccasion && selectedOccasionFilter === 'ALL' && sorted.includes(selectedOccasion)) {
+      return [selectedOccasion, ...sorted.filter(id => id !== selectedOccasion)];
+    }
+
+    return sorted;
+  }, [groupedAnimations, occasionMap, selectedOccasion, selectedOccasionFilter]);
 
   // Handle occasion filter change and scroll
   const handleOccasionFilterChange = (occasionShortId: string) => {
