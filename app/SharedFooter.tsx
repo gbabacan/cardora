@@ -106,8 +106,11 @@ export default function SharedFooter() {
 
           </div>
 
-          <div className="border-t border-white border-opacity-20 pt-8 text-center">
+          <div className="border-t border-white border-opacity-20 pt-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-center">
             <p className="text-sm text-white opacity-90">&copy; 2026 Cardora. All rights reserved.</p>
+            <div className="flex items-center gap-4">
+              <Link href="/privacy" className="text-sm text-white opacity-80 hover:opacity-100 transition-opacity">Privacy Policy</Link>
+            </div>
           </div>
         </div>
       </div>
