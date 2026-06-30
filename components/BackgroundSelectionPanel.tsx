@@ -554,18 +554,16 @@ export default function BackgroundSelectionPanel({
                   Animations
                 </button>
               )}
-              {isCardTheme && (
-                <button
-                  onClick={() => setActiveTab('image')}
-                  className={`flex-1 md:flex-none px-3 md:px-6 py-2.5 md:py-3 text-sm md:text-base font-semibold transition-all ${
-                    activeTab === 'image'
-                      ? 'text-[#2CB1A6] border-b-2 border-[#2CB1A6]'
-                      : 'text-[#5B6B75] hover:text-[#0B1F2A]'
-                  }`}
-                >
-                  Images
-                </button>
-              )}
+              <button
+                onClick={() => setActiveTab('image')}
+                className={`flex-1 md:flex-none px-3 md:px-6 py-2.5 md:py-3 text-sm md:text-base font-semibold transition-all ${
+                  activeTab === 'image'
+                    ? 'text-[#2CB1A6] border-b-2 border-[#2CB1A6]'
+                    : 'text-[#5B6B75] hover:text-[#0B1F2A]'
+                }`}
+              >
+                Images
+              </button>
               {!isCardTheme && (
                 <>
                   <button

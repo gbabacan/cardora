@@ -20,6 +20,7 @@ import type { Background } from "@/lib/backgrounds";
 import type { Effect } from "@/lib/effects";
 import { getBackgroundCssValue } from "@/lib/backgrounds";
 import { loadLottieAnimationData } from "@/lib/lotties";
+import { extractDominantColor } from "@/lib/colorExtractor";
 import { loadEffectAnimationData } from "@/lib/effects";
 
 function BoardEditorPageContent() {
@@ -59,6 +60,7 @@ function BoardEditorPageContent() {
   // Background selection panel state
   const [showBackgroundPanel, setShowBackgroundPanel] = useState(false);
   const [selectedBackground, setSelectedBackground] = useState<Background | null>(null);
+  const [imageBgColor, setImageBgColor] = useState<string>('#F7FAFC');
 
   // Effect selection panel state
   const [showEffectPanel, setShowEffectPanel] = useState(false);
@@ -285,6 +287,15 @@ function BoardEditorPageContent() {
     loadSelectedAnimation();
   }, [selectedBackground]);
 
+  // Extract dominant color from image background
+  useEffect(() => {
+    if (selectedBackground?.type === 'IMAGE' && selectedBackground.image?.file_path) {
+      extractDominantColor(selectedBackground.image.file_path).then(setImageBgColor);
+    } else {
+      setImageBgColor('#F7FAFC');
+    }
+  }, [selectedBackground]);
+
   // Load selected effect animation data when effect changes
   useEffect(() => {
     const loadSelectedEffectAnimation = async () => {
@@ -420,7 +431,7 @@ function BoardEditorPageContent() {
 
     try {
       // Determine which background field to update based on background type
-      const isAnimationBackground = selectedBackground?.type === 'ANIMATION';
+      const isAnimationBackground = selectedBackground?.type === 'ANIMATION' || selectedBackground?.type === 'IMAGE';
 
       // Update board status to DELIVERED
       const { error: boardError } = await updateBoard(boardId, {
@@ -698,7 +709,7 @@ function BoardEditorPageContent() {
 
     try {
       // Determine which background field to update based on background type
-      const isAnimationBackground = selectedBackground?.type === 'ANIMATION';
+      const isAnimationBackground = selectedBackground?.type === 'ANIMATION' || selectedBackground?.type === 'IMAGE';
 
       // Update board
       const { error: boardError } = await updateBoard(boardId, {
@@ -1010,6 +1021,16 @@ function BoardEditorPageContent() {
                             animationData={selectedLottieAnimation}
                             loop={true}
                             style={{ width: '100%', height: '100%' }}
+                          />
+                        </div>
+                      )}
+                      {/* Image Preview */}
+                      {selectedBackground?.type === 'IMAGE' && selectedBackground.image?.file_path && (
+                        <div className="absolute inset-0">
+                          <img
+                            src={selectedBackground.image.file_path}
+                            alt="Background"
+                            className="w-full h-full object-cover"
                           />
                         </div>
                       )}
@@ -1944,10 +1965,12 @@ function BoardEditorPageContent() {
                   backgroundPosition: 'center',
                   backgroundRepeat: 'repeat'
                 }
+              : selectedBackground?.type === 'IMAGE'
+              ? { backgroundColor: imageBgColor }
               : {})
           }}
         >
-          {/* Lottie Background Animation - Only show if ANIMATION type or no background selected */}
+          {/* Lottie Background Animation */}
           {(selectedBackground?.type === 'ANIMATION' && selectedLottieAnimation) || (!selectedBackground && lottieAnimation) ? (
             <div className="absolute inset-0 z-0 pointer-events-none">
               <LottieAnimation
@@ -1957,6 +1980,16 @@ function BoardEditorPageContent() {
               />
             </div>
           ) : null}
+          {/* Image Background */}
+          {selectedBackground?.type === 'IMAGE' && selectedBackground.image?.file_path && (
+            <div className="absolute inset-0 z-0 pointer-events-none flex items-center justify-center">
+              <img
+                src={selectedBackground.image.file_path}
+                alt="Board background"
+                className="max-w-full max-h-full object-contain"
+              />
+            </div>
+          )}
 
           {/* Content wrapper with higher z-index */}
           <div className="relative z-10">

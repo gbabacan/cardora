@@ -222,7 +222,8 @@ export async function getBoardById(boardId: string) {
         background_data:backgrounds!background_id(
           *,
           pattern:patterns(*),
-          lottie_animation:lottie_animations(*)
+          lottie_animation:lottie_animations(*),
+          image:images(*)
         ),
         effect_data:effects(*),
         texture_data:textures(*),
@@ -262,7 +263,8 @@ export async function getBoardByShortId(shortId: string) {
         background_data:backgrounds!background_id(
           *,
           pattern:patterns(*),
-          lottie_animation:lottie_animations(*)
+          lottie_animation:lottie_animations(*),
+          image:images(*)
         ),
         effect_data:effects(*),
         texture_data:textures(*),
@@ -295,15 +297,13 @@ export async function getBoardByShortId(shortId: string) {
 // Update board
 export async function updateBoard(boardId: string, updates: Partial<Omit<Board, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'short_id'>>) {
   try {
-    const { data: board, error } = await supabase
+    const { error } = await supabase
       .from('boards')
       .update(updates)
-      .eq('id', boardId)
-      .select()
-      .single();
+      .eq('id', boardId);
 
     if (error) throw error;
-    return { board, error: null };
+    return { board: null, error: null };
   } catch (error: any) {
     return { board: null, error: error.message };
   }

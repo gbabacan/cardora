@@ -14,6 +14,7 @@ import Toast from "@/components/Toast";
 import AddMessageModal from "@/components/AddMessageModal";
 import InviteModal from "@/components/InviteModal";
 import { loadLottieAnimationData } from "@/lib/lotties";
+import { extractDominantColor } from "@/lib/colorExtractor";
 
 export default function BoardViewPage({ params }: { params: Promise<{ id: string }> }) {
   // Unwrap params promise
@@ -30,6 +31,7 @@ export default function BoardViewPage({ params }: { params: Promise<{ id: string
   const [lottieAnimation, setLottieAnimation] = useState<any>(null);
   const [selectedLottieAnimation, setSelectedLottieAnimation] = useState<any>(null);
   const [background, setBackground] = useState<Background | null>(null);
+  const [imageBgColor, setImageBgColor] = useState<string>('#F7FAFC');
 
   // Edit/delete state
   const [ownedTokens, setOwnedTokens] = useState<Record<string, string>>({}); // { messageId: editToken }
@@ -142,6 +144,14 @@ export default function BoardViewPage({ params }: { params: Promise<{ id: string
     loadSelectedAnimation();
   }, [background]);
 
+  useEffect(() => {
+    if (background?.type === 'IMAGE' && background.image?.file_path) {
+      extractDominantColor(background.image.file_path).then(setImageBgColor);
+    } else {
+      setImageBgColor('#F7FAFC');
+    }
+  }, [background]);
+
   const loadBoardData = async () => {
     setLoading(true);
 
@@ -238,10 +248,12 @@ export default function BoardViewPage({ params }: { params: Promise<{ id: string
               backgroundPosition: 'center',
               backgroundRepeat: 'repeat'
             }
+          : background?.type === 'IMAGE'
+          ? { backgroundColor: imageBgColor }
           : { backgroundColor: '#F7FAFC' })
       }}
     >
-      {/* Lottie Background Animation - Only show if ANIMATION type or no background selected */}
+      {/* Lottie Background Animation */}
       {(background?.type === 'ANIMATION' && selectedLottieAnimation) || (!background && lottieAnimation) ? (
         <div className="fixed inset-0 z-0 pointer-events-none">
           <LottieAnimation
@@ -251,6 +263,16 @@ export default function BoardViewPage({ params }: { params: Promise<{ id: string
           />
         </div>
       ) : null}
+      {/* Image Background */}
+      {background?.type === 'IMAGE' && background.image?.file_path && (
+        <div className="fixed inset-0 z-0 pointer-events-none flex items-center justify-center">
+          <img
+            src={background.image.file_path}
+            alt="Board background"
+            className="max-w-full max-h-full object-contain"
+          />
+        </div>
+      )}
 
       {/* Content wrapper with higher z-index */}
       <div className="relative z-10">

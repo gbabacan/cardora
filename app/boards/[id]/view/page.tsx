@@ -14,6 +14,7 @@ import type { Effect } from "@/lib/effects";
 import Toast from "@/components/Toast";
 import EffectOverlay from "@/components/EffectOverlay";
 import { loadLottieAnimationData } from "@/lib/lotties";
+import { extractDominantColor } from "@/lib/colorExtractor";
 import { supabase } from "@/lib/supabase";
 
 export default function RecipientViewPage({ params }: { params: Promise<{ id: string }> }) {
@@ -30,6 +31,7 @@ export default function RecipientViewPage({ params }: { params: Promise<{ id: st
   const [lottieAnimation, setLottieAnimation] = useState<any>(null);
   const [selectedLottieAnimation, setSelectedLottieAnimation] = useState<any>(null);
   const [background, setBackground] = useState<Background | null>(null);
+  const [imageBgColor, setImageBgColor] = useState<string>('#F7FAFC');
   const [showIntro, setShowIntro] = useState(true);
   const [contentOpacity, setContentOpacity] = useState(0);
   const [backgroundOpacity, setBackgroundOpacity] = useState(0.4);
@@ -90,6 +92,14 @@ export default function RecipientViewPage({ params }: { params: Promise<{ id: st
     };
 
     loadSelectedAnimation();
+  }, [background]);
+
+  useEffect(() => {
+    if (background?.type === 'IMAGE' && background.image?.file_path) {
+      extractDominantColor(background.image.file_path).then(setImageBgColor);
+    } else {
+      setImageBgColor('#F7FAFC');
+    }
   }, [background]);
 
   // Fade in content and background when intro is dismissed
@@ -309,13 +319,15 @@ export default function RecipientViewPage({ params }: { params: Promise<{ id: st
                 backgroundPosition: 'center',
                 backgroundRepeat: 'repeat'
               }
+            : background?.type === 'IMAGE'
+            ? { backgroundColor: imageBgColor }
             : { backgroundColor: '#F7FAFC' })
         }}
       >
         {/* Effect Overlay - Plays on top of everything (but below intro) */}
         {!showIntro && board.effect_data && <EffectOverlay effect={board.effect_data} />}
 
-        {/* Lottie Background Animation - Only show if ANIMATION type or no background selected */}
+        {/* Lottie Background Animation */}
       {(background?.type === 'ANIMATION' && selectedLottieAnimation) || (!background && lottieAnimation) ? (
         <div
           className={`fixed inset-0 z-0 pointer-events-none ${!showIntro ? 'transition-opacity duration-2000 ease-in' : ''} ${showIntro ? 'blur-lg' : ''}`}
@@ -328,6 +340,19 @@ export default function RecipientViewPage({ params }: { params: Promise<{ id: st
           />
         </div>
       ) : null}
+      {/* Image Background */}
+      {background?.type === 'IMAGE' && background.image?.file_path && (
+        <div
+          className={`fixed inset-0 z-0 pointer-events-none flex items-center justify-center ${!showIntro ? 'transition-opacity duration-2000 ease-in' : ''} ${showIntro ? 'blur-lg' : ''}`}
+          style={{ opacity: backgroundOpacity }}
+        >
+          <img
+            src={background.image.file_path}
+            alt="Board background"
+            className="max-w-full max-h-full object-contain"
+          />
+        </div>
+      )}
 
       {/* Content wrapper with higher z-index */}
       <div
