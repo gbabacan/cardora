@@ -1254,6 +1254,16 @@ function BoardEditorPageContent() {
                           />
                         </div>
                       )}
+                      {/* Image Preview */}
+                      {selectedBackground?.type === 'IMAGE' && selectedBackground.image?.file_path && (
+                        <div className="absolute inset-0">
+                          <img
+                            src={selectedBackground.image.file_path}
+                            alt={selectedBackground.image.name || 'Card theme'}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
                       <button
                         onClick={() => setShowBackgroundPanel(true)}
                         className="absolute bottom-4 right-4 px-4 py-2 bg-[#5B6B75] hover:bg-[#0B1F2A] text-white rounded-lg font-medium transition-colors flex items-center gap-2"
@@ -2544,6 +2554,16 @@ function BoardEditorPageContent() {
                           />
                         </div>
                       )}
+                      {/* Theme Image */}
+                      {selectedBackground?.type === 'IMAGE' && selectedBackground.image?.file_path && (
+                        <div className="absolute inset-0">
+                          <img
+                            src={selectedBackground.image.file_path}
+                            alt={selectedBackground.image.name || 'Card theme'}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
                 ) : (
@@ -2732,7 +2752,7 @@ function BoardEditorPageContent() {
           setToast({ message: 'Card theme selected! Save changes to apply.', type: 'success' });
         }}
         currentBackground={selectedBackground}
-        onlyAnimations={true} // Show only animations for card themes
+        cardThemeMode={true} // Show animations + images for card themes
       />
 
       {/* Page Background Selection Panel (Patterns & Solid Colors only) */}

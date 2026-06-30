@@ -228,7 +228,8 @@ export async function getBoardById(boardId: string) {
         texture_data:textures(*),
         card_background_data:backgrounds!card_background_id(
           *,
-          lottie_animation:lottie_animations(*)
+          lottie_animation:lottie_animations(*),
+          image:images(*)
         )
       `)
       .eq('id', boardId)
@@ -267,7 +268,8 @@ export async function getBoardByShortId(shortId: string) {
         texture_data:textures(*),
         card_background_data:backgrounds!card_background_id(
           *,
-          lottie_animation:lottie_animations(*)
+          lottie_animation:lottie_animations(*),
+          image:images(*)
         )
       `)
       .eq('short_id', shortId)

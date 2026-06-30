@@ -777,13 +777,21 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
                   transformStyle: 'preserve-3d'
                 }}
               >
-                {/* Card Theme Animation */}
+                {/* Card Theme */}
                 {cardThemeAnimation ? (
                   <div className="absolute inset-0 z-0">
                     <LottieAnimation
                       animationData={cardThemeAnimation}
                       loop={true}
                       style={{ width: '100%', height: '100%' }}
+                    />
+                  </div>
+                ) : board?.card_background_data?.type === 'IMAGE' && board.card_background_data.image?.file_path ? (
+                  <div className="absolute inset-0 z-0">
+                    <img
+                      src={board.card_background_data.image.file_path}
+                      alt="Card theme"
+                      className="w-full h-full object-cover"
                     />
                   </div>
                 ) : (
@@ -998,17 +1006,23 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
         <div className="print-page">
           <div className="w-[600px] aspect-[3/4] relative rounded-lg overflow-hidden shadow-2xl bg-white flex items-center justify-center"
             style={
-              board.card_background_data
-                ? {
-                    backgroundImage: `url(${board.card_background_data.pattern?.file_path})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center'
-                  }
+              board.card_background_data?.type === 'PATTERN' && board.card_background_data.pattern?.file_path
+                ? { backgroundImage: `url(${board.card_background_data.pattern.file_path})`, backgroundSize: 'cover', backgroundPosition: 'center' }
                 : { background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }
             }>
+            {/* Image theme overlay for print */}
+            {board.card_background_data?.type === 'IMAGE' && board.card_background_data.image?.file_path && (
+              <div className="absolute inset-0">
+                <img
+                  src={board.card_background_data.image.file_path}
+                  alt="Card theme"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
             {/* Card Title if exists */}
             {board.title && (
-              <div className="text-center p-8">
+              <div className="text-center p-8 relative z-10">
                 <h1 className="font-bold" style={{
                   fontSize: board.title_font_size ? `${board.title_font_size}px` : '48px',
                   color: board.title_font_color || '#fff',

@@ -4,9 +4,11 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import LottieAnimation from "@/components/LottieAnimation";
 import { getAllLottieAnimations, groupAnimationsByOccasion, loadLottieAnimationData } from "@/lib/lotties";
 import { getAllPatterns } from "@/lib/backgrounds";
-import { createSolidBackground, createPatternBackground, createAnimationBackground } from "@/lib/backgrounds";
+import { createSolidBackground, createPatternBackground, createAnimationBackground, createImageBackground } from "@/lib/backgrounds";
+import { getAllImages, groupImagesByOccasion, getImageUrl } from "@/lib/images";
 import { getOccasions } from "@/lib/occasions";
 import type { LottieAnimation as LottieAnimationData } from "@/lib/lotties";
+import type { ImageItem } from "@/lib/images";
 import type { Background, Pattern } from "@/lib/backgrounds";
 import type { Occasion } from "@/lib/occasions";
 
@@ -138,7 +140,7 @@ export function getDarkerColor(color: string): string {
   return COLOR_DARKER_MAP[color.toUpperCase()] || color;
 }
 
-type TabType = 'solid' | 'pattern' | 'animation';
+type TabType = 'solid' | 'pattern' | 'animation' | 'image';
 
 interface BackgroundSelectionPanelProps {
   isOpen: boolean;
@@ -148,6 +150,7 @@ interface BackgroundSelectionPanelProps {
   currentBackground?: Background | null;
   hideAnimations?: boolean; // Hide animation tab (for page backgrounds)
   onlyAnimations?: boolean; // Show only animations, hide patterns and solid colors (for card themes)
+  cardThemeMode?: boolean; // Show animations + images only (for card themes)
 }
 
 // Animation Card Component
@@ -272,9 +275,11 @@ export default function BackgroundSelectionPanel({
   currentBackground,
   hideAnimations = false,
   onlyAnimations = false,
+  cardThemeMode = false,
 }: BackgroundSelectionPanelProps) {
+  const isCardTheme = onlyAnimations || cardThemeMode;
   const [activeTab, setActiveTab] = useState<TabType>(
-    onlyAnimations ? 'animation' : hideAnimations ? 'pattern' : 'animation'
+    isCardTheme ? 'animation' : hideAnimations ? 'pattern' : 'animation'
   );
   const [loading, setLoading] = useState(false);
 
@@ -296,6 +301,11 @@ export default function BackgroundSelectionPanel({
   const [previewAnimation, setPreviewAnimation] = useState<any>(null);
   const [occasions, setOccasions] = useState<Occasion[]>([]);
   const [selectedOccasionFilter, setSelectedOccasionFilter] = useState<string>('ALL');
+
+  // Image state
+  const [groupedImages, setGroupedImages] = useState<Record<string, ImageItem[]>>({});
+  const [selectedImage, setSelectedImage] = useState<ImageItem | null>(null);
+  const [selectedImageOccasionFilter, setSelectedImageOccasionFilter] = useState<string>('ALL');
 
   // Refs for scrolling to occasions
   const occasionRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -336,6 +346,12 @@ export default function BackgroundSelectionPanel({
     const { data: fetchedPatterns } = await getAllPatterns();
     if (fetchedPatterns) {
       setPatterns(fetchedPatterns);
+    }
+
+    // Load images
+    const { images: fetchedImages } = await getAllImages();
+    if (fetchedImages) {
+      setGroupedImages(groupImagesByOccasion(fetchedImages));
     }
 
     setLoading(false);
@@ -437,6 +453,53 @@ export default function BackgroundSelectionPanel({
     }
   };
 
+  // Order image occasions (same logic as animations, pin card's occasion first)
+  const orderedImageOccasions = useMemo(() => {
+    const ids = Object.keys(groupedImages);
+    const sorted = ids.sort((a, b) => {
+      const orderA = occasionMap.get(a)?.order ?? 999;
+      const orderB = occasionMap.get(b)?.order ?? 999;
+      return orderA - orderB;
+    });
+    if (selectedOccasion && sorted.includes(selectedOccasion)) {
+      return [selectedOccasion, ...sorted.filter(id => id !== selectedOccasion)];
+    }
+    return sorted;
+  }, [groupedImages, occasionMap, selectedOccasion]);
+
+  const imageOccasionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const imageScrollContainerRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  const handleImageOccasionFilterChange = (occasionShortId: string) => {
+    setSelectedImageOccasionFilter(occasionShortId);
+    if (occasionShortId !== 'ALL' && imageOccasionRefs.current[occasionShortId]) {
+      imageOccasionRefs.current[occasionShortId]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else if (occasionShortId === 'ALL') {
+      document.getElementById('images-scroll-container')?.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const scrollImageRow = (occasionId: string, direction: 'left' | 'right') => {
+    const container = imageScrollContainerRefs.current[occasionId];
+    if (container) {
+      container.scrollTo({ left: container.scrollLeft + (direction === 'left' ? -400 : 400), behavior: 'smooth' });
+    }
+  };
+
+  const handleImageSelect = async (image: ImageItem) => {
+    setSelectedImage(image);
+    const { data: bg, error } = await createImageBackground(image.id);
+    if (error) {
+      console.error('Error creating image background:', error);
+      return;
+    }
+    if (bg) {
+      // Attach image data locally since schema cache may not have the new FK yet
+      onSelectBackground({ ...bg, image });
+      onClose();
+    }
+  };
+
   // Handle horizontal scroll for occasion rows
   const scrollOccasionRow = (occasionId: string, direction: 'left' | 'right') => {
     const container = scrollContainerRefs.current[occasionId];
@@ -491,7 +554,19 @@ export default function BackgroundSelectionPanel({
                   Animations
                 </button>
               )}
-              {!onlyAnimations && (
+              {isCardTheme && (
+                <button
+                  onClick={() => setActiveTab('image')}
+                  className={`flex-1 md:flex-none px-3 md:px-6 py-2.5 md:py-3 text-sm md:text-base font-semibold transition-all ${
+                    activeTab === 'image'
+                      ? 'text-[#2CB1A6] border-b-2 border-[#2CB1A6]'
+                      : 'text-[#5B6B75] hover:text-[#0B1F2A]'
+                  }`}
+                >
+                  Images
+                </button>
+              )}
+              {!isCardTheme && (
                 <>
                   <button
                     onClick={() => setActiveTab('pattern')}
@@ -518,7 +593,25 @@ export default function BackgroundSelectionPanel({
             </div>
           </div>
 
-          {/* Occasion Filter - Fixed Section (Only for Animation Tab) */}
+          {/* Occasion Filter - Fixed Section (Animation or Image Tab) */}
+          {!loading && activeTab === 'image' && (
+            <div className="px-4 md:px-8 py-3 md:py-4 border-b border-[#E5EAF0] bg-white">
+              <label className="block text-sm font-semibold text-[#0B1F2A] mb-2">Filter by Occasion</label>
+              <select
+                value={selectedImageOccasionFilter}
+                onChange={(e) => handleImageOccasionFilterChange(e.target.value)}
+                className="w-full px-4 py-3 bg-white border-2 border-[#E5EAF0] rounded-lg focus:border-[#2CB1A6] focus:outline-none text-[#0B1F2A] font-medium"
+              >
+                <option value="ALL">All Occasions</option>
+                {orderedImageOccasions.map((id) => {
+                  const occ = occasionMap.get(id);
+                  return (
+                    <option key={id} value={id}>{occ?.name || formatOccasionName(id)}</option>
+                  );
+                })}
+              </select>
+            </div>
+          )}
           {!loading && activeTab === 'animation' && (
             <div className="px-4 md:px-8 py-3 md:py-4 border-b border-[#E5EAF0] bg-white">
               <label className="block text-sm font-semibold text-[#0B1F2A] mb-2">Filter by Occasion</label>
@@ -735,6 +828,89 @@ export default function BackgroundSelectionPanel({
                         </svg>
                         <p className="text-xl text-[#5B6B75] mb-2">No animations found</p>
                         <p className="text-[#5B6B75]">Add Lottie animations to your database</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Image Tab */}
+                {activeTab === 'image' && (
+                  <div className="space-y-8" id="images-scroll-container">
+                    {orderedImageOccasions
+                      .filter(occ => selectedImageOccasionFilter === 'ALL' || occ === selectedImageOccasionFilter)
+                      .map((occasion) => (
+                        <div
+                          key={occasion}
+                          ref={(el) => { imageOccasionRefs.current[occasion] = el; }}
+                        >
+                          <div className="flex items-center gap-3 mb-4">
+                            <h3 className="text-lg font-bold text-[#0B1F2A]">
+                              {occasionMap.get(occasion)?.name || formatOccasionName(occasion)}
+                            </h3>
+                            {occasion === selectedOccasion && (
+                              <span className="px-3 py-1 bg-[#2CB1A6] text-white text-xs font-semibold rounded-full">Your Occasion</span>
+                            )}
+                          </div>
+                          <div className="relative group">
+                            <button
+                              onClick={() => scrollImageRow(occasion, 'left')}
+                              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white hover:bg-[#2CB1A6] text-[#0B1F2A] hover:text-white rounded-full shadow-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                              aria-label="Scroll left"
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => scrollImageRow(occasion, 'right')}
+                              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white hover:bg-[#2CB1A6] text-[#0B1F2A] hover:text-white rounded-full shadow-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                              aria-label="Scroll right"
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                              </svg>
+                            </button>
+                            <div
+                              ref={(el) => { imageScrollContainerRefs.current[occasion] = el; }}
+                              className="overflow-x-auto pb-2 scrollbar-hide"
+                            >
+                              <div className="flex gap-4 w-max py-2 px-1">
+                                {groupedImages[occasion].map((image) => {
+                                  const isSelected = currentBackground?.type === 'IMAGE' && currentBackground.image_id === image.id;
+                                  const url = getImageUrl(image);
+                                  return (
+                                    <button
+                                      key={image.id}
+                                      onClick={() => handleImageSelect(image)}
+                                      className={`flex-shrink-0 w-40 aspect-square rounded-lg border-2 overflow-hidden transition-all hover:scale-105 hover:shadow-lg ${
+                                        isSelected ? 'border-[#2CB1A6]' : 'border-[#E5EAF0] hover:border-[#2CB1A6]'
+                                      }`}
+                                    >
+                                      {url ? (
+                                        <img
+                                          src={url}
+                                          alt={image.name || 'Image'}
+                                          className="w-full h-full object-cover"
+                                        />
+                                      ) : (
+                                        <div className="w-full h-full flex items-center justify-center bg-[#F7FAFC]">
+                                          <svg className="w-8 h-8 text-[#E5EAF0]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                          </svg>
+                                        </div>
+                                      )}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    {orderedImageOccasions.length === 0 && (
+                      <div className="text-center py-16">
+                        <p className="text-xl text-[#5B6B75] mb-2">No images found</p>
+                        <p className="text-[#5B6B75]">Add images to your database</p>
                       </div>
                     )}
                   </div>

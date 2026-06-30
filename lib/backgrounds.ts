@@ -1,6 +1,7 @@
 import { supabase } from './supabase';
+import type { ImageItem } from './images';
 
-export type BackgroundType = 'SOLID' | 'PATTERN' | 'ANIMATION';
+export type BackgroundType = 'SOLID' | 'PATTERN' | 'ANIMATION' | 'IMAGE';
 
 export interface Pattern {
   id: string;
@@ -19,6 +20,7 @@ export interface Background {
   color?: string;
   pattern_id?: string;
   lottie_animation_id?: string;
+  image_id?: string;
   created_at: string;
   updated_at: string;
 
@@ -33,6 +35,7 @@ export interface Background {
     remote_url?: string;
     helper_color?: string;
   };
+  image?: ImageItem;
 }
 
 /**
@@ -44,7 +47,8 @@ export async function getAllBackgrounds() {
     .select(`
       *,
       pattern:patterns(*),
-      lottie_animation:lottie_animations(*)
+      lottie_animation:lottie_animations(*),
+      image:images(*)
     `)
     .order('type', { ascending: true });
 
@@ -60,7 +64,8 @@ export async function getBackgroundsByType(type: BackgroundType) {
     .select(`
       *,
       pattern:patterns(*),
-      lottie_animation:lottie_animations(*)
+      lottie_animation:lottie_animations(*),
+      image:images(*)
     `)
     .eq('type', type);
 
@@ -76,7 +81,8 @@ export async function getBackgroundById(id: string) {
     .select(`
       *,
       pattern:patterns(*),
-      lottie_animation:lottie_animations(*)
+      lottie_animation:lottie_animations(*),
+      image:images(*)
     `)
     .eq('id', id)
     .single();
@@ -133,6 +139,22 @@ export async function createAnimationBackground(lottieAnimationId: string) {
       *,
       lottie_animation:lottie_animations(*)
     `)
+    .single();
+
+  return { data: data as Background | null, error: error?.message };
+}
+
+/**
+ * Create an image background
+ */
+export async function createImageBackground(imageId: string) {
+  const { data, error } = await supabase
+    .from('backgrounds')
+    .insert({
+      type: 'IMAGE',
+      image_id: imageId
+    })
+    .select('*')
     .single();
 
   return { data: data as Background | null, error: error?.message };
