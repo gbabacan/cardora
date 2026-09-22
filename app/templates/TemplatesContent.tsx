@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { isLottieFile } from "@/lib/lotties";
+import { getImageUrl } from "@/lib/images";
 import LottieAnimation from "@/components/LottieAnimation";
 import HorizontalScrollRow from "../HorizontalScrollRow";
 import type { Board } from "@/lib/boards";
@@ -35,7 +36,7 @@ export default function TemplatesContent() {
       setLoading(true);
       const { data, error } = await supabase
         .from("boards")
-        .select(`*, card_background_data:card_background_id(id, type, lottie_animation:lottie_animation_id(id, name, file_path))`)
+        .select(`*, card_background_data:card_background_id(id, type, lottie_animation:lottie_animation_id(id, name, file_path), image:image_id(id, name, file_path, source_type, remote_url))`)
         .eq("is_template", true)
         .order("occasion_type");
 
@@ -145,8 +146,21 @@ export default function TemplatesContent() {
                       className="group bg-white rounded-xl border-2 border-[#E5EAF0] hover:border-[#2CB1A6] hover:shadow-lg transition-all overflow-hidden flex-shrink-0 w-36 md:w-44"
                       style={{ scrollSnapAlign: "start" }}
                     >
-                      <div className="aspect-square bg-gradient-to-br from-[#E8F5F4] to-[#F7FAFC] flex items-center justify-center p-2">
-                        {template.lottieData ? (
+                      <div
+                        className={`aspect-square bg-gradient-to-br from-[#E8F5F4] to-[#F7FAFC] flex items-center justify-center overflow-hidden ${
+                          template.card_background_data?.type === "IMAGE" ? "" : "p-2"
+                        }`}
+                      >
+                        {template.card_background_data?.type === "IMAGE" &&
+                        template.card_background_data.image &&
+                        getImageUrl(template.card_background_data.image) ? (
+                          <img
+                            src={getImageUrl(template.card_background_data.image)}
+                            alt={template.card_background_data.image.name || template.title || "Template"}
+                            loading="lazy"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : template.lottieData ? (
                           <LottieAnimation animationData={template.lottieData} loop={true} style={{ width: "100%", height: "100%" }} />
                         ) : (
                           <div className="w-12 h-12 rounded-full bg-[#A7E8E2] flex items-center justify-center">
