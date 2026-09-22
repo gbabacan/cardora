@@ -28,7 +28,7 @@ const formatOccasionLabel = (type: string) =>
 export default function TemplatesContent() {
   const [templates, setTemplates] = useState<TemplateWithLottie[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filterFormat, setFilterFormat] = useState<"all" | "board" | "card">("all");
+  const [filterFormat, setFilterFormat] = useState<"all" | "board" | "card">("board");
   const [filterOccasion, setFilterOccasion] = useState<string>("all");
 
   useEffect(() => {
@@ -73,44 +73,73 @@ export default function TemplatesContent() {
     loadTemplates();
   }, []);
 
-  const allOccasionTypes = Array.from(new Set(templates.map((t) => t.occasion_type)));
+  // Occasion chips reflect the chosen format, so a chip never yields an empty page.
+  const formatMatches = templates.filter(
+    (t) => filterFormat === "all" || t.format_type === filterFormat
+  );
+  const allOccasionTypes = Array.from(new Set(formatMatches.map((t) => t.occasion_type)));
 
-  const filteredTemplates = templates.filter((t) => {
-    const matchesFormat = filterFormat === "all" || t.format_type === filterFormat;
-    const matchesOccasion = filterOccasion === "all" || t.occasion_type === filterOccasion;
-    return matchesFormat && matchesOccasion;
-  });
+  // Switching format can retire the selected occasion; fall back to All.
+  const activeOccasion =
+    filterOccasion !== "all" && !allOccasionTypes.includes(filterOccasion)
+      ? "all"
+      : filterOccasion;
+
+  const filteredTemplates = formatMatches.filter(
+    (t) => activeOccasion === "all" || t.occasion_type === activeOccasion
+  );
 
   const occasionTypes = Array.from(new Set(filteredTemplates.map((t) => t.occasion_type)));
 
   return (
     <div>
-      {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3 mb-8 md:mb-10">
-        <div className="flex items-center bg-white border-2 border-[#E5EAF0] rounded-lg overflow-hidden">
+      {/* Format filter */}
+      <div className="mb-5 md:mb-6">
+        <div
+          role="group"
+          aria-label="Filter by format"
+          className="inline-flex items-center gap-1 p-1.5 bg-white border-2 border-[#E5EAF0] rounded-2xl"
+        >
           {(["all", "board", "card"] as const).map((format) => (
             <button
               key={format}
               onClick={() => setFilterFormat(format)}
-              className={`px-3 md:px-4 py-2 text-sm font-semibold transition-colors ${
-                filterFormat === format ? "bg-[#2CB1A6] text-white" : "text-[#5B6B75] hover:bg-[#F7FAFC]"
+              aria-pressed={filterFormat === format}
+              className={`px-6 md:px-10 py-2.5 md:py-3 rounded-xl text-base md:text-lg font-bold transition-colors ${
+                filterFormat === format
+                  ? "bg-[#2CB1A6] text-white shadow-sm"
+                  : "text-[#5B6B75] hover:bg-[#F7FAFC]"
               }`}
             >
               {format === "all" ? "All" : format === "board" ? "Boards" : "Cards"}
             </button>
           ))}
         </div>
+      </div>
 
-        <select
-          value={filterOccasion}
-          onChange={(e) => setFilterOccasion(e.target.value)}
-          className="px-3 md:px-4 py-2 bg-white border-2 border-[#E5EAF0] rounded-lg text-sm font-semibold text-[#0B1F2A] focus:border-[#2CB1A6] focus:outline-none transition-colors"
-        >
-          <option value="all">All Occasions</option>
-          {allOccasionTypes.map((type) => (
-            <option key={type} value={type}>{formatOccasionLabel(type)}</option>
-          ))}
-        </select>
+      {/* Occasion filter */}
+      <div
+        role="group"
+        aria-label="Filter by occasion"
+        className="flex flex-wrap gap-2 mb-8 md:mb-10"
+      >
+        {["all", ...allOccasionTypes].map((type) => {
+          const active = activeOccasion === type;
+          return (
+            <button
+              key={type}
+              onClick={() => setFilterOccasion(type)}
+              aria-pressed={active}
+              className={`px-4 py-2 rounded-full border-2 text-sm font-semibold transition-colors ${
+                active
+                  ? "bg-[#2CB1A6] border-[#2CB1A6] text-white"
+                  : "bg-white border-[#E5EAF0] text-[#5B6B75] hover:border-[#2CB1A6] hover:text-[#2CB1A6]"
+              }`}
+            >
+              {type === "all" ? "All" : formatOccasionLabel(type)}
+            </button>
+          );
+        })}
       </div>
 
       {/* Grid */}
