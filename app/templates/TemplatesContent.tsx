@@ -238,7 +238,7 @@ export default function TemplatesContent() {
                       {/* 3/4 matches the 1200x1600 occasion images, so object-cover
                           crops nothing. Animations letterbox inside the same box. */}
                       <div
-                        className={`aspect-[3/4] bg-gradient-to-br from-[#E8F5F4] to-[#F7FAFC] flex items-center justify-center overflow-hidden ${
+                        className={`relative aspect-[3/4] bg-gradient-to-br from-[#E8F5F4] to-[#F7FAFC] flex items-center justify-center overflow-hidden ${
                           template.card_background_data?.type === "IMAGE" ? "" : "p-2"
                         }`}
                       >
@@ -260,14 +260,17 @@ export default function TemplatesContent() {
                             </svg>
                           </div>
                         )}
-                      </div>
-                      <div className="p-3">
-                        <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold mb-1 ${
-                          template.format_type === "card" ? "bg-purple-100 text-purple-700" : "bg-blue-100 text-blue-700"
-                        }`}>
+
+                        {/* Format sits on the thumbnail so the tile needs no footer. */}
+                        <span
+                          className={`absolute top-2 left-2 px-2 py-0.5 rounded-full text-xs font-semibold shadow-sm ring-1 ring-black/5 ${
+                            template.format_type === "card"
+                              ? "bg-purple-100 text-purple-700"
+                              : "bg-blue-100 text-blue-700"
+                          }`}
+                        >
                           {template.format_type === "card" ? "Card" : "Board"}
                         </span>
-                        <p className="text-xs text-[#5B6B75] group-hover:text-[#2CB1A6] transition-colors font-medium">View Template →</p>
                       </div>
                     </Link>
                   ))}
