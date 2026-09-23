@@ -235,8 +235,10 @@ export default function TemplatesContent() {
                       className="group bg-white rounded-xl border-2 border-[#E5EAF0] hover:border-[#2CB1A6] hover:shadow-lg transition-all overflow-hidden flex-shrink-0 w-36 md:w-44"
                       style={{ scrollSnapAlign: "start" }}
                     >
+                      {/* 3/4 matches the 1200x1600 occasion images, so object-cover
+                          crops nothing. Animations letterbox inside the same box. */}
                       <div
-                        className={`aspect-square bg-gradient-to-br from-[#E8F5F4] to-[#F7FAFC] flex items-center justify-center overflow-hidden ${
+                        className={`aspect-[3/4] bg-gradient-to-br from-[#E8F5F4] to-[#F7FAFC] flex items-center justify-center overflow-hidden ${
                           template.card_background_data?.type === "IMAGE" ? "" : "p-2"
                         }`}
                       >
