@@ -64,6 +64,19 @@ const OCCASION_LABELS: Record<string, string> = {
 const formatOccasionLabel = (type: string) =>
   OCCASION_LABELS[type] ?? type.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
 
+/**
+ * Within an occasion row: animation-backed templates first, then
+ * image-backed ones, then anything else. Read from the background
+ * relation rather than the fetched lottie, so a slow or failed
+ * animation fetch cannot reorder the row.
+ */
+const backgroundRank = (template: TemplateWithLottie) => {
+  const background = template.card_background_data;
+  if (background?.type === "ANIMATION" || background?.lottie_animation) return 0;
+  if (background?.type === "IMAGE") return 1;
+  return 2;
+};
+
 export default function TemplatesContent() {
   const [templates, setTemplates] = useState<TemplateWithLottie[]>([]);
   const [loading, setLoading] = useState(true);
@@ -200,9 +213,9 @@ export default function TemplatesContent() {
       ) : (
         <div className="space-y-10">
           {visibleOccasionLabels.map((occasionLabel) => {
-            const occasionTemplates = filteredTemplates.filter(
-              (t) => formatOccasionLabel(t.occasion_type) === occasionLabel
-            );
+            const occasionTemplates = filteredTemplates
+              .filter((t) => formatOccasionLabel(t.occasion_type) === occasionLabel)
+              .sort((a, b) => backgroundRank(a) - backgroundRank(b));
             return (
               <div key={occasionLabel}>
                 <div className="flex items-center gap-4 mb-5">
