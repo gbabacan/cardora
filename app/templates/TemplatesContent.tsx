@@ -13,13 +13,52 @@ interface TemplateWithLottie extends Board {
   lottieData?: any;
 }
 
+/**
+ * Display label per occasion_type. Templates carry two spellings of the
+ * same occasion, a legacy run-together one and the hyphenated short_id
+ * from the occasions table, so both map to one label and the page groups
+ * them together rather than showing near-duplicate chips.
+ */
 const OCCASION_LABELS: Record<string, string> = {
+  apology: "Apology",
+  appreciation: "Appreciation",
+  "employee-appreciation": "Employee Appreciation",
   birthday: "Birthday",
-  wedding: "Wedding",
-  newbaby: "New Baby",
+  birthdays: "Birthday",
+  celebration: "Celebration",
+  christmas: "Christmas",
   congratulations: "Congratulations",
   farewell: "Farewell",
+  fathersday: "Father's Day",
+  "fathers-day": "Father's Day",
+  getwellsoon: "Get Well Soon",
+  "get-well-soon": "Get Well Soon",
+  graduation: "Graduation",
+  "all-holidays": "All Holidays",
+  housewarming: "Housewarming",
+  mothersday: "Mother's Day",
+  "mothers-day": "Mother's Day",
+  newbaby: "New Baby",
+  "new-baby": "New Baby",
+  newyear: "New Year",
+  "new-year": "New Year",
+  "office-competition": "Office Competition",
+  promotion: "Promotion",
+  "recruiting-onboarding": "Recruit & Onboard",
+  retirement: "Retirement",
+  sympathy: "Sympathy",
   teamcelebration: "Team Celebration",
+  "team-celebration": "Team Celebration",
+  thankyou: "Thank You",
+  "thank-you": "Thank You",
+  valentinesday: "Valentine's Day",
+  "valentines-day": "Valentine's Day",
+  wedding: "Wedding",
+  weddings: "Wedding",
+  welcome: "Welcome",
+  workanniversary: "Work Anniversary",
+  "work-anniversary": "Work Anniversary",
+  "any-other": "Any Other",
 };
 
 const formatOccasionLabel = (type: string) =>
@@ -74,22 +113,28 @@ export default function TemplatesContent() {
   }, []);
 
   // Occasion chips reflect the chosen format, so a chip never yields an empty page.
+  // Filtering and grouping key off the label, not the raw occasion_type, so the
+  // two spellings of an occasion collapse into a single chip and a single row.
   const formatMatches = templates.filter(
     (t) => filterFormat === "all" || t.format_type === filterFormat
   );
-  const allOccasionTypes = Array.from(new Set(formatMatches.map((t) => t.occasion_type)));
+  const occasionLabels = Array.from(
+    new Set(formatMatches.map((t) => formatOccasionLabel(t.occasion_type)))
+  ).sort((a, b) => a.localeCompare(b));
 
   // Switching format can retire the selected occasion; fall back to All.
   const activeOccasion =
-    filterOccasion !== "all" && !allOccasionTypes.includes(filterOccasion)
+    filterOccasion !== "all" && !occasionLabels.includes(filterOccasion)
       ? "all"
       : filterOccasion;
 
   const filteredTemplates = formatMatches.filter(
-    (t) => activeOccasion === "all" || t.occasion_type === activeOccasion
+    (t) => activeOccasion === "all" || formatOccasionLabel(t.occasion_type) === activeOccasion
   );
 
-  const occasionTypes = Array.from(new Set(filteredTemplates.map((t) => t.occasion_type)));
+  const visibleOccasionLabels = Array.from(
+    new Set(filteredTemplates.map((t) => formatOccasionLabel(t.occasion_type)))
+  ).sort((a, b) => a.localeCompare(b));
 
   return (
     <div>
@@ -123,12 +168,12 @@ export default function TemplatesContent() {
         aria-label="Filter by occasion"
         className="flex flex-wrap gap-2 mb-8 md:mb-10"
       >
-        {["all", ...allOccasionTypes].map((type) => {
-          const active = activeOccasion === type;
+        {["all", ...occasionLabels].map((label) => {
+          const active = activeOccasion === label;
           return (
             <button
-              key={type}
-              onClick={() => setFilterOccasion(type)}
+              key={label}
+              onClick={() => setFilterOccasion(label)}
               aria-pressed={active}
               className={`px-4 py-2 rounded-full border-2 text-sm font-semibold transition-colors ${
                 active
@@ -136,7 +181,7 @@ export default function TemplatesContent() {
                   : "bg-white border-[#E5EAF0] text-[#5B6B75] hover:border-[#2CB1A6] hover:text-[#2CB1A6]"
               }`}
             >
-              {type === "all" ? "All" : formatOccasionLabel(type)}
+              {label === "all" ? "All" : label}
             </button>
           );
         })}
@@ -154,12 +199,14 @@ export default function TemplatesContent() {
         </div>
       ) : (
         <div className="space-y-10">
-          {occasionTypes.map((occasionType) => {
-            const occasionTemplates = filteredTemplates.filter((t) => t.occasion_type === occasionType);
+          {visibleOccasionLabels.map((occasionLabel) => {
+            const occasionTemplates = filteredTemplates.filter(
+              (t) => formatOccasionLabel(t.occasion_type) === occasionLabel
+            );
             return (
-              <div key={occasionType}>
+              <div key={occasionLabel}>
                 <div className="flex items-center gap-4 mb-5">
-                  <h2 className="text-xl font-bold text-[#0B1F2A]">{formatOccasionLabel(occasionType)}</h2>
+                  <h2 className="text-xl font-bold text-[#0B1F2A]">{occasionLabel}</h2>
                   <div className="flex-1 h-px bg-[#E5EAF0]"></div>
                   <span className="text-sm text-[#5B6B75]">
                     {occasionTemplates.length} template{occasionTemplates.length !== 1 ? "s" : ""}
