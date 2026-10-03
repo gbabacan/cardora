@@ -106,9 +106,10 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
   const handleOpenEnvelope = () => {
     setEnvelopeOpening(true);
 
-    // Animate rotation smoothly over 3 seconds using requestAnimationFrame
+    // Animate the turn smoothly using requestAnimationFrame. 3s was too
+    // slow and 1.6s too fast to read as a turn; 2.2s is the middle ground.
     const startTime = Date.now();
-    const duration = 3000;
+    const duration = 2200;
     const targetRotation = -180;
 
     const animateRotation = () => {
@@ -133,29 +134,34 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
 
     animateRotation();
 
-    // Start showing effects at the middle of the flip (1.5 seconds)
+    // Start showing effects at the middle of the turn
     setTimeout(() => {
       setShowEffects(true);
-    }, 1500);
+    }, duration / 2);
 
-    // Gradually increase background opacity during the animation
+    // Swap to the back face at the rotation's midpoint (edge-on), so the
+    // back is revealed exactly when it starts facing the viewer.
+    setTimeout(() => {
+      setEnvelopeView('back');
+    }, duration / 2);
+
+    // Gradually increase background opacity during the turn
     setTimeout(() => {
       setBackgroundOpacity(0.5);
-    }, 750);
+    }, duration * 0.25);
 
     setTimeout(() => {
       setBackgroundOpacity(0.7);
-    }, 1500);
+    }, duration * 0.5);
 
     setTimeout(() => {
       setBackgroundOpacity(0.9);
-    }, 2250);
+    }, duration * 0.75);
 
-    // After 3 seconds of animation, set full opacity and start card emergence
+    // After the turn completes, set full opacity and start card emergence
     setTimeout(() => {
       setBackgroundOpacity(1);
       setEnvelopeOpened(true);
-      setEnvelopeView('back'); // Set to back view after opening
       // Start card emerging from envelope
       setTimeout(() => {
         setCardEmerging(true);
@@ -164,18 +170,18 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
       setTimeout(() => {
         setCardFullyEmerged(true);
       }, 1500);
-    }, 3000);
+    }, duration);
 
     // Switch view mode to card after emergence completes
     setTimeout(() => {
       setViewMode('card');
-    }, 4500);
+    }, duration + 1500);
 
-    // Automatically flip the card to show the inside after card emerges and displays (8 seconds total: 3s envelope + 1.5s emergence + 3.5s display)
-    // Use slower flip animation (1000ms) for the automatic flip
+    // Automatically flip the card to show the inside after it emerges and
+    // displays for 3.5s. Use slower flip animation (1000ms) for the automatic flip.
     setTimeout(() => {
       handleFlipCard(1000);
-    }, 8000);
+    }, duration + 1500 + 3500);
   };
 
   // Helper function to check if a color is light
@@ -370,6 +376,9 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
     );
   }
 
+  // Envelope faces dim slightly once the card has taken over
+  const envelopeFaceOpacity = viewMode === 'envelope' ? 1 : (envelopeOpened ? 0.8 : 1);
+
   return (
     <div className="overflow-x-hidden">
       {/* Logo and Company Name - Upper Left */}
@@ -523,7 +532,8 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
                 transform: viewMode === 'card' ? 'scale(0.8) translateY(20px)' : 'scale(1) translateY(0)',
                 transition: 'opacity 0.6s ease-in-out, transform 0.6s ease-in-out',
                 zIndex: viewMode === 'envelope' ? 20 : 5,
-                pointerEvents: viewMode === 'card' ? 'none' : 'auto'
+                pointerEvents: viewMode === 'card' ? 'none' : 'auto',
+                perspective: '1500px'
               }}
             >
               <style jsx>{`
@@ -571,7 +581,10 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
                   pointerEvents: envelopeOpened ? 'none' : 'auto',
                   transform: `rotateY(${envelopeRotation}deg)`,
                   transition: isFlippingEnvelope ? 'transform 300ms ease-in-out, opacity 0.3s ease-in-out' : 'opacity 0.3s ease-in-out',
-                  opacity: viewMode === 'envelope' ? 1 : (envelopeOpened ? 0.8 : 1)
+                  // No opacity here: opacity < 1 on a preserve-3d element
+                  // flattens it, and with backface-visibility hidden on both
+                  // faces the whole envelope disappears. Dimming is applied
+                  // on the faces instead.
                 }}
               >
                 {/* Envelope Front */}
@@ -580,9 +593,12 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
                   style={{
                     backgroundColor: board.envelope_color || '#8B4513',
                     boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
-                    opacity: envelopeView === 'front' ? 1 : 0,
+                    opacity: envelopeView === 'front' ? envelopeFaceOpacity : 0,
                     transition: 'opacity 0.1s',
-                    pointerEvents: envelopeView === 'front' ? 'auto' : 'none'
+                    pointerEvents: envelopeView === 'front' ? 'auto' : 'none',
+                    transform: 'rotateY(0deg)',
+                    backfaceVisibility: 'hidden',
+                    WebkitBackfaceVisibility: 'hidden'
                   }}
                 >
                 {/* Stamp */}
@@ -691,9 +707,12 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
                   style={{
                     backgroundColor: board.envelope_color || '#8B4513',
                     boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
-                    opacity: envelopeView === 'back' ? 1 : 0,
+                    opacity: envelopeView === 'back' ? envelopeFaceOpacity : 0,
                     transition: 'opacity 0.1s',
-                    pointerEvents: envelopeView === 'back' ? 'auto' : 'none'
+                    pointerEvents: envelopeView === 'back' ? 'auto' : 'none',
+                    transform: 'rotateY(180deg)',
+                    backfaceVisibility: 'hidden',
+                    WebkitBackfaceVisibility: 'hidden'
                   }}
                 >
                   {/* Envelope opened flap with golden lining */}
