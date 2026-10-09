@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState, useEffect } from "react";
+import { use, useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import LottieAnimation from "@/components/LottieAnimation";
@@ -35,6 +35,8 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
   const [envelopeOpening, setEnvelopeOpening] = useState(false); // Envelope opening animation state
   const [envelopeOpened, setEnvelopeOpened] = useState(false);
   const [envelopeRotation, setEnvelopeRotation] = useState(0); // Rotation degree for envelope
+  const [envelopeLift, setEnvelopeLift] = useState(0); // Float offset (px) eased back to 0 when opening starts
+  const envelopeBodyRef = useRef<HTMLDivElement>(null);
   const [envelopeView, setEnvelopeView] = useState<'front' | 'back'>('front'); // Which side of envelope to show
   const [isFlippingEnvelope, setIsFlippingEnvelope] = useState(false); // Envelope flipping state
   const [showEffects, setShowEffects] = useState(false); // Control when effects appear
@@ -104,7 +106,19 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
 
   // Handle envelope opening sequence
   const handleOpenEnvelope = () => {
+    // Capture where the float bob currently has the envelope, so removing
+    // the float animation doesn't snap it back to rest. The offset is then
+    // eased to 0 alongside the turn below.
+    let startLift = 0;
+    if (envelopeBodyRef.current) {
+      const computed = getComputedStyle(envelopeBodyRef.current).transform;
+      if (computed && computed !== 'none') {
+        startLift = new DOMMatrixReadOnly(computed).m42;
+      }
+    }
+    setEnvelopeLift(startLift);
     setEnvelopeOpening(true);
+    const settleDuration = 600; // matches the button area's collapse transition
 
     // Animate the turn smoothly using requestAnimationFrame. 3s was too
     // slow and 1.6s too fast to read as a turn; 2.2s is the middle ground.
@@ -124,11 +138,19 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
       const currentRotation = easeProgress * targetRotation;
       setEnvelopeRotation(currentRotation);
 
+      // Ease the captured float offset back to rest
+      const settleProgress = Math.min(elapsed / settleDuration, 1);
+      const settleEase = settleProgress < 0.5
+        ? 2 * settleProgress * settleProgress
+        : 1 - Math.pow(-2 * settleProgress + 2, 2) / 2;
+      setEnvelopeLift(startLift * (1 - settleEase));
+
       if (progress < 1) {
         requestAnimationFrame(animateRotation);
       } else {
         // Ensure rotation stays at -180 after animation completes
         setEnvelopeRotation(-180);
+        setEnvelopeLift(0);
       }
     };
 
@@ -573,13 +595,14 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
                 }
               `}</style>
               <div
+                ref={envelopeBodyRef}
                 className={`relative ${!envelopeOpening && !envelopeOpened ? 'float-animation' : ''}`}
                 style={{
                   width: '100%',
                   aspectRatio: '16/10',
                   transformStyle: 'preserve-3d',
                   pointerEvents: envelopeOpened ? 'none' : 'auto',
-                  transform: `rotateY(${envelopeRotation}deg)`,
+                  transform: `translateY(${envelopeLift}px) rotateY(${envelopeRotation}deg)`,
                   transition: isFlippingEnvelope ? 'transform 300ms ease-in-out, opacity 0.3s ease-in-out' : 'opacity 0.3s ease-in-out',
                   // No opacity here: opacity < 1 on a preserve-3d element
                   // flattens it, and with backface-visibility hidden on both
@@ -723,6 +746,43 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
                       style={{ backgroundColor: board.envelope_color || '#8B4513' }}
                     />
 
+                    {/* Paper fold shadows: diagonal creases from each bottom
+                        corner up to the center, where the bottom flap's
+                        edges overlap the side flaps. Each crease is a soft
+                        blurred shadow on the outer side plus a thin highlight
+                        on the fold edge, fading toward the center. Rendered
+                        before the flap so the flap draws over it. */}
+                    <svg
+                      className="absolute inset-0 w-full h-full pointer-events-none"
+                      viewBox="0 0 100 100"
+                      preserveAspectRatio="none"
+                      aria-hidden="true"
+                    >
+                      <defs>
+                        <filter id="envelope-fold-blur" x="-10%" y="-10%" width="120%" height="120%">
+                          <feGaussianBlur stdDeviation="0.8" />
+                        </filter>
+                        <linearGradient id="envelope-fold-shadow-left" gradientUnits="userSpaceOnUse" x1="0" y1="100" x2="50" y2="50">
+                          <stop offset="0%" stopColor="#000" stopOpacity="0.22" />
+                          <stop offset="100%" stopColor="#000" stopOpacity="0.08" />
+                        </linearGradient>
+                        <linearGradient id="envelope-fold-shadow-right" gradientUnits="userSpaceOnUse" x1="100" y1="100" x2="50" y2="50">
+                          <stop offset="0%" stopColor="#000" stopOpacity="0.22" />
+                          <stop offset="100%" stopColor="#000" stopOpacity="0.08" />
+                        </linearGradient>
+                      </defs>
+                      {/* Soft shadows, nudged just above each crease */}
+                      <g filter="url(#envelope-fold-blur)" transform="translate(0 -0.8)">
+                        <line x1="0" y1="100" x2="50" y2="50" stroke="url(#envelope-fold-shadow-left)" strokeWidth="8" vectorEffect="non-scaling-stroke" strokeLinecap="round" />
+                        <line x1="100" y1="100" x2="50" y2="50" stroke="url(#envelope-fold-shadow-right)" strokeWidth="8" vectorEffect="non-scaling-stroke" strokeLinecap="round" />
+                      </g>
+                      {/* Thin highlight along the fold edge itself */}
+                      <g transform="translate(0 0.4)">
+                        <line x1="0" y1="100" x2="50" y2="50" stroke="rgba(255,255,255,0.28)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" strokeLinecap="round" />
+                        <line x1="100" y1="100" x2="50" y2="50" stroke="rgba(255,255,255,0.28)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" strokeLinecap="round" />
+                      </g>
+                    </svg>
+
                     {/* Top flap opened */}
                     <div className="absolute inset-x-0 top-0 h-1/2 overflow-hidden">
                       <div
@@ -739,11 +799,30 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
               </div>
 
               {/* Open Envelope Button */}
-              {!envelopeOpening && (
-                <div className="text-center mt-12">
+              {/* Stays mounted and collapses smoothly once opening starts.
+                  Unmounting it instantly shrank the centered layout, which
+                  made the envelope jump down. */}
+              {!envelopeOpened && (
+                <div
+                  className="text-center overflow-hidden"
+                  aria-hidden={envelopeOpening}
+                  style={{
+                    // Padding keeps the button's shadow and hover scale from
+                    // being clipped; margin + padding still equal the original 3rem gap.
+                    marginTop: envelopeOpening ? 0 : '1.5rem',
+                    paddingTop: envelopeOpening ? 0 : '1.5rem',
+                    paddingBottom: envelopeOpening ? 0 : '1.5rem',
+                    maxHeight: envelopeOpening ? 0 : '120px',
+                    opacity: envelopeOpening ? 0 : 1,
+                    pointerEvents: envelopeOpening ? 'none' : 'auto',
+                    transition: 'max-height 0.6s ease-in-out, margin-top 0.6s ease-in-out, padding 0.6s ease-in-out, opacity 0.3s ease-in-out'
+                  }}
+                >
                   <button
                     onClick={handleOpenEnvelope}
-                    className="bg-white text-[#0B1F2A] px-12 py-5 rounded-full font-bold text-xl hover:scale-105 transform transition-all shadow-lg hover:shadow-2xl"
+                    disabled={envelopeOpening}
+                    tabIndex={envelopeOpening ? -1 : 0}
+                    className="bg-white text-[#0B1F2A] px-12 py-5 rounded-full font-bold text-xl hover:scale-105 transform transition-all shadow-lg"
                   >
                     Open Envelope
                   </button>
