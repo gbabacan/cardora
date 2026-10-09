@@ -157,11 +157,6 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
 
     animateRotation();
 
-    // Start showing effects at the middle of the turn
-    setTimeout(() => {
-      setShowEffects(true);
-    }, duration / 2);
-
     // Swap to the back face at the rotation's midpoint (edge-on), so the
     // back is revealed exactly when it starts facing the viewer.
     setTimeout(() => {
@@ -193,6 +188,9 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
       setEnvelopeOpened(true);
 
       setTimeout(() => {
+        // The selected effect (confetti etc.) starts together with the flap opening
+        setShowEffects(true);
+
         const flapStartTime = Date.now();
         const animateFlap = () => {
           const progress = Math.min((Date.now() - flapStartTime) / flapDuration, 1);
