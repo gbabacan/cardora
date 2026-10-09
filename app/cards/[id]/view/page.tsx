@@ -787,12 +787,12 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
                       }}
                     />
 
-                    {/* Paper fold shadows: diagonal creases from each bottom
-                        corner up to the meeting point, where the bottom flap's
-                        edges overlap the side flaps. Each crease is a soft
-                        blurred shadow on the outer side plus a thin highlight
-                        on the fold edge, fading toward the center. Rendered
-                        before the flap so the flap draws over it. */}
+                    {/* Bottom flap and fold shadows. The bottom flap is a
+                        filled layer whose edges run up from each bottom
+                        corner to a rounded, oval tip that slightly overlaps
+                        the tip of the gold pocket opening. It casts a soft
+                        shadow just outside its edge and has a thin highlight
+                        along the fold. The top flap draws over all of this. */}
                     <svg
                       className="absolute inset-0 w-full h-full pointer-events-none"
                       viewBox="0 0 100 100"
@@ -803,31 +803,45 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
                         <filter id="envelope-fold-blur" x="-10%" y="-10%" width="120%" height="120%">
                           <feGaussianBlur stdDeviation="0.8" />
                         </filter>
-                        <linearGradient id="envelope-fold-shadow-left" gradientUnits="userSpaceOnUse" x1="0" y1="100" x2="50" y2="46">
-                          <stop offset="0%" stopColor="#000" stopOpacity="0.22" />
-                          <stop offset="100%" stopColor="#000" stopOpacity="0.08" />
-                        </linearGradient>
-                        <linearGradient id="envelope-fold-shadow-right" gradientUnits="userSpaceOnUse" x1="100" y1="100" x2="50" y2="46">
+                        {/* Shadow fades from the corners toward the tip */}
+                        <linearGradient id="envelope-fold-shadow" gradientUnits="userSpaceOnUse" x1="0" y1="100" x2="0" y2="43">
                           <stop offset="0%" stopColor="#000" stopOpacity="0.22" />
                           <stop offset="100%" stopColor="#000" stopOpacity="0.08" />
                         </linearGradient>
                       </defs>
-                      {/* Soft shadows, nudged just above each crease */}
-                      <g filter="url(#envelope-fold-blur)" transform="translate(0 -0.8)">
-                        <line x1="0" y1="100" x2="50" y2="46" stroke="url(#envelope-fold-shadow-left)" strokeWidth="8" vectorEffect="non-scaling-stroke" strokeLinecap="round" />
-                        <line x1="100" y1="100" x2="50" y2="46" stroke="url(#envelope-fold-shadow-right)" strokeWidth="8" vectorEffect="non-scaling-stroke" strokeLinecap="round" />
-                      </g>
                       {/* Pocket edges: side flaps cast a soft shadow onto the
                           gold interior along the V opening */}
                       <g filter="url(#envelope-fold-blur)" transform="translate(0 -0.9)">
                         <line x1="0" y1="0" x2="50" y2="46" stroke="rgba(0,0,0,0.3)" strokeWidth="7" vectorEffect="non-scaling-stroke" strokeLinecap="round" />
                         <line x1="100" y1="0" x2="50" y2="46" stroke="rgba(0,0,0,0.3)" strokeWidth="7" vectorEffect="non-scaling-stroke" strokeLinecap="round" />
                       </g>
+                      {/* Soft shadow, nudged just above the bottom flap's edge.
+                          Drawn before the flap so only the outside part shows. */}
+                      <path
+                        d="M0,100 L42,47.92 Q50,38 58,47.92 L100,100"
+                        fill="none"
+                        stroke="url(#envelope-fold-shadow)"
+                        strokeWidth="8"
+                        vectorEffect="non-scaling-stroke"
+                        strokeLinejoin="round"
+                        filter="url(#envelope-fold-blur)"
+                        transform="translate(0 -0.8)"
+                      />
+                      {/* Bottom flap */}
+                      <path
+                        d="M0,100 L42,47.92 Q50,38 58,47.92 L100,100 Z"
+                        fill={board.envelope_color || '#8B4513'}
+                      />
                       {/* Thin highlight along the fold edge itself */}
-                      <g transform="translate(0 0.4)">
-                        <line x1="0" y1="100" x2="50" y2="46" stroke="rgba(255,255,255,0.28)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" strokeLinecap="round" />
-                        <line x1="100" y1="100" x2="50" y2="46" stroke="rgba(255,255,255,0.28)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" strokeLinecap="round" />
-                      </g>
+                      <path
+                        d="M0,100 L42,47.92 Q50,38 58,47.92 L100,100"
+                        fill="none"
+                        stroke="rgba(255,255,255,0.28)"
+                        strokeWidth="1.5"
+                        vectorEffect="non-scaling-stroke"
+                        strokeLinejoin="round"
+                        transform="translate(0 0.4)"
+                      />
                     </svg>
 
                   </div>
