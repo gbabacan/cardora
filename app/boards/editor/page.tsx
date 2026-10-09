@@ -85,6 +85,12 @@ function BoardEditorPageContent() {
   const [notifyContributors, setNotifyContributors] = useState(true);
   const [scheduledDate, setScheduledDate] = useState('');
   const [scheduledTime, setScheduledTime] = useState('');
+  // Scheduled times are entered in the browser's time zone; shown so senders
+  // know which zone applies. Read after mount to avoid a hydration mismatch.
+  const [timeZoneName, setTimeZoneName] = useState('');
+  useEffect(() => {
+    setTimeZoneName(Intl.DateTimeFormat().resolvedOptions().timeZone.replace(/_/g, ' '));
+  }, []);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [scheduleConfirmed, setScheduleConfirmed] = useState(false);
   const [deliveringNow, setDeliveringNow] = useState(false);
@@ -1729,6 +1735,9 @@ function BoardEditorPageContent() {
                       />
                     </div>
                   </div>
+                  {timeZoneName && (
+                    <p className="text-xs text-[#5B6B75] -mt-1 mb-3">Times are in your time zone: {timeZoneName}</p>
+                  )}
                   {scheduledDate && scheduledTime ? (
                     (() => {
                       const scheduledDT = new Date(`${scheduledDate}T${scheduledTime}:00`);
@@ -1747,7 +1756,7 @@ function BoardEditorPageContent() {
                           </svg>
                           <div>
                             <p className="text-sm text-[#0B1F2A] font-semibold">Schedule confirmed ✓</p>
-                            <p className="text-xs text-[#5B6B75] mt-0.5">{scheduledDT.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })} at {scheduledTime}</p>
+                            <p className="text-xs text-[#5B6B75] mt-0.5">{scheduledDT.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })} at {scheduledTime}{timeZoneName && ` (${timeZoneName})`}</p>
                           </div>
                         </div>
                       ) : (
@@ -1783,7 +1792,7 @@ function BoardEditorPageContent() {
                           <p className="text-base font-bold text-[#0B1F2A]">
                             {new Date(`${scheduledDate}T${scheduledTime}:00`).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
                           </p>
-                          <p className="text-sm text-[#2CB1A6] font-semibold">at {scheduledTime}</p>
+                          <p className="text-sm text-[#2CB1A6] font-semibold">at {scheduledTime}{timeZoneName && ` (${timeZoneName} time)`}</p>
                         </div>
 
                         <div className="space-y-2 mb-5">

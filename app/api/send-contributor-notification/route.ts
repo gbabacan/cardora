@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { render } from '@react-email/render';
 import ContributorNotificationEmail from '@/emails/ContributorNotificationEmail';
+import { EMAIL_FROM, summarizeSendResults } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
   try {
@@ -51,7 +52,7 @@ export async function POST(request: NextRequest) {
       );
 
       return resend.emails.send({
-        from: 'Cardora <onboarding@resend.dev>', // Update this to your verified domain
+        from: EMAIL_FROM,
         to: email,
         subject: `Your contribution to "${boardTitle}" has been delivered!`,
         html: emailHtml,
@@ -60,19 +61,17 @@ export async function POST(request: NextRequest) {
 
     const results = await Promise.allSettled(emailPromises);
 
-    // Check for failures
-    const failures = results.filter((result) => result.status === 'rejected');
-    const successes = results.filter((result) => result.status === 'fulfilled');
+    const { sent, failed, errors } = summarizeSendResults(results);
 
-    if (failures.length > 0) {
-      console.error('Some contributor notification emails failed to send:', failures);
+    if (failed > 0) {
+      console.error('Some contributor notification emails failed to send:', errors);
     }
 
     return NextResponse.json({
       success: true,
-      sent: successes.length,
-      failed: failures.length,
-      message: `Successfully notified ${successes.length} out of ${emails.length} contributors`,
+      sent,
+      failed,
+      message: `Successfully notified ${sent} out of ${emails.length} contributors`,
     });
   } catch (error: any) {
     console.error('Error sending contributor notifications:', error);

@@ -4,6 +4,7 @@ import { render } from '@react-email/render';
 import { Resend } from 'resend';
 import DeliveryEmail from '@/emails/DeliveryEmail';
 import ContributorNotificationEmail from '@/emails/ContributorNotificationEmail';
+import { EMAIL_FROM, summarizeSendResults } from '@/lib/email';
 
 // Create Supabase admin client (bypasses RLS)
 const supabaseAdmin = createClient(
@@ -97,7 +98,7 @@ export async function GET(request: NextRequest) {
             );
 
             return resend.emails.send({
-              from: 'Cardora <onboarding@resend.dev>',
+              from: EMAIL_FROM,
               to: email,
               subject: `You have a special gift waiting for you 💝`,
               html: emailHtml,
@@ -105,8 +106,22 @@ export async function GET(request: NextRequest) {
           });
 
           const recipientResults = await Promise.allSettled(recipientEmailPromises);
-          recipientEmailsSent = recipientResults.filter(r => r.status === 'fulfilled').length;
+          const summary = summarizeSendResults(recipientResults);
+          recipientEmailsSent = summary.sent;
           console.log(`Sent ${recipientEmailsSent} emails to recipients`);
+
+          // Leave the board scheduled so the next run retries it, and skip
+          // the contributor "delivered" emails since nothing was delivered
+          if (recipientEmailsSent === 0) {
+            console.error(`All recipient emails failed for board ${board.id}:`, summary.errors);
+            deliveryResults.push({
+              boardId: board.id,
+              title: board.title,
+              success: false,
+              error: 'All recipient emails failed to send'
+            });
+            continue;
+          }
         }
 
         // Send emails to contributors if enabled
@@ -129,7 +144,7 @@ export async function GET(request: NextRequest) {
               );
 
               return resend.emails.send({
-                from: 'Cardora <onboarding@resend.dev>',
+                from: EMAIL_FROM,
                 to: email,
                 subject: `Your contribution to "${board.title}" has been delivered!`,
                 html: emailHtml,
@@ -137,7 +152,7 @@ export async function GET(request: NextRequest) {
             });
 
             const contributorResults = await Promise.allSettled(contributorEmailPromises);
-            contributorEmailsSent = contributorResults.filter(r => r.status === 'fulfilled').length;
+            contributorEmailsSent = summarizeSendResults(contributorResults).sent;
             console.log(`Sent ${contributorEmailsSent} emails to contributors`);
           }
         }

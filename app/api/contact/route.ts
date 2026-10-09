@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
+import { CONTACT_FORM_FROM } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
   try {
@@ -127,13 +128,16 @@ export async function POST(request: NextRequest) {
       </html>
     `;
 
-    await resend.emails.send({
-      from: 'Cardora Contact Form <onboarding@resend.dev>',
+    const { error: sendError } = await resend.emails.send({
+      from: CONTACT_FORM_FROM,
       to: 'gokhanbabacan@gmail.com',
       replyTo: email,
       subject: `[${type}] Contact Form - ${name}`,
       html: emailHtml,
     });
+    if (sendError) {
+      throw new Error(sendError.message);
+    }
 
     return NextResponse.json({
       success: true,

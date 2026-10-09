@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { render } from '@react-email/render';
 import DeliveryEmail from '@/emails/DeliveryEmail';
+import { EMAIL_FROM, summarizeSendResults } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
   try {
@@ -57,7 +58,7 @@ export async function POST(request: NextRequest) {
       );
 
       return resend.emails.send({
-        from: 'Cardora <onboarding@resend.dev>', // Update this to your verified domain
+        from: EMAIL_FROM,
         to: email,
         subject: `You have a special gift waiting for you 💝`,
         html: emailHtml,
@@ -66,19 +67,17 @@ export async function POST(request: NextRequest) {
 
     const results = await Promise.allSettled(emailPromises);
 
-    // Check for failures
-    const failures = results.filter((result) => result.status === 'rejected');
-    const successes = results.filter((result) => result.status === 'fulfilled');
+    const { sent, failed, errors } = summarizeSendResults(results);
 
-    if (failures.length > 0) {
-      console.error('Some emails failed to send:', failures);
+    if (failed > 0) {
+      console.error('Some emails failed to send:', errors);
     }
 
     return NextResponse.json({
       success: true,
-      sent: successes.length,
-      failed: failures.length,
-      message: `Successfully delivered to ${successes.length} out of ${emails.length} recipients`,
+      sent,
+      failed,
+      message: `Successfully delivered to ${sent} out of ${emails.length} recipients`,
     });
   } catch (error: any) {
     console.error('Error sending delivery emails:', error);

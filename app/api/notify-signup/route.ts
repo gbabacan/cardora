@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
+import { EMAIL_FROM } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
@@ -16,8 +17,8 @@ export async function POST(request: NextRequest) {
 
     const resend = new Resend(process.env.RESEND_API_KEY);
 
-    await resend.emails.send({
-      from: 'Cardora <onboarding@resend.dev>',
+    const { error: sendError } = await resend.emails.send({
+      from: EMAIL_FROM,
       to: 'gokhanbabacan@gmail.com',
       subject: `New signup: ${name || email}`,
       html: `
@@ -27,6 +28,9 @@ export async function POST(request: NextRequest) {
         <p><strong>Time:</strong> ${new Date(signedUpAt).toLocaleString('en-US', { timeZone: 'America/New_York' })}</p>
       `,
     });
+    if (sendError) {
+      throw new Error(sendError.message);
+    }
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
