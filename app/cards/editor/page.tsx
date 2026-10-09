@@ -26,6 +26,7 @@ import type { Effect } from "@/lib/effects";
 import { getBackgroundCssValue } from "@/lib/backgrounds";
 import { loadLottieAnimationData } from "@/lib/lotties";
 import { loadEffectAnimationData } from "@/lib/effects";
+import { getAuthHeaders } from "@/lib/auth";
 
 function BoardEditorPageContent() {
   const router = useRouter();
@@ -619,14 +620,9 @@ function BoardEditorPageContent() {
       if (recipientEmailsList.length > 0) {
         const emailResponse = await fetch('/api/send-delivery', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: await getAuthHeaders(),
           body: JSON.stringify({
-            emails: recipientEmailsList,
-            boardTitle,
-            recipientNames: recipients.filter(r => r.trim()),
-            boardLink: `cardora.cards/${formatType === 'board' ? 'boards' : 'cards'}/${boardData?.short_id}/view`,
-            deliveryMessage: recipientMessage || undefined,
-            formatType: formatType,
+            boardId,
             senderName: senderName || user?.user_metadata?.name || user?.email || 'Sender'
           })
         });
@@ -655,12 +651,9 @@ function BoardEditorPageContent() {
           if (contributorEmailsList.length > 0) {
             const contributorResponse = await fetch('/api/send-contributor-notification', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: await getAuthHeaders(),
               body: JSON.stringify({
-                emails: contributorEmailsList,
-                boardTitle,
-                recipientNames: recipients.filter(r => r.trim()),
-                boardLink: boardLink
+                boardId
               })
             });
 
@@ -741,14 +734,10 @@ function BoardEditorPageContent() {
       // Step 2: Send email invitations
       const emailResponse = await fetch('/api/send-invite', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: await getAuthHeaders(),
         body: JSON.stringify({
+          boardId,
           emails: trimmedEmails,
-          boardTitle: boardTitle,
-          recipientNames: recipients.filter(r => r.trim()),
-          boardLink: boardLink,
           customMessage: inviteMessage,
           creatorName: senderName || user?.user_metadata?.name || user?.email || 'Someone',
         }),

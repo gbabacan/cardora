@@ -1,6 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { getAuthHeaders } from "@/lib/auth";
+
+// Non-owners send a standard invite (no custom message), capped per request
+const MAX_CONTRIBUTOR_INVITES = 10;
 
 interface InviteModalProps {
   isOpen: boolean;
@@ -8,7 +12,7 @@ interface InviteModalProps {
   boardLink: string;
   boardTitle: string;
   boardId: string;
-  recipientNames: string[];
+  isOwner?: boolean;
   onError?: (message: string) => void;
   onSuccess?: (message: string) => void;
 }
@@ -19,7 +23,7 @@ export default function InviteModal({
   boardLink,
   boardTitle,
   boardId,
-  recipientNames,
+  isOwner = false,
   onError,
   onSuccess
 }: InviteModalProps) {
@@ -56,6 +60,13 @@ export default function InviteModal({
       return;
     }
 
+    if (!isOwner && trimmedEmails.length > MAX_CONTRIBUTOR_INVITES) {
+      if (onError) {
+        onError(`You can invite up to ${MAX_CONTRIBUTOR_INVITES} people at a time`);
+      }
+      return;
+    }
+
     setSendingInvites(true);
 
     try {
@@ -82,14 +93,11 @@ export default function InviteModal({
       // Step 2: Send email invitations
       const emailResponse = await fetch('/api/send-invite', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await getAuthHeaders(),
         body: JSON.stringify({
+          boardId,
           emails: trimmedEmails,
-          boardTitle: boardTitle,
-          recipientNames: recipientNames,
-          boardLink: boardLink,
-          customMessage: inviteMessage,
-          creatorName: 'A contributor'
+          customMessage: isOwner ? inviteMessage : undefined
         })
       });
 
@@ -246,6 +254,7 @@ export default function InviteModal({
                         )}
                       </div>
                     ))}
+                    {(isOwner || inviteEmails.length < MAX_CONTRIBUTOR_INVITES) && (
                     <button
                       onClick={() => setInviteEmails([...inviteEmails, ''])}
                       className="text-sm text-[#2CB1A6] hover:text-[#1F8F86] font-medium flex items-center gap-1"
@@ -255,19 +264,26 @@ export default function InviteModal({
                       </svg>
                       Add another email
                     </button>
+                    )}
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-bold text-[#0B1F2A] mb-2">Message</label>
-                  <textarea
-                    value={inviteMessage}
-                    onChange={(e) => setInviteMessage(e.target.value)}
-                    rows={4}
-                    className="w-full px-4 py-3 bg-white border-2 border-[#E5EAF0] rounded-lg focus:border-[#2CB1A6] focus:outline-none transition-colors resize-none"
-                    placeholder="Add a personal message..."
-                  />
-                </div>
+                {isOwner ? (
+                  <div>
+                    <label className="block text-sm font-bold text-[#0B1F2A] mb-2">Message</label>
+                    <textarea
+                      value={inviteMessage}
+                      onChange={(e) => setInviteMessage(e.target.value)}
+                      rows={4}
+                      className="w-full px-4 py-3 bg-white border-2 border-[#E5EAF0] rounded-lg focus:border-[#2CB1A6] focus:outline-none transition-colors resize-none"
+                      placeholder="Add a personal message..."
+                    />
+                  </div>
+                ) : (
+                  <p className="text-sm text-[#5B6B75]">
+                    They&apos;ll get an email invite to add their message to {boardTitle}. You can invite up to {MAX_CONTRIBUTOR_INVITES} people at a time.
+                  </p>
+                )}
 
                 <button
                   onClick={handleSendInvites}

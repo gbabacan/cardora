@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import LottieAnimation from "@/components/LottieAnimation";
 import { getBoardByShortId } from "@/lib/boards";
+import { getCurrentUser } from "@/lib/auth";
 import { getBoardMessages } from "@/lib/messages";
 import type { Board, Recipient } from "@/lib/boards";
 import type { Message } from "@/lib/messages";
@@ -39,6 +40,12 @@ export default function BoardViewPage({ params }: { params: Promise<{ id: string
   const [deletingMessageId, setDeletingMessageId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [messagesHidden, setMessagesHidden] = useState(false);
+  // Owners can add a personal message to email invites; contributors can't
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    getCurrentUser().then(({ user }) => setCurrentUserId(user?.id ?? null));
+  }, []);
 
   useEffect(() => {
     loadBoardData();
@@ -592,7 +599,7 @@ export default function BoardViewPage({ params }: { params: Promise<{ id: string
           boardLink={`${process.env.NEXT_PUBLIC_APP_URL || 'https://cardora.cards'}/boards/${boardShortId}`}
           boardTitle={board.title}
           boardId={board.id}
-          recipientNames={recipients.map(r => r.name)}
+          isOwner={!!currentUserId && currentUserId === board.user_id}
           onError={handleMessageError}
           onSuccess={handleInviteSuccess}
         />

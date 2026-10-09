@@ -141,3 +141,13 @@ export async function signInWithLinkedIn(options?: { redirectTo?: string }) {
     return { data: null, error: error.message };
   }
 }
+// Headers for calling our API routes as the logged-in user. Routes verify the
+// bearer token server-side; logged-out callers just get JSON headers.
+export async function getAuthHeaders(): Promise<Record<string, string>> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session?.access_token) {
+    headers.Authorization = `Bearer ${session.access_token}`;
+  }
+  return headers;
+}

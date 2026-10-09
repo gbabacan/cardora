@@ -3,6 +3,7 @@ import { Resend } from 'resend';
 import { render } from '@react-email/render';
 import DeliveryEmail from '@/emails/DeliveryEmail';
 import { EMAIL_FROM, summarizeSendResults } from '@/lib/email';
+import { getRequestUser, getEmailBoard, savedEmailList, recipientNamesOf, boardViewLink } from '@/lib/serverAuth';
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,31 +18,33 @@ export async function POST(request: NextRequest) {
 
     const resend = new Resend(process.env.RESEND_API_KEY);
 
-    const body = await request.json();
-    const {
-      emails,
-      boardTitle,
-      recipientNames,
-      boardLink,
-      deliveryMessage,
-      formatType,
-      senderName,
-    } = body;
+    const user = await getRequestUser(request);
+    if (!user) {
+      return NextResponse.json({ error: 'Please log in to deliver' }, { status: 401 });
+    }
 
-    // Validate required fields
-    if (!emails || !Array.isArray(emails) || emails.length === 0) {
+    const body = await request.json();
+    const { boardId, senderName } = body;
+
+    // Only the board's owner can send its delivery emails
+    const board = await getEmailBoard(boardId);
+    if (!board || board.user_id !== user.id) {
+      return NextResponse.json({ error: 'Board not found' }, { status: 404 });
+    }
+
+    const emails = savedEmailList(board.recipients.map(r => r.email));
+    if (emails.length === 0) {
       return NextResponse.json(
         { error: 'Recipient email addresses are required' },
         { status: 400 }
       );
     }
 
-    if (!boardTitle || !recipientNames || !boardLink) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      );
-    }
+    const boardTitle = board.title;
+    const recipientNames = recipientNamesOf(board);
+    const boardLink = boardViewLink(board);
+    const deliveryMessage = board.recipient_message || undefined;
+    const formatType = board.format_type || 'board';
 
     // Send emails to all recipients
     const emailPromises = emails.map(async (email: string) => {
@@ -53,7 +56,7 @@ export async function POST(request: NextRequest) {
           boardLink,
           deliveryMessage,
           formatType,
-          senderName,
+          senderName: typeof senderName === 'string' ? senderName.slice(0, 100) : undefined,
         })
       );
 

@@ -3,6 +3,7 @@ import { Resend } from 'resend';
 import { render } from '@react-email/render';
 import ContributorNotificationEmail from '@/emails/ContributorNotificationEmail';
 import { EMAIL_FROM, summarizeSendResults } from '@/lib/email';
+import { getRequestUser, getEmailBoard, savedEmailList, recipientNamesOf, boardViewLink } from '@/lib/serverAuth';
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,28 +18,31 @@ export async function POST(request: NextRequest) {
 
     const resend = new Resend(process.env.RESEND_API_KEY);
 
-    const body = await request.json();
-    const {
-      emails,
-      boardTitle,
-      recipientNames,
-      boardLink,
-    } = body;
+    const user = await getRequestUser(request);
+    if (!user) {
+      return NextResponse.json({ error: 'Please log in to notify contributors' }, { status: 401 });
+    }
 
-    // Validate required fields
-    if (!emails || !Array.isArray(emails) || emails.length === 0) {
+    const body = await request.json();
+    const { boardId } = body;
+
+    // Only the board's owner can notify its contributors
+    const board = await getEmailBoard(boardId);
+    if (!board || board.user_id !== user.id) {
+      return NextResponse.json({ error: 'Board not found' }, { status: 404 });
+    }
+
+    const emails = savedEmailList(board.contributors.map(c => c.email));
+    if (emails.length === 0) {
       return NextResponse.json(
         { error: 'Contributor email addresses are required' },
         { status: 400 }
       );
     }
 
-    if (!boardTitle || !recipientNames || !boardLink) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      );
-    }
+    const boardTitle = board.title;
+    const recipientNames = recipientNamesOf(board);
+    const boardLink = boardViewLink(board);
 
     // Send emails to all contributors
     const emailPromises = emails.map(async (email: string) => {

@@ -3,6 +3,10 @@ import { Resend } from 'resend';
 import { render } from '@react-email/render';
 import InviteEmail from '@/emails/InviteEmail';
 import { EMAIL_FROM, summarizeSendResults } from '@/lib/email';
+import { getRequestUser, getEmailBoard, cleanEmailList, recipientNamesOf, boardViewLink } from '@/lib/serverAuth';
+
+const MAX_OWNER_INVITES = 50;
+const MAX_CONTRIBUTOR_INVITES = 10;
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,29 +22,56 @@ export async function POST(request: NextRequest) {
     const resend = new Resend(process.env.RESEND_API_KEY);
 
     const body = await request.json();
-    const {
-      emails,
-      boardTitle,
-      recipientNames,
-      boardLink,
-      customMessage,
-      creatorName,
-    } = body;
+    const { boardId, customMessage, creatorName: requestedCreatorName } = body;
 
-    // Validate required fields
-    if (!emails || !Array.isArray(emails) || emails.length === 0) {
+    const board = await getEmailBoard(boardId);
+    if (!board) {
+      return NextResponse.json({ error: 'Board not found' }, { status: 404 });
+    }
+
+    // Contributors (often logged out) may invite others too, but only with
+    // the standard invite built from the board's saved data. A custom
+    // message and sender name are reserved for the owner, so the endpoint
+    // can't be used to send arbitrary text from our domain.
+    const user = await getRequestUser(request);
+    const isOwner = !!user && user.id === board.user_id;
+
+    if (!isOwner && (board.format_type === 'card' || board.status === 'DELIVERED')) {
       return NextResponse.json(
-        { error: 'Email addresses are required' },
+        { error: 'This board is no longer accepting contributors' },
+        { status: 403 }
+      );
+    }
+
+    const emails = cleanEmailList(body.emails);
+    if (!emails || emails.length === 0) {
+      return NextResponse.json(
+        { error: 'Valid email addresses are required' },
         { status: 400 }
       );
     }
 
-    if (!boardTitle || !recipientNames || !boardLink || !creatorName) {
+    const maxInvites = isOwner ? MAX_OWNER_INVITES : MAX_CONTRIBUTOR_INVITES;
+    if (emails.length > maxInvites) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: `You can invite up to ${maxInvites} people at a time` },
         { status: 400 }
       );
     }
+
+    const boardTitle = board.title;
+    const recipientNames = recipientNamesOf(board);
+    const boardLink = board.format_type === 'card'
+      ? boardViewLink(board)
+      : `cardora.cards/boards/${board.short_id}`;
+    const ownerCustomMessage = isOwner && typeof customMessage === 'string' && customMessage.trim()
+      ? customMessage.slice(0, 1000)
+      : undefined;
+    const creatorName = isOwner
+      ? (typeof requestedCreatorName === 'string' && requestedCreatorName.trim()
+          ? requestedCreatorName.slice(0, 100)
+          : user.user_metadata?.name || 'Someone')
+      : 'A contributor';
 
     // Send emails to all contributors
     const emailPromises = emails.map(async (email: string) => {
@@ -50,7 +81,7 @@ export async function POST(request: NextRequest) {
           boardTitle,
           recipientNames,
           boardLink,
-          customMessage,
+          customMessage: ownerCustomMessage,
           creatorName,
         })
       );
