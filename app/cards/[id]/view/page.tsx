@@ -37,6 +37,7 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
   const [envelopeRotation, setEnvelopeRotation] = useState(0); // Rotation degree for envelope
   const [envelopeLift, setEnvelopeLift] = useState(0); // Float offset (px) eased back to 0 when opening starts
   const envelopeBodyRef = useRef<HTMLDivElement>(null);
+  const [flapAngle, setFlapAngle] = useState(0); // Top flap hinge angle: 0 = closed over the envelope, 180 = open, standing above it
   const [envelopeView, setEnvelopeView] = useState<'front' | 'back'>('front'); // Which side of envelope to show
   const [isFlippingEnvelope, setIsFlippingEnvelope] = useState(false); // Envelope flipping state
   const [showEffects, setShowEffects] = useState(false); // Control when effects appear
@@ -180,30 +181,52 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
       setBackgroundOpacity(0.9);
     }, duration * 0.75);
 
-    // After the turn completes, set full opacity and start card emergence
+    // Once the turn ends, the top flap swings open upward on its hinge.
+    // The card only starts emerging after the flap is fully open.
+    const flapDelay = 150; // brief beat on the sealed back before the flap lifts
+    const flapDuration = 700;
+    const cardStart = flapDelay + flapDuration + 150;
+
+    // After the turn completes, set full opacity, open the flap, then start card emergence
     setTimeout(() => {
       setBackgroundOpacity(1);
       setEnvelopeOpened(true);
+
+      setTimeout(() => {
+        const flapStartTime = Date.now();
+        const animateFlap = () => {
+          const progress = Math.min((Date.now() - flapStartTime) / flapDuration, 1);
+          const easeProgress = progress < 0.5
+            ? 2 * progress * progress
+            : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+          setFlapAngle(easeProgress * 180);
+          if (progress < 1) {
+            requestAnimationFrame(animateFlap);
+          }
+        };
+        animateFlap();
+      }, flapDelay);
+
       // Start card emerging from envelope
       setTimeout(() => {
         setCardEmerging(true);
-      }, 100);
+      }, cardStart);
       // Card fully emerged after 1.5 seconds
       setTimeout(() => {
         setCardFullyEmerged(true);
-      }, 1500);
+      }, cardStart + 1500);
     }, duration);
 
     // Switch view mode to card after emergence completes
     setTimeout(() => {
       setViewMode('card');
-    }, duration + 1500);
+    }, duration + cardStart + 1500);
 
     // Automatically flip the card to show the inside after it emerges and
     // displays for 3.5s. Use slower flip animation (1000ms) for the automatic flip.
     setTimeout(() => {
       handleFlipCard(1000);
-    }, duration + 1500 + 3500);
+    }, duration + cardStart + 1500 + 3500);
   };
 
   // Helper function to check if a color is light
@@ -362,6 +385,7 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
     setEnvelopeOpening(false);
     setEnvelopeOpened(false);
     setEnvelopeRotation(0);
+    setFlapAngle(0);
     setEnvelopeView('front');
     setShowEffects(false);
     setCardEmerging(false);
@@ -724,9 +748,11 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
                 </div>
                 </div>
 
-                {/* Envelope Back */}
+                {/* Envelope Back. Not clipped itself, so the open top flap
+                    can rise above the envelope; the body layers below are
+                    clipped by their own wrapper instead. */}
                 <div
-                  className="absolute inset-0 rounded-lg overflow-hidden"
+                  className="absolute inset-0 rounded-lg"
                   style={{
                     backgroundColor: board.envelope_color || '#8B4513',
                     boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
@@ -738,16 +764,31 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
                     WebkitBackfaceVisibility: 'hidden'
                   }}
                 >
-                  {/* Envelope opened flap with golden lining */}
-                  <div className="absolute inset-0">
+                  {/* Envelope body, clipped to the rounded corners */}
+                  <div className="absolute inset-0 rounded-lg overflow-hidden">
                     {/* Bottom part of envelope */}
                     <div
                       className="absolute inset-x-0 bottom-0 h-2/3"
                       style={{ backgroundColor: board.envelope_color || '#8B4513' }}
                     />
 
+                    {/* Envelope interior: gold lining visible through the
+                        pocket's V opening. Hidden under the closed flap.
+                        Shaded darker near the top edge, where the inside of
+                        the envelope sits in the open flap's shadow; this also
+                        separates it from the flap's own gold lining. */}
+                    <div
+                      className="absolute inset-x-0 top-0"
+                      style={{
+                        height: '46%',
+                        backgroundColor: '#D4AF37',
+                        backgroundImage: 'linear-gradient(to bottom, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0.08) 35%, rgba(0,0,0,0) 70%)',
+                        clipPath: 'polygon(0 0, 100% 0, 50% 100%)'
+                      }}
+                    />
+
                     {/* Paper fold shadows: diagonal creases from each bottom
-                        corner up to the center, where the bottom flap's
+                        corner up to the meeting point, where the bottom flap's
                         edges overlap the side flaps. Each crease is a soft
                         blurred shadow on the outer side plus a thin highlight
                         on the fold edge, fading toward the center. Rendered
@@ -762,37 +803,93 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
                         <filter id="envelope-fold-blur" x="-10%" y="-10%" width="120%" height="120%">
                           <feGaussianBlur stdDeviation="0.8" />
                         </filter>
-                        <linearGradient id="envelope-fold-shadow-left" gradientUnits="userSpaceOnUse" x1="0" y1="100" x2="50" y2="50">
+                        <linearGradient id="envelope-fold-shadow-left" gradientUnits="userSpaceOnUse" x1="0" y1="100" x2="50" y2="46">
                           <stop offset="0%" stopColor="#000" stopOpacity="0.22" />
                           <stop offset="100%" stopColor="#000" stopOpacity="0.08" />
                         </linearGradient>
-                        <linearGradient id="envelope-fold-shadow-right" gradientUnits="userSpaceOnUse" x1="100" y1="100" x2="50" y2="50">
+                        <linearGradient id="envelope-fold-shadow-right" gradientUnits="userSpaceOnUse" x1="100" y1="100" x2="50" y2="46">
                           <stop offset="0%" stopColor="#000" stopOpacity="0.22" />
                           <stop offset="100%" stopColor="#000" stopOpacity="0.08" />
                         </linearGradient>
                       </defs>
                       {/* Soft shadows, nudged just above each crease */}
                       <g filter="url(#envelope-fold-blur)" transform="translate(0 -0.8)">
-                        <line x1="0" y1="100" x2="50" y2="50" stroke="url(#envelope-fold-shadow-left)" strokeWidth="8" vectorEffect="non-scaling-stroke" strokeLinecap="round" />
-                        <line x1="100" y1="100" x2="50" y2="50" stroke="url(#envelope-fold-shadow-right)" strokeWidth="8" vectorEffect="non-scaling-stroke" strokeLinecap="round" />
+                        <line x1="0" y1="100" x2="50" y2="46" stroke="url(#envelope-fold-shadow-left)" strokeWidth="8" vectorEffect="non-scaling-stroke" strokeLinecap="round" />
+                        <line x1="100" y1="100" x2="50" y2="46" stroke="url(#envelope-fold-shadow-right)" strokeWidth="8" vectorEffect="non-scaling-stroke" strokeLinecap="round" />
+                      </g>
+                      {/* Pocket edges: side flaps cast a soft shadow onto the
+                          gold interior along the V opening */}
+                      <g filter="url(#envelope-fold-blur)" transform="translate(0 -0.9)">
+                        <line x1="0" y1="0" x2="50" y2="46" stroke="rgba(0,0,0,0.3)" strokeWidth="7" vectorEffect="non-scaling-stroke" strokeLinecap="round" />
+                        <line x1="100" y1="0" x2="50" y2="46" stroke="rgba(0,0,0,0.3)" strokeWidth="7" vectorEffect="non-scaling-stroke" strokeLinecap="round" />
                       </g>
                       {/* Thin highlight along the fold edge itself */}
                       <g transform="translate(0 0.4)">
-                        <line x1="0" y1="100" x2="50" y2="50" stroke="rgba(255,255,255,0.28)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" strokeLinecap="round" />
-                        <line x1="100" y1="100" x2="50" y2="50" stroke="rgba(255,255,255,0.28)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" strokeLinecap="round" />
+                        <line x1="0" y1="100" x2="50" y2="46" stroke="rgba(255,255,255,0.28)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" strokeLinecap="round" />
+                        <line x1="100" y1="100" x2="50" y2="46" stroke="rgba(255,255,255,0.28)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" strokeLinecap="round" />
                       </g>
                     </svg>
 
-                    {/* Top flap opened */}
-                    <div className="absolute inset-x-0 top-0 h-1/2 overflow-hidden">
+                  </div>
+
+                  {/* Top flap, hinged on the envelope's top edge. Starts
+                      closed over the body (outside face showing), then
+                      swings toward the viewer and up to stand above the
+                      envelope with its gold lining showing. Lives outside
+                      the clipped body so the open flap isn't cut off. */}
+                  <div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{ perspective: '1400px', perspectiveOrigin: '50% 50%' }}
+                  >
+                    <div
+                      className="absolute inset-x-0 top-0"
+                      style={{
+                        height: '48%',
+                        transformOrigin: 'top center',
+                        transformStyle: 'preserve-3d',
+                        transform: `rotateX(${flapAngle}deg)`
+                      }}
+                    >
+                      {/* Outside of the flap: envelope color, pointing down when closed */}
                       <div
-                        className="absolute inset-0 origin-top"
+                        className="absolute inset-0"
+                        style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
+                      >
+                        <svg
+                          className="absolute inset-0 w-full h-full"
+                          viewBox="0 0 100 100"
+                          preserveAspectRatio="none"
+                          aria-hidden="true"
+                          style={{ overflow: 'visible', filter: 'drop-shadow(0 3px 4px rgba(0,0,0,0.28))' }}
+                        >
+                          <path d="M0,0 L100,0 L53.5,94 Q50,100 46.5,94 Z" fill={board.envelope_color || '#8B4513'} />
+                        </svg>
+                      </div>
+
+                      {/* Inside of the flap: gold lining with an envelope-color
+                          border. Drawn pointing up, so it reads correctly
+                          once the hinge has turned it over above the envelope.
+                          The base runs slightly past the hinge to cover the
+                          seam where the flap meets the envelope's top edge. */}
+                      <div
+                        className="absolute inset-0"
                         style={{
-                          backgroundColor: '#D4AF37',
-                          clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
-                          transform: 'scaleY(1.2) translateY(-10%)'
+                          transform: 'rotateX(180deg)',
+                          backfaceVisibility: 'hidden',
+                          WebkitBackfaceVisibility: 'hidden'
                         }}
-                      />
+                      >
+                        <svg
+                          className="absolute inset-0 w-full h-full"
+                          viewBox="0 0 100 100"
+                          preserveAspectRatio="none"
+                          aria-hidden="true"
+                          style={{ overflow: 'visible' }}
+                        >
+                          <path d="M0,101.5 L100,101.5 L100,100 L53.5,6 Q50,0 46.5,6 L0,100 Z" fill={board.envelope_color || '#8B4513'} />
+                          <path d="M6,101.5 L94,101.5 L94,100 L52.6,15 Q50,10 47.4,15 L6,100 Z" fill="#D4AF37" />
+                        </svg>
+                      </div>
                     </div>
                   </div>
                 </div>
