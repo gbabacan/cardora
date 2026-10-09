@@ -177,10 +177,13 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
     }, duration * 0.75);
 
     // Once the turn ends, the top flap swings open upward on its hinge.
-    // The card only starts emerging after the flap is fully open.
+    // The card starts emerging while the flap finishes its swing (70% of
+    // the way through, when it is already well past upright), so there is
+    // no dead pause between the flap opening and the card appearing.
     const flapDelay = 150; // brief beat on the sealed back before the flap lifts
     const flapDuration = 700;
-    const cardStart = flapDelay + flapDuration + 150;
+    const cardStart = flapDelay + flapDuration * 0.7;
+    const cardFrontDelay = 500; // time the card spends behind the envelope before coming forward
 
     // After the turn completes, set full opacity, open the flap, then start card emergence
     setTimeout(() => {
@@ -209,22 +212,25 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
       setTimeout(() => {
         setCardEmerging(true);
       }, cardStart);
-      // Card fully emerged after 1.5 seconds
+      // Bring the card to the front shortly after it starts emerging. It
+      // used to stay hidden behind the envelope for the full 1.5s, which
+      // read as a long pause after the flap opened. Its 1.5s slide into
+      // place continues smoothly from here.
       setTimeout(() => {
         setCardFullyEmerged(true);
-      }, cardStart + 1500);
+      }, cardStart + cardFrontDelay);
     }, duration);
 
-    // Switch view mode to card after emergence completes
+    // Switch view mode to card as it comes to the front
     setTimeout(() => {
       setViewMode('card');
-    }, duration + cardStart + 1500);
+    }, duration + cardStart + cardFrontDelay);
 
-    // Automatically flip the card to show the inside after it emerges and
-    // displays for 3.5s. Use slower flip animation (1000ms) for the automatic flip.
+    // Automatically flip the card to show the inside once it has settled
+    // (1.5s slide) and displayed for 3.5s. Use slower flip animation (1000ms).
     setTimeout(() => {
       handleFlipCard(1000);
-    }, duration + cardStart + 1500 + 3500);
+    }, duration + cardStart + cardFrontDelay + 1500 + 3500);
   };
 
   // Helper function to check if a color is light
