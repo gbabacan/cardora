@@ -60,7 +60,10 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
     const updateScale = () => {
       // 750px envelope + ~64px toggle button + ~48px gap + padding = ~920px total
       const containerWidth = 920;
-      const scale = Math.min(1, window.innerWidth / containerWidth);
+      // 750px card (taller than the open envelope) + room for the header bar,
+      // so short screens like landscape phones fit vertically too
+      const containerHeight = 860;
+      const scale = Math.min(1, window.innerWidth / containerWidth, window.innerHeight / containerHeight);
       setEnvelopeScale(scale);
     };
     updateScale();
