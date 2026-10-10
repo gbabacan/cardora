@@ -1091,99 +1091,106 @@ function BoardEditorPageContent() {
                   </div>
                 </div>
 
-                {/* Title Color - the title sits in the white page header, so
-                    header colour and title size are no longer options */}
+                {/* Title font and color side by side. The title sits in the
+                    white page header, so header colour and title size are no
+                    longer options. */}
                 <div>
-                  <label className="block text-sm font-bold text-[#0B1F2A] mb-2">Title color</label>
-                  <input
-                    type="color"
-                    value={titleFontColor}
-                    onChange={(e) => setTitleFontColor(e.target.value)}
-                    className="w-full h-10 rounded border-2 border-[#E5EAF0] cursor-pointer"
-                  />
+                  <div className="relative flex items-end gap-3">
+                    {/* Title Font */}
+                    <div className="flex-1 min-w-0">
+                      <label className="block text-sm font-bold text-[#0B1F2A] mb-2">Title font</label>
+                      <button
+                        onClick={() => setShowTitleFontPicker(!showTitleFontPicker)}
+                        className="w-full bg-white border-2 border-[#E5EAF0] rounded-lg p-4 flex items-center justify-between hover:border-[#2CB1A6] transition-colors"
+                      >
+                        <span className="text-[#5B6B75] font-medium">{titleFont}</span>
+                        <svg className="w-5 h-5 text-[#5B6B75]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+
+                      {/* Font Picker Dropdown */}
+                      {showTitleFontPicker && (
+                        <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-[#E5EAF0] rounded-lg shadow-xl max-h-96 overflow-y-auto z-50">
+                          {/* Professional Fonts */}
+                          <div className="p-3 bg-[#F7FAFC] border-b border-[#E5EAF0]">
+                            <h5 className="text-xs font-bold text-[#5B6B75] uppercase tracking-wide">Professional</h5>
+                          </div>
+                          {fonts.filter(f => f.category === 'Professional').map((font) => (
+                            <button
+                              key={font.name}
+                              onClick={() => {
+                                setTitleFont(font.name);
+                                setShowTitleFontPicker(false);
+                              }}
+                              className={`w-full p-3 text-left hover:bg-[#F7FAFC] transition-colors border-b border-[#E5EAF0] ${
+                                titleFont === font.name ? 'bg-[#E8F5F4] text-[#2CB1A6]' : 'text-[#0B1F2A]'
+                              }`}
+                              style={{ fontFamily: font.name }}
+                            >
+                              {font.name}
+                            </button>
+                          ))}
+
+                          {/* Playful Fonts */}
+                          <div className="p-3 bg-[#F7FAFC] border-b border-[#E5EAF0]">
+                            <h5 className="text-xs font-bold text-[#5B6B75] uppercase tracking-wide">Playful</h5>
+                          </div>
+                          {fonts.filter(f => f.category === 'Playful').map((font) => (
+                            <button
+                              key={font.name}
+                              onClick={() => {
+                                setTitleFont(font.name);
+                                setShowTitleFontPicker(false);
+                              }}
+                              className={`w-full p-3 text-left hover:bg-[#F7FAFC] transition-colors border-b border-[#E5EAF0] ${
+                                titleFont === font.name ? 'bg-[#E8F5F4] text-[#2CB1A6]' : 'text-[#0B1F2A]'
+                              }`}
+                              style={{ fontFamily: font.name }}
+                            >
+                              {font.name}
+                            </button>
+                          ))}
+
+                          {/* Handwriting Fonts */}
+                          <div className="p-3 bg-[#F7FAFC] border-b border-[#E5EAF0]">
+                            <h5 className="text-xs font-bold text-[#5B6B75] uppercase tracking-wide">Handwriting</h5>
+                          </div>
+                          {fonts.filter(f => f.category === 'Handwriting').map((font) => (
+                            <button
+                              key={font.name}
+                              onClick={() => {
+                                setTitleFont(font.name);
+                                setShowTitleFontPicker(false);
+                              }}
+                              className={`w-full p-3 text-left hover:bg-[#F7FAFC] transition-colors border-b border-[#E5EAF0] last:border-b-0 ${
+                                titleFont === font.name ? 'bg-[#E8F5F4] text-[#2CB1A6]' : 'text-[#0B1F2A]'
+                              }`}
+                              style={{ fontFamily: font.name }}
+                            >
+                              {font.name}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Title Color */}
+                    <div className="flex-shrink-0">
+                      <label className="block text-sm font-bold text-[#0B1F2A] mb-2">Title color</label>
+                      <input
+                        type="color"
+                        value={titleFontColor}
+                        onChange={(e) => setTitleFontColor(e.target.value)}
+                        className="block w-20 h-[60px] p-1 bg-white rounded-lg border-2 border-[#E5EAF0] hover:border-[#2CB1A6] cursor-pointer transition-colors"
+                        title="Title color"
+                      />
+                    </div>
+                  </div>
                   {headerTitleColor(titleFontColor) !== titleFontColor && (
                     <p className="mt-2 text-xs text-[#5B6B75]">
                       This color is too light to read on the white header, so the title will show in dark navy.
                     </p>
-                  )}
-                </div>
-
-                {/* Title Font */}
-                <div className="relative">
-                  <label className="block text-sm font-bold text-[#0B1F2A] mb-2">Title font</label>
-                  <button
-                    onClick={() => setShowTitleFontPicker(!showTitleFontPicker)}
-                    className="w-full bg-white border-2 border-[#E5EAF0] rounded-lg p-4 flex items-center justify-between hover:border-[#2CB1A6] transition-colors"
-                  >
-                    <span className="text-[#5B6B75] font-medium">{titleFont}</span>
-                    <svg className="w-5 h-5 text-[#5B6B75]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </button>
-
-                  {/* Font Picker Dropdown */}
-                  {showTitleFontPicker && (
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-[#E5EAF0] rounded-lg shadow-xl max-h-96 overflow-y-auto z-50">
-                      {/* Professional Fonts */}
-                      <div className="p-3 bg-[#F7FAFC] border-b border-[#E5EAF0]">
-                        <h5 className="text-xs font-bold text-[#5B6B75] uppercase tracking-wide">Professional</h5>
-                      </div>
-                      {fonts.filter(f => f.category === 'Professional').map((font) => (
-                        <button
-                          key={font.name}
-                          onClick={() => {
-                            setTitleFont(font.name);
-                            setShowTitleFontPicker(false);
-                          }}
-                          className={`w-full p-3 text-left hover:bg-[#F7FAFC] transition-colors border-b border-[#E5EAF0] ${
-                            titleFont === font.name ? 'bg-[#E8F5F4] text-[#2CB1A6]' : 'text-[#0B1F2A]'
-                          }`}
-                          style={{ fontFamily: font.name }}
-                        >
-                          {font.name}
-                        </button>
-                      ))}
-
-                      {/* Playful Fonts */}
-                      <div className="p-3 bg-[#F7FAFC] border-b border-[#E5EAF0]">
-                        <h5 className="text-xs font-bold text-[#5B6B75] uppercase tracking-wide">Playful</h5>
-                      </div>
-                      {fonts.filter(f => f.category === 'Playful').map((font) => (
-                        <button
-                          key={font.name}
-                          onClick={() => {
-                            setTitleFont(font.name);
-                            setShowTitleFontPicker(false);
-                          }}
-                          className={`w-full p-3 text-left hover:bg-[#F7FAFC] transition-colors border-b border-[#E5EAF0] ${
-                            titleFont === font.name ? 'bg-[#E8F5F4] text-[#2CB1A6]' : 'text-[#0B1F2A]'
-                          }`}
-                          style={{ fontFamily: font.name }}
-                        >
-                          {font.name}
-                        </button>
-                      ))}
-
-                      {/* Handwriting Fonts */}
-                      <div className="p-3 bg-[#F7FAFC] border-b border-[#E5EAF0]">
-                        <h5 className="text-xs font-bold text-[#5B6B75] uppercase tracking-wide">Handwriting</h5>
-                      </div>
-                      {fonts.filter(f => f.category === 'Handwriting').map((font) => (
-                        <button
-                          key={font.name}
-                          onClick={() => {
-                            setTitleFont(font.name);
-                            setShowTitleFontPicker(false);
-                          }}
-                          className={`w-full p-3 text-left hover:bg-[#F7FAFC] transition-colors border-b border-[#E5EAF0] last:border-b-0 ${
-                            titleFont === font.name ? 'bg-[#E8F5F4] text-[#2CB1A6]' : 'text-[#0B1F2A]'
-                          }`}
-                          style={{ fontFamily: font.name }}
-                        >
-                          {font.name}
-                        </button>
-                      ))}
-                    </div>
                   )}
                 </div>
 
