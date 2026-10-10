@@ -9,8 +9,8 @@ export const metadata: Metadata = {
 };
 
 const LAST_UPDATED = "June 23, 2026";
-const CONTACT_EMAIL = "privacy@cardora.com";
-const APP_URL = "https://cardora.com";
+const CONTACT_EMAIL = "hello@cardora.cards";
+const APP_URL = "https://cardora.cards";
 
 const sections = [
   {
