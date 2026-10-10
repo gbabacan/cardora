@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState, useEffect } from "react";
+import { use, useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import LottieAnimation from "@/components/LottieAnimation";
@@ -38,6 +38,8 @@ export default function RecipientViewPage({ params }: { params: Promise<{ id: st
   const [showHeader, setShowHeader] = useState(false);
   const [visibleMessages, setVisibleMessages] = useState<Set<string>>(new Set());
   const [messagesHidden, setMessagesHidden] = useState(false);
+  const headerObserverRef = useRef<ResizeObserver | null>(null);
+  const [headerHeight, setHeaderHeight] = useState(0);
 
   useEffect(() => {
     loadBoardData();
@@ -102,6 +104,18 @@ export default function RecipientViewPage({ params }: { params: Promise<{ id: st
       setImageBgColor('#F7FAFC');
     }
   }, [background]);
+
+  // Track the header's height so the background can make room for it. A
+  // callback ref, since the header only mounts once loading has finished.
+  const headerRef = useCallback((header: HTMLElement | null) => {
+    headerObserverRef.current?.disconnect();
+    headerObserverRef.current = null;
+    if (!header) return;
+    const update = () => setHeaderHeight(header.offsetHeight);
+    update();
+    headerObserverRef.current = new ResizeObserver(update);
+    headerObserverRef.current.observe(header);
+  }, []);
 
   // Fade in content and background when intro is dismissed
   useEffect(() => {
@@ -252,6 +266,14 @@ export default function RecipientViewPage({ params }: { params: Promise<{ id: st
   }
 
   const formatName = board.format_type === 'board' ? 'board' : 'card';
+
+  // As the header slides down, lower the background's top edge in step with
+  // it so the image/animation shrinks to fit instead of being covered
+  const backgroundLayerStyle: React.CSSProperties = {
+    opacity: backgroundOpacity,
+    top: showHeader ? headerHeight : 0,
+    transition: showIntro ? undefined : 'opacity 2000ms ease-in, top 2000ms ease-out'
+  };
   const isDelivered = board.status === 'DELIVERED';
 
   return (
@@ -331,8 +353,8 @@ export default function RecipientViewPage({ params }: { params: Promise<{ id: st
         {/* Lottie Background Animation */}
       {(background?.type === 'ANIMATION' && selectedLottieAnimation) || (!background && lottieAnimation) ? (
         <div
-          className={`fixed inset-0 z-0 pointer-events-none ${!showIntro ? 'transition-opacity duration-2000 ease-in' : ''} ${showIntro ? 'blur-lg' : ''}`}
-          style={{ opacity: backgroundOpacity }}
+          className={`fixed inset-0 z-0 pointer-events-none ${showIntro ? 'blur-lg' : ''}`}
+          style={backgroundLayerStyle}
         >
           <LottieAnimation
             animationData={background?.type === 'ANIMATION' ? selectedLottieAnimation : lottieAnimation}
@@ -344,8 +366,8 @@ export default function RecipientViewPage({ params }: { params: Promise<{ id: st
       {/* Image Background */}
       {background?.type === 'IMAGE' && background.image?.file_path && (
         <div
-          className={`fixed inset-0 z-0 pointer-events-none flex items-center justify-center ${!showIntro ? 'transition-opacity duration-2000 ease-in' : ''} ${showIntro ? 'blur-lg' : ''}`}
-          style={{ opacity: backgroundOpacity }}
+          className={`fixed inset-0 z-0 pointer-events-none flex items-center justify-center ${showIntro ? 'blur-lg' : ''}`}
+          style={backgroundLayerStyle}
         >
           <img
             src={background.image.file_path}
@@ -371,6 +393,7 @@ export default function RecipientViewPage({ params }: { params: Promise<{ id: st
 
       {/* Header */}
       <header
+        ref={headerRef}
         className="bg-white border-b border-[#E5EAF0] sticky top-0 z-50 transition-all duration-2000 ease-out"
         style={{
           opacity: showHeader ? 1 : 0,
