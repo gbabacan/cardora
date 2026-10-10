@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -23,6 +23,7 @@ import { loadLottieAnimationData } from "@/lib/lotties";
 import { extractDominantColor } from "@/lib/colorExtractor";
 import { loadEffectAnimationData } from "@/lib/effects";
 import { getAuthHeaders } from "@/lib/auth";
+import { headerTitleColor } from "@/lib/boardTitle";
 
 function BoardEditorPageContent() {
   const router = useRouter();
@@ -46,10 +47,21 @@ function BoardEditorPageContent() {
   // Appearance panel state
   const [showAppearance, setShowAppearance] = useState(false);
   const [mobilePanel, setMobilePanel] = useState<'customize' | 'preview'>('preview');
-  const [headerColorEnabled, setHeaderColorEnabled] = useState(false);
-  const [headerColorCode, setHeaderColorCode] = useState<string>('#2CB1A6');
+  const previewHeaderObserverRef = useRef<ResizeObserver | null>(null);
+  const [previewHeaderHeight, setPreviewHeaderHeight] = useState(0);
+
+  // Track the preview header's height so the background starts below it, as
+  // on the live board page
+  const previewHeaderRef = useCallback((header: HTMLElement | null) => {
+    previewHeaderObserverRef.current?.disconnect();
+    previewHeaderObserverRef.current = null;
+    if (!header) return;
+    const update = () => setPreviewHeaderHeight(header.offsetHeight);
+    update();
+    previewHeaderObserverRef.current = new ResizeObserver(update);
+    previewHeaderObserverRef.current.observe(header);
+  }, []);
   const [titleFont, setTitleFont] = useState('Inter');
-  const [titleFontSize, setTitleFontSize] = useState<number>(48);
   const [titleFontColor, setTitleFontColor] = useState<string>('#0B1F2A');
   const [bodyFont, setBodyFont] = useState('Inter');
   const [backgroundImage, setBackgroundImage] = useState<string | undefined>(undefined);
@@ -237,10 +249,7 @@ function BoardEditorPageContent() {
 
       setFormatType(board.format_type);
       setOccasionType(board.occasion_type);
-      setHeaderColorEnabled(board.header_color);
-      setHeaderColorCode(board.header_color_code || '#2CB1A6');
       setTitleFont(board.title_font);
-      setTitleFontSize(board.title_font_size || 48);
       setTitleFontColor(board.title_font_color || '#0B1F2A');
       setBodyFont(board.body_font);
       setBackgroundImage(board.background);
@@ -710,10 +719,7 @@ function BoardEditorPageContent() {
       // Update board
       const { error: boardError } = await updateBoard(boardId, {
         title: boardTitle,
-        header_color: headerColorEnabled,
-        header_color_code: headerColorEnabled ? headerColorCode : undefined,
         title_font: titleFont,
-        title_font_size: titleFontSize,
         title_font_color: titleFontColor,
         body_font: bodyFont,
         intro_animation: true,
@@ -761,6 +767,48 @@ function BoardEditorPageContent() {
       setSaving(false);
     }
   };
+
+  // Preview header pieces. The title sits in the white header, so its font and
+  // colour still apply but the title size and header colour do not.
+  const previewLogo = (
+    <div className="flex items-center gap-2 flex-shrink-0">
+      <Image src="/cardoraLogo.png" alt="Cardora" width={180} height={48} className="h-8 md:h-10 w-auto" />
+      <span className="text-lg md:text-xl font-bold text-[#2CB1A6]">Cardora</span>
+    </div>
+  );
+  const previewTitle = (
+    <textarea
+      value={boardTitle}
+      onChange={(e) => {
+        if (!isReadOnly) {
+          const newValue = e.target.value;
+          const lineCount = newValue.split('\n').length;
+          // Limit to 2 lines
+          if (lineCount <= 2) {
+            setBoardTitle(newValue);
+          }
+        }
+      }}
+      rows={boardTitle.split('\n').length}
+      disabled={isReadOnly}
+      className={`block font-bold text-center w-full bg-transparent border-2 rounded-lg px-2 py-0.5 text-lg md:text-2xl leading-tight transition-colors resize-none overflow-hidden [field-sizing:content] ${
+        isReadOnly
+          ? 'border-transparent cursor-default'
+          : 'border-transparent hover:border-[#E5EAF0] focus:border-[#2CB1A6] focus:outline-none'
+      }`}
+      placeholder="Enter board title..."
+      style={{
+        fontFamily: titleFont,
+        color: headerTitleColor(titleFontColor)
+      }}
+    />
+  );
+  const previewRecipientNames = recipients.map(name => name.trim()).filter(Boolean);
+  const previewRecipients = previewRecipientNames.length > 0 && (
+    <p className="mt-0.5 text-sm md:text-base font-semibold text-[#2CB1A6] truncate">
+      For: {previewRecipientNames.join(', ')}
+    </p>
+  );
 
   return (
     <>
@@ -1043,91 +1091,22 @@ function BoardEditorPageContent() {
                   </div>
                 </div>
 
-                {/* Header Color */}
+                {/* Title Color - the title sits in the white page header, so
+                    header colour and title size are no longer options */}
                 <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <label className="text-sm font-bold text-[#0B1F2A]">Header color</label>
-                    <button
-                      onClick={() => setHeaderColorEnabled(!headerColorEnabled)}
-                      className={`relative w-14 h-8 rounded-full transition-colors ${
-                        headerColorEnabled ? 'bg-[#2CB1A6]' : 'bg-[#E5EAF0]'
-                      }`}
-                    >
-                      <div className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full transition-transform ${
-                        headerColorEnabled ? 'translate-x-6' : ''
-                      }`} />
-                    </button>
-                  </div>
-
-                  {/* Show color pickers when header color is enabled */}
-                  {headerColorEnabled && (
-                    <div className="mt-3 grid grid-cols-3 gap-3">
-                      {/* Header Background Color */}
-                      <div>
-                        <label className="block text-xs font-semibold text-[#5B6B75] mb-2">Header Color</label>
-                        <input
-                          type="color"
-                          value={headerColorCode}
-                          onChange={(e) => setHeaderColorCode(e.target.value)}
-                          className="w-full h-10 rounded border-2 border-[#E5EAF0] cursor-pointer"
-                        />
-                      </div>
-
-                      {/* Title Font Size */}
-                      <div>
-                        <label className="block text-xs font-semibold text-[#5B6B75] mb-2">Title Size (px)</label>
-                        <input
-                          type="number"
-                          min="8"
-                          max="128"
-                          value={titleFontSize}
-                          onChange={(e) => setTitleFontSize(parseInt(e.target.value) || 48)}
-                          className="w-full px-3 py-2 border-2 border-[#E5EAF0] rounded-lg focus:border-[#2CB1A6] focus:outline-none text-sm"
-                        />
-                      </div>
-
-                      {/* Title Font Color */}
-                      <div>
-                        <label className="block text-xs font-semibold text-[#5B6B75] mb-2">Title Color</label>
-                        <input
-                          type="color"
-                          value={titleFontColor}
-                          onChange={(e) => setTitleFontColor(e.target.value)}
-                          className="w-full h-10 rounded border-2 border-[#E5EAF0] cursor-pointer"
-                        />
-                      </div>
-                    </div>
+                  <label className="block text-sm font-bold text-[#0B1F2A] mb-2">Title color</label>
+                  <input
+                    type="color"
+                    value={titleFontColor}
+                    onChange={(e) => setTitleFontColor(e.target.value)}
+                    className="w-full h-10 rounded border-2 border-[#E5EAF0] cursor-pointer"
+                  />
+                  {headerTitleColor(titleFontColor) !== titleFontColor && (
+                    <p className="mt-2 text-xs text-[#5B6B75]">
+                      This color is too light to read on the white header, so the title will show in dark navy.
+                    </p>
                   )}
                 </div>
-
-                {/* Title Size and Color - Show when header color is disabled */}
-                {!headerColorEnabled && (
-                  <div className="grid grid-cols-2 gap-3">
-                    {/* Title Font Size */}
-                    <div>
-                      <label className="block text-xs font-semibold text-[#5B6B75] mb-2">Title Size (px)</label>
-                      <input
-                        type="number"
-                        min="8"
-                        max="128"
-                        value={titleFontSize}
-                        onChange={(e) => setTitleFontSize(parseInt(e.target.value) || 48)}
-                        className="w-full px-3 py-2 border-2 border-[#E5EAF0] rounded-lg focus:border-[#2CB1A6] focus:outline-none text-sm"
-                      />
-                    </div>
-
-                    {/* Title Font Color */}
-                    <div>
-                      <label className="block text-xs font-semibold text-[#5B6B75] mb-2">Title Color</label>
-                      <input
-                        type="color"
-                        value={titleFontColor}
-                        onChange={(e) => setTitleFontColor(e.target.value)}
-                        className="w-full h-10 rounded border-2 border-[#E5EAF0] cursor-pointer"
-                      />
-                    </div>
-                  </div>
-                )}
 
                 {/* Title Font */}
                 <div className="relative">
@@ -1971,7 +1950,7 @@ function BoardEditorPageContent() {
         >
           {/* Lottie Background Animation */}
           {(selectedBackground?.type === 'ANIMATION' && selectedLottieAnimation) || (!selectedBackground && lottieAnimation) ? (
-            <div className="absolute inset-0 z-0 pointer-events-none">
+            <div className="absolute inset-0 z-0 pointer-events-none" style={{ top: previewHeaderHeight }}>
               <LottieAnimation
                 animationData={selectedBackground?.type === 'ANIMATION' ? selectedLottieAnimation : lottieAnimation}
                 loop={true}
@@ -1981,7 +1960,7 @@ function BoardEditorPageContent() {
           ) : null}
           {/* Image Background */}
           {selectedBackground?.type === 'IMAGE' && selectedBackground.image?.file_path && (
-            <div className="absolute inset-0 z-0 pointer-events-none flex items-center justify-center">
+            <div className="absolute inset-0 z-0 pointer-events-none flex items-center justify-center" style={{ top: previewHeaderHeight }}>
               <img
                 src={selectedBackground.image.file_path}
                 alt="Board background"
@@ -1992,50 +1971,25 @@ function BoardEditorPageContent() {
 
           {/* Content wrapper with higher z-index */}
           <div className="relative z-10">
-          {/* Board Title */}
-          <div
-            className="py-6 px-8 transition-colors relative"
-            style={{
-              backgroundColor: headerColorEnabled ? headerColorCode : 'transparent'
-            }}
-          >
-            {/* Gradient shadow overlay when header color is disabled */}
-            {!headerColorEnabled && (
-              <div
-                className="absolute inset-0 pointer-events-none"
-                style={{
-                  background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.3) 50%, transparent)'
-                }}
-              />
-            )}
+          {/* Board Header - mirrors the white header on the live board page */}
+          <div ref={previewHeaderRef} className="sticky top-0 z-20 bg-white border-b border-[#E5EAF0]">
+            <div className="px-4 md:px-6 py-3 flex items-center gap-4">
+              {previewLogo}
+              <div className="hidden md:block flex-1 min-w-0 text-center">
+                {previewTitle}
+                {previewRecipients}
+              </div>
+              {/* Invisible copy of the logo keeps the title centred */}
+              <div className="hidden md:block invisible" aria-hidden="true">
+                {previewLogo}
+              </div>
+            </div>
 
-            <textarea
-              value={boardTitle}
-              onChange={(e) => {
-                if (!isReadOnly) {
-                  const newValue = e.target.value;
-                  const lineCount = newValue.split('\n').length;
-                  // Limit to 2 lines
-                  if (lineCount <= 2) {
-                    setBoardTitle(newValue);
-                  }
-                }
-              }}
-              rows={1}
-              disabled={isReadOnly}
-              className={`font-bold text-center w-full bg-transparent border-2 rounded-lg px-4 py-2 transition-colors resize-none overflow-hidden relative z-10 ${
-                isReadOnly
-                  ? 'border-transparent cursor-default'
-                  : 'border-transparent hover:border-[#E5EAF0] focus:border-[#2CB1A6] focus:outline-none'
-              }`}
-              placeholder="Enter board title..."
-              style={{
-                fontFamily: titleFont,
-                fontSize: `${titleFontSize}px`,
-                color: titleFontColor,
-                lineHeight: '1.2'
-              }}
-            />
+            {/* Narrow screens: title on its own row, as on the live page */}
+            <div className="md:hidden border-t border-[#E5EAF0] px-4 py-2 text-center">
+              {previewTitle}
+              {previewRecipients}
+            </div>
           </div>
 
           {/* Board Content Area - Messages */}

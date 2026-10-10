@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState, useEffect } from "react";
+import { use, useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -16,6 +16,8 @@ import AddMessageModal from "@/components/AddMessageModal";
 import InviteModal from "@/components/InviteModal";
 import { loadLottieAnimationData } from "@/lib/lotties";
 import { extractDominantColor } from "@/lib/colorExtractor";
+import { headerTitleColor } from "@/lib/boardTitle";
+import { useEqualSides } from "@/lib/useEqualSides";
 
 export default function BoardViewPage({ params }: { params: Promise<{ id: string }> }) {
   // Unwrap params promise
@@ -28,6 +30,21 @@ export default function BoardViewPage({ params }: { params: Promise<{ id: string
   const [loading, setLoading] = useState(true);
   const [showAddMessageModal, setShowAddMessageModal] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const headerObserverRef = useRef<ResizeObserver | null>(null);
+  const [headerHeight, setHeaderHeight] = useState(0);
+  const { leftRef: headerLeftRef, rightRef: headerRightRef, sideWidth: headerSideWidth } = useEqualSides();
+
+  // Track the header's height so the background starts below it rather than
+  // being covered. A callback ref, since the header only mounts after loading.
+  const headerRef = useCallback((header: HTMLElement | null) => {
+    headerObserverRef.current?.disconnect();
+    headerObserverRef.current = null;
+    if (!header) return;
+    const update = () => setHeaderHeight(header.offsetHeight);
+    update();
+    headerObserverRef.current = new ResizeObserver(update);
+    headerObserverRef.current.observe(header);
+  }, []);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
   const [lottieAnimation, setLottieAnimation] = useState<any>(null);
   const [selectedLottieAnimation, setSelectedLottieAnimation] = useState<any>(null);
@@ -242,6 +259,20 @@ export default function BoardViewPage({ params }: { params: Promise<{ id: string
   const formatName = board.format_type === 'board' ? 'board' : 'card';
   const isDelivered = board.status === 'DELIVERED';
   const isCard = board.format_type === 'card';
+  const boardTitle = (
+    <h1
+      className="font-bold text-lg md:text-2xl lg:text-3xl leading-tight line-clamp-2 break-words"
+      style={{ fontFamily: board.title_font || 'Inter', color: headerTitleColor(board.title_font_color) }}
+      title={board.title}
+    >
+      {board.title}
+    </h1>
+  );
+  const recipientLine = recipients.length > 0 && (
+    <p className="mt-0.5 text-sm md:text-base font-semibold text-[#2CB1A6] truncate">
+      For: {recipients.map(r => r.name).join(', ')}
+    </p>
+  );
 
   return (
     <div
@@ -263,7 +294,7 @@ export default function BoardViewPage({ params }: { params: Promise<{ id: string
     >
       {/* Lottie Background Animation */}
       {(background?.type === 'ANIMATION' && selectedLottieAnimation) || (!background && lottieAnimation) ? (
-        <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="fixed inset-0 z-0 pointer-events-none" style={{ top: headerHeight }}>
           <LottieAnimation
             animationData={background?.type === 'ANIMATION' ? selectedLottieAnimation : lottieAnimation}
             loop={true}
@@ -273,7 +304,7 @@ export default function BoardViewPage({ params }: { params: Promise<{ id: string
       ) : null}
       {/* Image Background */}
       {background?.type === 'IMAGE' && background.image?.file_path && (
-        <div className="fixed inset-0 z-0 pointer-events-none flex items-center justify-center">
+        <div className="fixed inset-0 z-0 pointer-events-none flex items-center justify-center" style={{ top: headerHeight }}>
           <img
             src={background.image.file_path}
             alt="Board background"
@@ -294,95 +325,98 @@ export default function BoardViewPage({ params }: { params: Promise<{ id: string
         )}
 
       {/* Header */}
-      <header className="bg-white border-b border-[#E5EAF0] sticky top-0 z-50">
-        <div className="max-w-screen-2xl mx-auto px-4 md:px-8 py-3 md:py-4 flex items-center justify-between gap-2">
-          <Link href="/" className="flex items-center gap-2 md:gap-3 flex-shrink-0">
-            <Image
-              src="/cardoraLogo.png"
-              alt="Cardora"
-              width={180}
-              height={48}
-              className="h-9 md:h-12 w-auto"
-            />
-            <span className="text-xl md:text-2xl font-bold text-[#2CB1A6]">Cardora</span>
-          </Link>
+      <header ref={headerRef} className="bg-white border-b border-[#E5EAF0] sticky top-0 z-50">
+        <div
+          className="max-w-screen-2xl mx-auto px-4 md:px-8 py-3 md:py-4 flex items-center justify-between gap-2 lg:gap-6"
+          style={{ '--header-side': `${headerSideWidth}px` } as React.CSSProperties}
+        >
+          {/* Equal-width sides keep the title centred on the page */}
+          <div className="flex-shrink-0 lg:flex-1 lg:basis-0 lg:min-w-[var(--header-side)]">
+            <Link ref={headerLeftRef} href="/" className="flex items-center gap-2 md:gap-3 w-fit">
+              <Image
+                src="/cardoraLogo.png"
+                alt="Cardora"
+                width={180}
+                height={48}
+                className="h-9 md:h-12 w-auto"
+              />
+              <span className="text-xl md:text-2xl font-bold text-[#2CB1A6]">Cardora</span>
+            </Link>
+          </div>
 
-          {/* Center - For Recipients (desktop only) */}
-          {recipients.length > 0 && (
-            <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2">
-              <span className="text-xl font-bold text-[#2CB1A6]">
-                For: {recipients.map(r => r.name).join(', ')}
-              </span>
-            </div>
-          )}
+          {/* Center - board title with recipients underneath (large screens; the
+              action buttons leave too little room on tablets) */}
+          <div className="hidden lg:block min-w-0 text-center">
+            {boardTitle}
+            {recipientLine}
+          </div>
 
           {/* Right side - Action Buttons */}
           {board && (
-            <div className="flex items-center gap-2">
-              {isCard ? (
-                <div className="px-3 py-1.5 md:px-4 md:py-2 bg-blue-100 text-blue-800 rounded-full font-semibold text-xs md:text-sm flex items-center gap-1.5">
-                  <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span className="hidden sm:inline">Single Card (View Only)</span>
-                </div>
-              ) : !isDelivered ? (
-                <>
-                  {/* View as Recipient — icon only on mobile */}
-                  <Link href={`/boards/${boardShortId}/view`} target="_blank">
-                    <button className="w-9 h-9 md:w-auto md:h-auto md:px-4 md:py-2 bg-white border-2 border-[#2CB1A6] text-[#2CB1A6] hover:bg-[#E8F5F4] font-semibold rounded-full transition-colors flex items-center justify-center gap-2" title="View as Recipient">
+            <div className="flex justify-end flex-shrink-0 lg:flex-1 lg:basis-0 lg:min-w-[var(--header-side)]">
+              <div ref={headerRightRef} className="flex items-center gap-2 flex-shrink-0">
+                {isCard ? (
+                  <div className="px-3 py-1.5 md:px-4 md:py-2 bg-blue-100 text-blue-800 rounded-full font-semibold text-xs md:text-sm flex items-center gap-1.5">
+                    <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="hidden sm:inline">Single Card (View Only)</span>
+                  </div>
+                ) : !isDelivered ? (
+                  <>
+                    {/* View as Recipient — compact so the centred title has room; icon only below xl */}
+                    <Link href={`/boards/${boardShortId}/view`} target="_blank">
+                      <button className="w-9 h-9 xl:w-auto xl:px-3 bg-white border-2 border-[#2CB1A6] text-[#2CB1A6] hover:bg-[#E8F5F4] font-semibold text-sm rounded-full transition-colors flex items-center justify-center gap-1.5" title="View as Recipient">
+                        <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        <span className="hidden xl:inline">Preview</span>
+                      </button>
+                    </Link>
+
+                    {/* Invite People — compact so the centred title has room; icon only below xl */}
+                    <button
+                      onClick={() => setShowInviteModal(true)}
+                      className="w-9 h-9 xl:w-auto xl:px-3 bg-white border-2 border-[#2CB1A6] text-[#2CB1A6] hover:bg-[#E8F5F4] font-semibold text-sm rounded-full transition-colors flex items-center justify-center gap-1.5"
+                      title="Invite People"
+                    >
                       <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                       </svg>
-                      <span className="hidden md:inline">View as Recipient</span>
+                      <span className="hidden xl:inline">Invite</span>
                     </button>
-                  </Link>
 
-                  {/* Invite People — icon only on mobile */}
-                  <button
-                    onClick={() => setShowInviteModal(true)}
-                    className="w-9 h-9 md:w-auto md:h-auto md:px-4 md:py-2 bg-white border-2 border-[#2CB1A6] text-[#2CB1A6] hover:bg-[#E8F5F4] font-semibold rounded-full transition-colors flex items-center justify-center gap-2"
-                    title="Invite People"
-                  >
-                    <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                    {/* Add Your Message — always shows text */}
+                    <button
+                      onClick={() => setShowAddMessageModal(true)}
+                      className="px-3 py-2 md:px-5 md:py-2.5 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white font-semibold rounded-full transition-colors shadow-lg flex items-center gap-1.5 text-sm md:text-base whitespace-nowrap"
+                    >
+                      <svg className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      <span className="hidden sm:inline">Add Your Message</span>
+                      <span className="sm:hidden">Add</span>
+                    </button>
+                  </>
+                ) : (
+                  <div className="px-3 py-1.5 md:px-4 md:py-2 bg-green-100 text-green-800 rounded-full font-semibold text-xs md:text-sm flex items-center gap-1.5">
+                    <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
-                    <span className="hidden md:inline">Invite People</span>
-                  </button>
-
-                  {/* Add Your Message — always shows text */}
-                  <button
-                    onClick={() => setShowAddMessageModal(true)}
-                    className="px-3 py-2 md:px-6 md:py-3 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white font-semibold rounded-full transition-colors shadow-lg flex items-center gap-1.5 text-sm md:text-base"
-                  >
-                    <svg className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                    <span className="hidden sm:inline">Add Your Message</span>
-                    <span className="sm:hidden">Add</span>
-                  </button>
-                </>
-              ) : (
-                <div className="px-3 py-1.5 md:px-4 md:py-2 bg-green-100 text-green-800 rounded-full font-semibold text-xs md:text-sm flex items-center gap-1.5">
-                  <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  Delivered
-                </div>
-              )}
+                    Delivered
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
 
-        {/* Mobile recipient row */}
-        {recipients.length > 0 && (
-          <div className="md:hidden border-t border-[#E5EAF0] px-4 py-1.5 text-center">
-            <span className="text-sm font-bold text-[#2CB1A6]">
-              For: {recipients.map(r => r.name).join(', ')}
-            </span>
-          </div>
-        )}
+        {/* Title row for phones and tablets - too narrow to share the bar with the logo and buttons */}
+        <div className="lg:hidden border-t border-[#E5EAF0] px-4 py-2 text-center">
+          {boardTitle}
+          {recipientLine}
+        </div>
       </header>
 
       {/* Card Type Notice Banner */}
@@ -404,37 +438,6 @@ export default function BoardViewPage({ params }: { params: Promise<{ id: string
           </div>
         </div>
       )}
-
-      {/* Board Header with Background */}
-      <div
-        className="py-12 relative"
-        style={{
-          backgroundColor: board.header_color && board.header_color_code ? board.header_color_code : 'transparent'
-        }}
-      >
-        {/* Gradient shadow overlay when header color is disabled */}
-        {!board.header_color && (
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.3) 50%, transparent)'
-            }}
-          />
-        )}
-
-        <div className="max-w-7xl mx-auto px-6 text-center relative z-10">
-          <h1
-            className="font-bold"
-            style={{
-              fontFamily: board.title_font || 'Inter',
-              fontSize: `${board.title_font_size || 48}px`,
-              color: board.title_font_color || '#0B1F2A'
-            }}
-          >
-            {board.title}
-          </h1>
-        </div>
-      </div>
 
       {/* Messages Grid */}
       <main

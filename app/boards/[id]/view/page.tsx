@@ -16,6 +16,8 @@ import EffectOverlay from "@/components/EffectOverlay";
 import { loadLottieAnimationData } from "@/lib/lotties";
 import { extractDominantColor } from "@/lib/colorExtractor";
 import { supabase } from "@/lib/supabase";
+import { headerTitleColor } from "@/lib/boardTitle";
+import { useEqualSides } from "@/lib/useEqualSides";
 
 export default function RecipientViewPage({ params }: { params: Promise<{ id: string }> }) {
   // Unwrap params promise
@@ -40,6 +42,7 @@ export default function RecipientViewPage({ params }: { params: Promise<{ id: st
   const [messagesHidden, setMessagesHidden] = useState(false);
   const headerObserverRef = useRef<ResizeObserver | null>(null);
   const [headerHeight, setHeaderHeight] = useState(0);
+  const { leftRef: headerLeftRef, rightRef: headerRightRef, sideWidth: headerSideWidth } = useEqualSides();
 
   useEffect(() => {
     loadBoardData();
@@ -267,6 +270,22 @@ export default function RecipientViewPage({ params }: { params: Promise<{ id: st
 
   const formatName = board.format_type === 'board' ? 'board' : 'card';
 
+  const titleColor = headerTitleColor(board.title_font_color);
+  const boardTitle = (
+    <h1
+      className="font-bold text-lg md:text-2xl lg:text-3xl leading-tight line-clamp-2 break-words"
+      style={{ fontFamily: board.title_font || 'Inter', color: titleColor }}
+      title={board.title}
+    >
+      {board.title}
+    </h1>
+  );
+  const recipientLine = recipients.length > 0 && (
+    <p className="mt-0.5 text-sm md:text-base font-semibold text-[#2CB1A6] truncate">
+      For: {recipients.map(r => r.name).join(', ')}
+    </p>
+  );
+
   // As the header slides down, lower the background's top edge in step with
   // it so the image/animation shrinks to fit instead of being covered
   const backgroundLayerStyle: React.CSSProperties = {
@@ -400,106 +419,75 @@ export default function RecipientViewPage({ params }: { params: Promise<{ id: st
           transform: showHeader ? 'translateY(0)' : 'translateY(-100%)'
         }}
       >
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-3 md:py-4 flex items-center justify-between gap-2">
-          <Link href="/" className="flex items-center gap-2 md:gap-3 flex-shrink-0">
-            <Image
-              src="/cardoraLogo.png"
-              alt="Cardora"
-              width={180}
-              height={48}
-              className="h-9 md:h-12 w-auto"
-            />
-            <span className="text-xl md:text-2xl font-bold text-[#2CB1A6]">Cardora</span>
-          </Link>
+        <div
+          className="max-w-7xl mx-auto px-4 md:px-6 py-3 md:py-4 flex items-center justify-between gap-2 md:gap-6"
+          style={{ '--header-side': `${headerSideWidth}px` } as React.CSSProperties}
+        >
+          {/* Equal-width sides keep the title centred on the page */}
+          <div className="flex-shrink-0 md:flex-1 md:basis-0 md:min-w-[var(--header-side)]">
+            <Link ref={headerLeftRef} href="/" className="flex items-center gap-2 md:gap-3 w-fit">
+              <Image
+                src="/cardoraLogo.png"
+                alt="Cardora"
+                width={180}
+                height={48}
+                className="h-9 md:h-12 w-auto"
+              />
+              <span className="text-xl md:text-2xl font-bold text-[#2CB1A6]">Cardora</span>
+            </Link>
+          </div>
 
-          {/* Center - For Recipients (desktop only) */}
-          {recipients.length > 0 && (
-            <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2">
-              <span className="text-xl font-bold text-[#2CB1A6]">
-                For: {recipients.map(r => r.name).join(', ')}
-              </span>
-            </div>
-          )}
+          {/* Center - board title with recipients underneath (desktop) */}
+          <div className="hidden md:block min-w-0 text-center">
+            {boardTitle}
+            {recipientLine}
+          </div>
 
           {/* Right side - Buttons */}
-          <div className="flex items-center gap-2">
-            {board?.is_template ? (
-              <button
-                onClick={handleUseTemplate}
-                disabled={usingTemplate}
-                className="no-print px-3 md:px-6 py-2 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold transition-colors flex items-center gap-1.5 shadow-md disabled:opacity-60 disabled:cursor-not-allowed text-sm md:text-base"
-              >
-                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                {usingTemplate ? 'Creating...' : 'Use This Template'}
-              </button>
-            ) : (
-              <button
-                onClick={() => window.print()}
-                className="no-print w-9 h-9 md:w-auto md:h-auto md:px-4 md:py-2 bg-white hover:bg-[#E8F5F4] text-[#2CB1A6] border-2 border-[#2CB1A6] rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-                title="Print / Save PDF"
-              >
-                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                </svg>
-                <span className="hidden md:inline">Print / Save PDF</span>
-              </button>
-            )}
+          <div className="flex justify-end md:flex-1 md:basis-0 md:min-w-[var(--header-side)]">
+            <div ref={headerRightRef} className="flex items-center gap-2 flex-shrink-0">
+              {board?.is_template ? (
+                <button
+                  onClick={handleUseTemplate}
+                  disabled={usingTemplate}
+                  className="no-print px-3 md:px-6 py-2 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold transition-colors flex items-center gap-1.5 shadow-md disabled:opacity-60 disabled:cursor-not-allowed text-sm md:text-base whitespace-nowrap"
+                >
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  {usingTemplate ? 'Creating...' : 'Use This Template'}
+                </button>
+              ) : (
+                <button
+                  onClick={() => window.print()}
+                  className="no-print w-9 h-9 md:w-auto md:h-auto md:px-4 md:py-2 bg-white hover:bg-[#E8F5F4] text-[#2CB1A6] border-2 border-[#2CB1A6] rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                  title="Print / Save PDF"
+                >
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                  </svg>
+                  <span className="hidden md:inline">Print / Save PDF</span>
+                </button>
+              )}
 
-            {board && isDelivered && (
-              <div className="no-print px-2 py-1.5 md:px-4 md:py-2 bg-green-100 text-green-800 rounded-full font-semibold text-xs md:text-sm flex items-center gap-1.5">
-                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                Delivered
-              </div>
-            )}
+              {board && isDelivered && (
+                <div className="no-print px-2 py-1.5 md:px-4 md:py-2 bg-green-100 text-green-800 rounded-full font-semibold text-xs md:text-sm flex items-center gap-1.5">
+                  <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Delivered
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Mobile recipient sub-row */}
-        {recipients.length > 0 && (
-          <div className="md:hidden border-t border-[#E5EAF0] px-4 py-1.5 text-center">
-            <span className="text-sm font-bold text-[#2CB1A6]">
-              For: {recipients.map(r => r.name).join(', ')}
-            </span>
-          </div>
-        )}
+        {/* Mobile title row - too narrow to share the bar with the logo and buttons */}
+        <div className="md:hidden border-t border-[#E5EAF0] px-4 py-2 text-center">
+          {boardTitle}
+          {recipientLine}
+        </div>
       </header>
-
-      {/* Board Header with Background */}
-      <div
-        className="py-12 relative transition-all duration-2000 ease-out"
-        style={{
-          backgroundColor: board.header_color && board.header_color_code ? board.header_color_code : 'transparent',
-          opacity: showHeader ? 1 : 0,
-          transform: showHeader ? 'translateY(0)' : 'translateY(-50px)'
-        }}
-      >
-        {/* Gradient shadow overlay when header color is disabled */}
-        {!board.header_color && (
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.3) 50%, transparent)'
-            }}
-          />
-        )}
-
-        <div className="max-w-7xl mx-auto px-6 text-center relative z-10">
-          <h1
-            className="font-bold"
-            style={{
-              fontFamily: board.title_font || 'Inter',
-              fontSize: `${board.title_font_size || 48}px`,
-              color: board.title_font_color || '#0B1F2A'
-            }}
-          >
-            {board.title}
-          </h1>
-        </div>
-      </div>
 
       {/* Messages Grid */}
       <main
