@@ -124,6 +124,7 @@ export default function DashboardPage() {
           )
         `)
         .eq('is_template', true)
+        .eq('template_hidden', false)
         .order('occasion_type')
         .order('template_order', { ascending: true, nullsFirst: false });
 

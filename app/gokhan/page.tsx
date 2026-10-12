@@ -1,14 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/hooks/useAuth";
 import NotFound from "@/app/not-found";
 import Analytics from "./Analytics";
+import Templates from "./Templates";
+
+const TABS = [
+  { id: "analytics", label: "Analytics" },
+  { id: "templates", label: "Templates" },
+] as const;
+type Tab = (typeof TABS)[number]["id"];
+
+// The tab lives in the URL hash so a reload stays on it. Read through
+// useSyncExternalStore so the server render (no hash) can't mismatch.
+const subscribeHash = (onChange: () => void) => {
+  window.addEventListener("hashchange", onChange);
+  return () => window.removeEventListener("hashchange", onChange);
+};
 
 // Sections still to build, in priority order. See ADMIN_PAGE_PLAN.md.
 const SECTIONS = [
-  { title: "Templates", detail: "Create, edit, order and switch templates on or off." },
   { title: "Media library", detail: "Lotties, images and backgrounds, and where they are used." },
   { title: "Moderation", detail: "Find any board or card, hide messages, restore boards." },
   { title: "Deliveries", detail: "Scheduled and failed emails, resend and reschedule." },
@@ -18,6 +31,12 @@ export default function AdminPage() {
   const { user, loading } = useAuth();
   // Result of the server-side admin check, tied to the user it was run for.
   const [check, setCheck] = useState<{ userId: string; email: string | null } | null>(null);
+  const hash = useSyncExternalStore(subscribeHash, () => window.location.hash, () => "");
+  const tab: Tab = hash === "#templates" ? "templates" : "analytics";
+  const openTab = (next: Tab) => {
+    window.history.replaceState(null, "", next === "analytics" ? window.location.pathname : `#${next}`);
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -47,12 +66,28 @@ export default function AdminPage() {
           <h1 className="text-xl font-bold text-[#0B1F2A]">Cardora Admin</h1>
           <span className="text-sm text-[#5B6B75] truncate">{checked.email}</span>
         </div>
+        <nav className="max-w-6xl mx-auto px-4 md:px-6 flex gap-6" aria-label="Admin sections">
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => openTab(t.id)}
+              className={`pb-3 text-sm font-semibold border-b-2 transition-colors ${
+                tab === t.id
+                  ? "border-[#2CB1A6] text-[#0B1F2A]"
+                  : "border-transparent text-[#5B6B75] hover:text-[#0B1F2A]"
+              }`}
+              aria-current={tab === t.id ? "page" : undefined}
+            >
+              {t.label}
+            </button>
+          ))}
+        </nav>
       </header>
 
       <main className="max-w-6xl mx-auto px-4 md:px-6 py-8 space-y-10">
-        <Analytics />
+        {tab === "analytics" ? <Analytics /> : <Templates />}
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-3">
           {SECTIONS.map((section) => (
             <div key={section.title} className="bg-white rounded-xl border-2 border-[#E5EAF0] p-5">
               <div className="flex items-center justify-between gap-2 mb-2">
