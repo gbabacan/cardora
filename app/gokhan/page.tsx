@@ -7,11 +7,13 @@ import NotFound from "@/app/not-found";
 import Analytics from "./Analytics";
 import Templates from "./Templates";
 import MediaLibrary from "./MediaLibrary";
+import Moderation from "./Moderation";
 
 const TABS = [
   { id: "analytics", label: "Analytics" },
   { id: "templates", label: "Templates" },
   { id: "media", label: "Media" },
+  { id: "moderation", label: "Moderation" },
 ] as const;
 type Tab = (typeof TABS)[number]["id"];
 
@@ -24,7 +26,6 @@ const subscribeHash = (onChange: () => void) => {
 
 // Sections still to build, in priority order. See ADMIN_PAGE_PLAN.md.
 const SECTIONS = [
-  { title: "Moderation", detail: "Find any board or card, hide messages, restore boards." },
   { title: "Deliveries", detail: "Scheduled and failed emails, resend and reschedule." },
 ];
 
@@ -89,8 +90,9 @@ export default function AdminPage() {
         {tab === "analytics" && <Analytics />}
         {tab === "templates" && <Templates />}
         {tab === "media" && <MediaLibrary />}
+        {tab === "moderation" && <Moderation />}
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {SECTIONS.map((section) => (
             <div key={section.title} className="bg-white rounded-xl border-2 border-[#E5EAF0] p-5">
               <div className="flex items-center justify-between gap-2 mb-2">

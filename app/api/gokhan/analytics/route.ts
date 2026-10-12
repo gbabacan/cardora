@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import type { User } from '@supabase/supabase-js';
-import { getRequestAdmin, supabaseAdmin, fetchAllRows } from '@/lib/serverAuth';
+import { getRequestAdmin, fetchAllRows } from '@/lib/serverAuth';
 import { formatOccasionLabel } from '@/lib/occasionLabels';
+import { listAllUsers } from '@/lib/adminModeration';
 
 const RANGES = [7, 30, 90, 365];
-const PAGE = 1000;
 const DAY = 24 * 60 * 60 * 1000;
 
 interface BoardRow {
@@ -25,16 +24,6 @@ interface BoardRow {
 interface MessageRow {
   board_id: string;
   created_at: string;
-}
-
-async function fetchAllUsers(): Promise<User[]> {
-  const users: User[] = [];
-  for (let page = 1; ; page++) {
-    const { data, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: PAGE });
-    if (error) throw new Error(`users: ${error.message}`);
-    users.push(...data.users);
-    if (data.users.length < PAGE) return users;
-  }
 }
 
 // Buckets are UTC days, or UTC weeks starting Monday for the year view.
@@ -72,7 +61,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const [users, allBoards, messages, contributors] = await Promise.all([
-      fetchAllUsers(),
+      listAllUsers(),
       fetchAllRows<BoardRow>(
         'boards',
         'id, user_id, title, short_id, format_type, occasion_type, status, delivery_type, scheduled_delivery, is_template, source_template_id, created_at'
