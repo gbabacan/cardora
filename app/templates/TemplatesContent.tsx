@@ -68,7 +68,8 @@ const formatOccasionLabel = (type: string) =>
  * Within an occasion row: animation-backed templates first, then
  * image-backed ones, then anything else. Read from the background
  * relation rather than the fetched lottie, so a slow or failed
- * animation fetch cannot reorder the row.
+ * animation fetch cannot reorder the row. The sort is stable, so ties
+ * keep the query order, which follows template_order.
  */
 const backgroundRank = (template: TemplateWithLottie) => {
   const background = template.card_background_data;
@@ -90,7 +91,8 @@ export default function TemplatesContent() {
         .from("boards")
         .select(`*, card_background_data:card_background_id(id, type, lottie_animation:lottie_animation_id(id, name, file_path), image:image_id(id, name, file_path, source_type, remote_url))`)
         .eq("is_template", true)
-        .order("occasion_type");
+        .order("occasion_type")
+        .order("template_order", { ascending: true, nullsFirst: false });
 
       if (error || !data) {
         setLoading(false);

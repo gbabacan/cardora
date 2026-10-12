@@ -121,7 +121,8 @@ export default function DashboardPage() {
           )
         `)
         .eq('is_template', true)
-        .order('occasion_type');
+        .order('occasion_type')
+        .order('template_order', { ascending: true, nullsFirst: false });
 
       if (error) {
         console.error('Error loading templates:', error);
