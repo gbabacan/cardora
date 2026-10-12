@@ -3,6 +3,7 @@ import { Resend } from 'resend';
 import { render } from '@react-email/render';
 import ContributorNotificationEmail from '@/emails/ContributorNotificationEmail';
 import { EMAIL_FROM, summarizeSendResults } from '@/lib/email';
+import { sendLogged } from '@/lib/emailLog';
 import { getRequestUser, getEmailBoard, savedEmailList, recipientNamesOf, boardViewLink } from '@/lib/serverAuth';
 
 export async function POST(request: NextRequest) {
@@ -55,12 +56,12 @@ export async function POST(request: NextRequest) {
         })
       );
 
-      return resend.emails.send({
+      return sendLogged(resend, {
         from: EMAIL_FROM,
         to: email,
         subject: `Your contribution to "${boardTitle}" has been delivered!`,
         html: emailHtml,
-      });
+      }, { kind: 'delivered_notice', trigger: 'owner', boardId: board.id });
     });
 
     const results = await Promise.allSettled(emailPromises);

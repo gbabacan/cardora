@@ -1,34 +1,50 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { render } from '@react-email/render';
 import { Resend } from 'resend';
-import DeliveryEmail from '@/emails/DeliveryEmail';
-import ContributorNotificationEmail from '@/emails/ContributorNotificationEmail';
-import { EMAIL_FROM, summarizeSendResults } from '@/lib/email';
+import { supabaseAdmin } from '@/lib/serverAuth';
+import { deliverBoard, DELIVERY_SELECT, type DeliverableBoard } from '@/lib/delivery';
 
-// Create Supabase admin client (bypasses RLS)
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
+// Records each run in cron_runs so the admin page can see when cron-job.org
+// last called. Best effort: a missing table never stops deliveries.
+async function startRun(): Promise<string | null> {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('cron_runs')
+      .insert({ job: 'deliver-scheduled' })
+      .select('id')
+      .single();
+    if (error) throw error;
+    return data.id;
+  } catch (err) {
+    console.error('cron_runs insert failed:', err);
+    return null;
   }
-);
+}
+
+async function finishRun(id: string | null, result: { due?: number; delivered?: number; failed?: number; error?: string }) {
+  if (!id) return;
+  try {
+    await supabaseAdmin
+      .from('cron_runs')
+      .update({ finished_at: new Date().toISOString(), ...result })
+      .eq('id', id);
+  } catch (err) {
+    console.error('cron_runs update failed:', err);
+  }
+}
 
 export async function GET(request: NextRequest) {
-  try {
-    // Verify the request is from a cron job (optional: add authentication)
-    const authHeader = request.headers.get('authorization');
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+  // Called hourly by cron-job.org with the shared secret.
+  const authHeader = request.headers.get('authorization');
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
-    // Check if Resend API key is configured
+  const runId = await startRun();
+
+  try {
     if (!process.env.RESEND_API_KEY) {
       console.error('RESEND_API_KEY is not configured');
+      await finishRun(runId, { error: 'RESEND_API_KEY is not configured' });
       return NextResponse.json(
         { error: 'Email service is not configured' },
         { status: 500 }
@@ -36,14 +52,12 @@ export async function GET(request: NextRequest) {
     }
 
     const resend = new Resend(process.env.RESEND_API_KEY);
-
-    // Get current time
     const now = new Date().toISOString();
 
     // Find all scheduled boards that are due for delivery
     const { data: scheduledBoards, error: fetchError } = await supabaseAdmin
       .from('boards')
-      .select('*, recipients(*), contributors(*)')
+      .select(DELIVERY_SELECT)
       .eq('status', 'PUBLISHED')
       .eq('delivery_type', 'SCHEDULED')
       .not('scheduled_delivery', 'is', null)
@@ -51,6 +65,7 @@ export async function GET(request: NextRequest) {
 
     if (fetchError) {
       console.error('Error fetching scheduled boards:', fetchError);
+      await finishRun(runId, { error: fetchError.message });
       return NextResponse.json(
         { error: 'Failed to fetch scheduled boards', details: fetchError.message, hint: fetchError.hint },
         { status: 500 }
@@ -58,6 +73,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (!scheduledBoards || scheduledBoards.length === 0) {
+      await finishRun(runId, { due: 0, delivered: 0, failed: 0 });
       return NextResponse.json({
         success: true,
         message: 'No boards or cards due for delivery',
@@ -68,130 +84,28 @@ export async function GET(request: NextRequest) {
     console.log(`Found ${scheduledBoards.length} boards due for delivery`);
 
     const deliveryResults = [];
-
-    // Process each board
-    for (const board of scheduledBoards) {
+    for (const board of scheduledBoards as DeliverableBoard[]) {
       try {
         console.log(`Processing board: ${board.id} - ${board.title}`);
-
-        const recipientNames = board.recipients.map((r: any) => r.name);
-        const formatType = board.format_type || 'board';
-        const boardLink = `cardora.cards/${formatType === 'card' ? 'cards' : 'boards'}/${board.short_id}/view`;
-
-        // Send emails to recipients
-        const recipientEmails = board.recipients
-          .map((r: any) => r.email)
-          .filter((email: string) => email && email.trim());
-
-        let recipientEmailsSent = 0;
-
-        if (recipientEmails.length > 0) {
-          const recipientEmailPromises = recipientEmails.map(async (email: string) => {
-            const emailHtml = await render(
-              DeliveryEmail({
-                recipientEmail: email,
-                boardTitle: board.title,
-                recipientNames,
-                boardLink,
-                deliveryMessage: board.recipient_message,
-              })
-            );
-
-            return resend.emails.send({
-              from: EMAIL_FROM,
-              to: email,
-              subject: `You have a special gift waiting for you 💝`,
-              html: emailHtml,
-            });
-          });
-
-          const recipientResults = await Promise.allSettled(recipientEmailPromises);
-          const summary = summarizeSendResults(recipientResults);
-          recipientEmailsSent = summary.sent;
-          console.log(`Sent ${recipientEmailsSent} emails to recipients`);
-
-          // Leave the board scheduled so the next run retries it, and skip
-          // the contributor "delivered" emails since nothing was delivered
-          if (recipientEmailsSent === 0) {
-            console.error(`All recipient emails failed for board ${board.id}:`, summary.errors);
-            deliveryResults.push({
-              boardId: board.id,
-              title: board.title,
-              success: false,
-              error: 'All recipient emails failed to send'
-            });
-            continue;
-          }
-        }
-
-        // Send emails to contributors if enabled
-        let contributorEmailsSent = 0;
-
-        if (board.notify_contributors && board.contributors && board.contributors.length > 0) {
-          const contributorEmails = board.contributors
-            .map((c: any) => c.email)
-            .filter((email: string) => email && email.trim());
-
-          if (contributorEmails.length > 0) {
-            const contributorEmailPromises = contributorEmails.map(async (email: string) => {
-              const emailHtml = await render(
-                ContributorNotificationEmail({
-                  contributorEmail: email,
-                  boardTitle: board.title,
-                  recipientNames,
-                  boardLink,
-                })
-              );
-
-              return resend.emails.send({
-                from: EMAIL_FROM,
-                to: email,
-                subject: `Your contribution to "${board.title}" has been delivered!`,
-                html: emailHtml,
-              });
-            });
-
-            const contributorResults = await Promise.allSettled(contributorEmailPromises);
-            contributorEmailsSent = summarizeSendResults(contributorResults).sent;
-            console.log(`Sent ${contributorEmailsSent} emails to contributors`);
-          }
-        }
-
-        // Update board status to DELIVERED
-        const { error: updateError } = await supabaseAdmin
-          .from('boards')
-          .update({ status: 'DELIVERED' })
-          .eq('id', board.id);
-
-        if (updateError) {
-          console.error(`Error updating board ${board.id}:`, updateError);
-          deliveryResults.push({
-            boardId: board.id,
-            title: board.title,
-            success: false,
-            error: updateError.message
-          });
-        } else {
-          deliveryResults.push({
-            boardId: board.id,
-            title: board.title,
-            success: true,
-            recipientEmailsSent,
-            contributorEmailsSent
-          });
-        }
-      } catch (error: any) {
+        const result = await deliverBoard(resend, board, 'cron');
+        deliveryResults.push({ boardId: board.id, title: board.title, ...result });
+      } catch (error) {
         console.error(`Error processing board ${board.id}:`, error);
         deliveryResults.push({
           boardId: board.id,
           title: board.title,
           success: false,
-          error: error.message
+          error: (error as Error).message
         });
       }
     }
 
     const successCount = deliveryResults.filter(r => r.success).length;
+    await finishRun(runId, {
+      due: scheduledBoards.length,
+      delivered: successCount,
+      failed: scheduledBoards.length - successCount,
+    });
 
     return NextResponse.json({
       success: true,
@@ -200,10 +114,11 @@ export async function GET(request: NextRequest) {
       results: deliveryResults
     });
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error in scheduled delivery cron:', error);
+    await finishRun(runId, { error: (error as Error).message });
     return NextResponse.json(
-      { error: error.message || 'Failed to process scheduled deliveries' },
+      { error: (error as Error).message || 'Failed to process scheduled deliveries' },
       { status: 500 }
     );
   }

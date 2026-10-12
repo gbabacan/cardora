@@ -3,6 +3,7 @@ import { Resend } from 'resend';
 import { render } from '@react-email/render';
 import InviteEmail from '@/emails/InviteEmail';
 import { EMAIL_FROM, summarizeSendResults } from '@/lib/email';
+import { sendLogged } from '@/lib/emailLog';
 import { getRequestUser, getEmailBoard, cleanEmailList, recipientNamesOf, boardViewLink } from '@/lib/serverAuth';
 
 const MAX_OWNER_INVITES = 50;
@@ -86,12 +87,12 @@ export async function POST(request: NextRequest) {
         })
       );
 
-      return resend.emails.send({
+      return sendLogged(resend, {
         from: EMAIL_FROM,
         to: email,
         subject: `You're invited to contribute to "${boardTitle}"`,
         html: emailHtml,
-      });
+      }, { kind: 'invite', trigger: isOwner ? 'owner' : 'contributor', boardId: board.id });
     });
 
     const results = await Promise.allSettled(emailPromises);

@@ -3,6 +3,7 @@ import { Resend } from 'resend';
 import { render } from '@react-email/render';
 import DeliveryEmail from '@/emails/DeliveryEmail';
 import { EMAIL_FROM, summarizeSendResults } from '@/lib/email';
+import { sendLogged } from '@/lib/emailLog';
 import { getRequestUser, getEmailBoard, savedEmailList, recipientNamesOf, boardViewLink } from '@/lib/serverAuth';
 
 export async function POST(request: NextRequest) {
@@ -60,12 +61,12 @@ export async function POST(request: NextRequest) {
         })
       );
 
-      return resend.emails.send({
+      return sendLogged(resend, {
         from: EMAIL_FROM,
         to: email,
         subject: `You have a special gift waiting for you 💝`,
         html: emailHtml,
-      });
+      }, { kind: 'delivery', trigger: 'owner', boardId: board.id });
     });
 
     const results = await Promise.allSettled(emailPromises);

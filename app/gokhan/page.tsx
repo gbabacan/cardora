@@ -8,12 +8,14 @@ import Analytics from "./Analytics";
 import Templates from "./Templates";
 import MediaLibrary from "./MediaLibrary";
 import Moderation from "./Moderation";
+import Deliveries from "./Deliveries";
 
 const TABS = [
   { id: "analytics", label: "Analytics" },
   { id: "templates", label: "Templates" },
   { id: "media", label: "Media" },
   { id: "moderation", label: "Moderation" },
+  { id: "deliveries", label: "Deliveries" },
 ] as const;
 type Tab = (typeof TABS)[number]["id"];
 
@@ -23,11 +25,6 @@ const subscribeHash = (onChange: () => void) => {
   window.addEventListener("hashchange", onChange);
   return () => window.removeEventListener("hashchange", onChange);
 };
-
-// Sections still to build, in priority order. See ADMIN_PAGE_PLAN.md.
-const SECTIONS = [
-  { title: "Deliveries", detail: "Scheduled and failed emails, resend and reschedule." },
-];
 
 export default function AdminPage() {
   const { user, loading } = useAuth();
@@ -68,12 +65,13 @@ export default function AdminPage() {
           <h1 className="text-xl font-bold text-[#0B1F2A]">Cardora Admin</h1>
           <span className="text-sm text-[#5B6B75] truncate">{checked.email}</span>
         </div>
-        <nav className="max-w-6xl mx-auto px-4 md:px-6 flex gap-6" aria-label="Admin sections">
+        {/* Scrolls sideways on phones rather than widening the page. */}
+        <nav className="max-w-6xl mx-auto px-4 md:px-6 flex gap-6 overflow-x-auto scrollbar-hide" aria-label="Admin sections">
           {TABS.map((t) => (
             <button
               key={t.id}
               onClick={() => openTab(t.id)}
-              className={`pb-3 text-sm font-semibold border-b-2 transition-colors ${
+              className={`pb-3 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors ${
                 tab === t.id
                   ? "border-[#2CB1A6] text-[#0B1F2A]"
                   : "border-transparent text-[#5B6B75] hover:text-[#0B1F2A]"
@@ -86,25 +84,12 @@ export default function AdminPage() {
         </nav>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 md:px-6 py-8 space-y-10">
+      <main className="max-w-6xl mx-auto px-4 md:px-6 py-8">
         {tab === "analytics" && <Analytics />}
         {tab === "templates" && <Templates />}
         {tab === "media" && <MediaLibrary />}
         {tab === "moderation" && <Moderation />}
-
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {SECTIONS.map((section) => (
-            <div key={section.title} className="bg-white rounded-xl border-2 border-[#E5EAF0] p-5">
-              <div className="flex items-center justify-between gap-2 mb-2">
-                <h2 className="font-semibold text-[#0B1F2A]">{section.title}</h2>
-                <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-[#E8F5F4] text-[#2CB1A6]">
-                  Coming soon
-                </span>
-              </div>
-              <p className="text-sm text-[#5B6B75]">{section.detail}</p>
-            </div>
-          ))}
-        </div>
+        {tab === "deliveries" && <Deliveries />}
       </main>
     </div>
   );
