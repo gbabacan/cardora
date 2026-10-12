@@ -4,8 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { isLottieFile } from "@/lib/lotties";
-import LottieAnimation from "@/components/LottieAnimation";
+import LazyLottie from "@/components/LazyLottie";
 import HorizontalScrollRow from "../HorizontalScrollRow";
 import { useAuth } from "@/hooks/useAuth";
 import { signOut } from "@/lib/auth";
@@ -21,9 +20,13 @@ interface BoardWithRecipients extends Board {
   messageCount?: number;
 }
 
-interface TemplateWithLottie extends Board {
-  lottieData?: any;
-}
+const placeholderIcon = (
+  <div className="w-12 h-12 rounded-full bg-[#A7E8E2] flex items-center justify-center">
+    <svg className="w-6 h-6 text-[#2CB1A6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+    </svg>
+  </div>
+);
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
@@ -35,7 +38,7 @@ export default function DashboardPage() {
   const [loadingBoards, setLoadingBoards] = useState(true);
   const [occasions, setOccasions] = useState<Occasion[]>([]);
   const [loadingOccasions, setLoadingOccasions] = useState(true);
-  const [templates, setTemplates] = useState<TemplateWithLottie[]>([]);
+  const [templates, setTemplates] = useState<Board[]>([]);
   const [loadingTemplates, setLoadingTemplates] = useState(true);
   const [visibleOccasionCount, setVisibleOccasionCount] = useState(3);
   const [templateFilterFormat, setTemplateFilterFormat] = useState<'all' | 'board' | 'card'>('all');
@@ -135,36 +138,9 @@ export default function DashboardPage() {
         return;
       }
 
-      // Load lottie data for each template based on format_type
-      const lottieCache: Record<string, any> = {};
-      const templatesWithLottie = await Promise.all(
-        data.map(async (template) => {
-          // Both boards and cards store their lottie in card_background_id
-          const lottieAnim = template.card_background_data?.lottie_animation;
-
-          if (!lottieAnim?.file_path) return { ...template, lottieData: null };
-
-          const cacheKey = lottieAnim.id;
-          if (!lottieCache[cacheKey]) {
-            try {
-              if (isLottieFile(lottieAnim.file_path)) {
-                lottieCache[cacheKey] = { __lottieFileSrc: lottieAnim.file_path };
-              } else {
-                const res = await fetch(lottieAnim.file_path);
-                if (res.ok) {
-                  lottieCache[cacheKey] = await res.json();
-                }
-              }
-            } catch (err) {
-              console.error('Error loading lottie:', lottieAnim.file_path, err);
-            }
-          }
-
-          return { ...template, lottieData: lottieCache[cacheKey] || null };
-        })
-      );
-
-      setTemplates(templatesWithLottie as TemplateWithLottie[]);
+      // Animations load per tile as they scroll into view (LazyLottie),
+      // so the section can render as soon as the rows are known.
+      setTemplates(data as Board[]);
       setLoadingTemplates(false);
     };
 
@@ -867,14 +843,14 @@ export default function DashboardPage() {
                             style={{ scrollSnapAlign: "start" }}
                           >
                             <div className="aspect-square bg-gradient-to-br from-[#E8F5F4] to-[#F7FAFC] flex items-center justify-center p-2">
-                              {template.lottieData ? (
-                                <LottieAnimation animationData={template.lottieData} loop={true} style={{ width: '100%', height: '100%' }} />
+                              {template.card_background_data?.lottie_animation?.file_path ? (
+                                <LazyLottie
+                                  filePath={template.card_background_data.lottie_animation.file_path}
+                                  className="w-full h-full flex items-center justify-center"
+                                  placeholder={placeholderIcon}
+                                />
                               ) : (
-                                <div className="w-12 h-12 rounded-full bg-[#A7E8E2] flex items-center justify-center">
-                                  <svg className="w-6 h-6 text-[#2CB1A6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                  </svg>
-                                </div>
+                                placeholderIcon
                               )}
                             </div>
                             <div className="p-3">

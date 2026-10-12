@@ -1,6 +1,16 @@
 "use client";
 
-import { useRef, useState, useEffect, useCallback } from "react";
+import { createContext, useRef, useState, useEffect, useCallback } from "react";
+
+/**
+ * Lets tiles inside a row lazy-load against the row rather than the page:
+ * `root` is the scroll container, and `nearViewport` says whether the row
+ * itself is on (or close to) the screen vertically.
+ */
+export const ScrollRowContext = createContext<{
+  root: HTMLDivElement | null;
+  nearViewport: boolean;
+} | null>(null);
 
 interface Props {
   children: React.ReactNode;
@@ -10,6 +20,8 @@ export default function HorizontalScrollRow({ children }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [root, setRoot] = useState<HTMLDivElement | null>(null);
+  const [nearViewport, setNearViewport] = useState(false);
 
   const checkScroll = useCallback(() => {
     const el = scrollRef.current;
@@ -30,49 +42,63 @@ export default function HorizontalScrollRow({ children }: Props) {
     };
   }, [checkScroll]);
 
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setRoot(el);
+    const observer = new IntersectionObserver(
+      ([entry]) => setNearViewport(entry.isIntersecting),
+      { rootMargin: "300px 0px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   const scrollBy = (dir: "left" | "right") => {
     scrollRef.current?.scrollBy({ left: dir === "right" ? 300 : -300, behavior: "smooth" });
   };
 
   return (
-    <div className="relative group/scroll">
-      {/* Scroll container */}
-      <div
-        ref={scrollRef}
-        className="flex flex-row gap-4 overflow-x-auto pb-2 scrollbar-hide"
-        style={{ scrollSnapType: "x mandatory" }}
-      >
-        {children}
-      </div>
-
-      {/* Left arrow */}
-      {canScrollLeft && (
-        <button
-          onClick={() => scrollBy("left")}
-          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 z-10 w-8 h-8 bg-white border-2 border-[#E5EAF0] rounded-full shadow-lg flex items-center justify-center hover:border-[#2CB1A6] hover:text-[#2CB1A6] text-[#5B6B75] transition-all"
-          aria-label="Scroll left"
+    <ScrollRowContext.Provider value={{ root, nearViewport }}>
+      <div className="relative group/scroll">
+        {/* Scroll container */}
+        <div
+          ref={scrollRef}
+          className="flex flex-row gap-4 overflow-x-auto pb-2 scrollbar-hide"
+          style={{ scrollSnapType: "x mandatory" }}
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-      )}
+          {children}
+        </div>
 
-      {/* Right arrow + fade */}
-      {canScrollRight && (
-        <>
-          <div className="absolute right-0 top-0 bottom-2 w-16 bg-gradient-to-l from-white via-white/80 to-transparent pointer-events-none rounded-r-xl" />
+        {/* Left arrow */}
+        {canScrollLeft && (
           <button
-            onClick={() => scrollBy("right")}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 z-10 w-8 h-8 bg-white border-2 border-[#2CB1A6] rounded-full shadow-lg flex items-center justify-center text-[#2CB1A6] hover:bg-[#2CB1A6] hover:text-white transition-all"
-            aria-label="Scroll right"
+            onClick={() => scrollBy("left")}
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 z-10 w-8 h-8 bg-white border-2 border-[#E5EAF0] rounded-full shadow-lg flex items-center justify-center hover:border-[#2CB1A6] hover:text-[#2CB1A6] text-[#5B6B75] transition-all"
+            aria-label="Scroll left"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-        </>
-      )}
-    </div>
+        )}
+
+        {/* Right arrow + fade */}
+        {canScrollRight && (
+          <>
+            <div className="absolute right-0 top-0 bottom-2 w-16 bg-gradient-to-l from-white via-white/80 to-transparent pointer-events-none rounded-r-xl" />
+            <button
+              onClick={() => scrollBy("right")}
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 z-10 w-8 h-8 bg-white border-2 border-[#2CB1A6] rounded-full shadow-lg flex items-center justify-center text-[#2CB1A6] hover:bg-[#2CB1A6] hover:text-white transition-all"
+              aria-label="Scroll right"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </>
+        )}
+      </div>
+    </ScrollRowContext.Provider>
   );
 }

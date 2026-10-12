@@ -3,15 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import { isLottieFile } from "@/lib/lotties";
 import { getImageUrl } from "@/lib/images";
-import LottieAnimation from "@/components/LottieAnimation";
+import LazyLottie from "@/components/LazyLottie";
 import HorizontalScrollRow from "../HorizontalScrollRow";
 import type { Board } from "@/lib/boards";
-
-interface TemplateWithLottie extends Board {
-  lottieData?: any;
-}
 
 /**
  * Display label per occasion_type. Templates carry two spellings of the
@@ -71,15 +66,23 @@ const formatOccasionLabel = (type: string) =>
  * animation fetch cannot reorder the row. The sort is stable, so ties
  * keep the query order, which follows template_order.
  */
-const backgroundRank = (template: TemplateWithLottie) => {
+const backgroundRank = (template: Board) => {
   const background = template.card_background_data;
   if (background?.type === "ANIMATION" || background?.lottie_animation) return 0;
   if (background?.type === "IMAGE") return 1;
   return 2;
 };
 
+const placeholderIcon = (
+  <div className="w-12 h-12 rounded-full bg-[#A7E8E2] flex items-center justify-center">
+    <svg className="w-6 h-6 text-[#2CB1A6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+    </svg>
+  </div>
+);
+
 export default function TemplatesContent() {
-  const [templates, setTemplates] = useState<TemplateWithLottie[]>([]);
+  const [templates, setTemplates] = useState<Board[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterFormat, setFilterFormat] = useState<"all" | "board" | "card">("board");
   const [filterOccasion, setFilterOccasion] = useState<string>("all");
@@ -99,28 +102,9 @@ export default function TemplatesContent() {
         return;
       }
 
-      const lottieCache: Record<string, any> = {};
-      const templatesWithLottie = await Promise.all(
-        data.map(async (template) => {
-          const lottieAnim = template.card_background_data?.lottie_animation;
-          if (!lottieAnim?.file_path) return { ...template, lottieData: null };
-          const cacheKey = lottieAnim.id;
-          if (!lottieCache[cacheKey]) {
-            try {
-              if (isLottieFile(lottieAnim.file_path)) {
-                // .lottie binary — store sentinel so LottieAnimation uses DotLottieReact
-                lottieCache[cacheKey] = { __lottieFileSrc: lottieAnim.file_path };
-              } else {
-                const res = await fetch(lottieAnim.file_path);
-                if (res.ok) lottieCache[cacheKey] = await res.json();
-              }
-            } catch {}
-          }
-          return { ...template, lottieData: lottieCache[cacheKey] || null };
-        })
-      );
-
-      setTemplates(templatesWithLottie as TemplateWithLottie[]);
+      // Animations load per tile as they scroll into view (LazyLottie),
+      // so the page can render as soon as the rows are known.
+      setTemplates(data as Board[]);
       setLoading(false);
     };
 
@@ -249,14 +233,14 @@ export default function TemplatesContent() {
                       loading="lazy"
                       className="w-full h-full object-cover"
                     />
-                  ) : template.lottieData ? (
-                    <LottieAnimation animationData={template.lottieData} loop={true} style={{ width: "100%", height: "100%" }} />
+                  ) : template.card_background_data?.lottie_animation?.file_path ? (
+                    <LazyLottie
+                      filePath={template.card_background_data.lottie_animation.file_path}
+                      className="w-full h-full flex items-center justify-center"
+                      placeholder={placeholderIcon}
+                    />
                   ) : (
-                    <div className="w-12 h-12 rounded-full bg-[#A7E8E2] flex items-center justify-center">
-                      <svg className="w-6 h-6 text-[#2CB1A6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                    </div>
+                    placeholderIcon
                   )}
 
                   {/* Format sits on the thumbnail so the tile needs no footer. */}

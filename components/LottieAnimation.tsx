@@ -1,6 +1,7 @@
 "use client";
 
-import Lottie from "lottie-react";
+import { useEffect, useRef } from "react";
+import Lottie, { type LottieRefCurrentProps } from "lottie-react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { isLottieFileSentinel } from "@/lib/lotties";
 
@@ -13,6 +14,12 @@ interface LottieAnimationProps {
   className?: string;
   style?: React.CSSProperties;
   onComplete?: () => void;
+  /**
+   * Pause a JSON animation, e.g. while it is scrolled out of view.
+   * .lottie files need no help: the dotLottie player already freezes
+   * itself when its canvas is off screen.
+   */
+  paused?: boolean;
 }
 
 export default function LottieAnimation({
@@ -23,7 +30,15 @@ export default function LottieAnimation({
   className = "",
   style,
   onComplete,
+  paused = false,
 }: LottieAnimationProps) {
+  const lottieRef = useRef<LottieRefCurrentProps | null>(null);
+
+  useEffect(() => {
+    if (paused) lottieRef.current?.pause();
+    else if (autoplay) lottieRef.current?.play();
+  }, [paused, autoplay]);
+
   const lottieFileSrc = src || (isLottieFileSentinel(animationData) ? animationData.__lottieFileSrc : null);
 
   if (lottieFileSrc) {
@@ -42,6 +57,7 @@ export default function LottieAnimation({
 
   return (
     <Lottie
+      lottieRef={lottieRef}
       animationData={animationData}
       loop={loop}
       autoplay={autoplay}
