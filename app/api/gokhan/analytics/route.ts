@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type { User } from '@supabase/supabase-js';
-import { getRequestAdmin, supabaseAdmin } from '@/lib/serverAuth';
+import { getRequestAdmin, supabaseAdmin, fetchAllRows } from '@/lib/serverAuth';
 import { formatOccasionLabel } from '@/lib/occasionLabels';
 
 const RANGES = [7, 30, 90, 365];
@@ -25,21 +25,6 @@ interface BoardRow {
 interface MessageRow {
   board_id: string;
   created_at: string;
-}
-
-// Supabase caps a select at 1000 rows, so read in pages.
-async function fetchAll<T>(table: string, columns: string): Promise<T[]> {
-  const rows: T[] = [];
-  for (let from = 0; ; from += PAGE) {
-    const { data, error } = await supabaseAdmin
-      .from(table)
-      .select(columns)
-      .order('created_at', { ascending: true })
-      .range(from, from + PAGE - 1);
-    if (error) throw new Error(`${table}: ${error.message}`);
-    rows.push(...((data ?? []) as T[]));
-    if (!data || data.length < PAGE) return rows;
-  }
 }
 
 async function fetchAllUsers(): Promise<User[]> {
@@ -88,12 +73,12 @@ export async function GET(request: NextRequest) {
   try {
     const [users, allBoards, messages, contributors] = await Promise.all([
       fetchAllUsers(),
-      fetchAll<BoardRow>(
+      fetchAllRows<BoardRow>(
         'boards',
         'id, user_id, title, short_id, format_type, occasion_type, status, delivery_type, scheduled_delivery, is_template, source_template_id, created_at'
       ),
-      fetchAll<MessageRow>('messages', 'board_id, created_at'),
-      fetchAll<{ board_id: string; created_at: string }>('contributors', 'board_id, created_at'),
+      fetchAllRows<MessageRow>('messages', 'board_id, created_at'),
+      fetchAllRows<{ board_id: string; created_at: string }>('contributors', 'board_id, created_at'),
     ]);
 
     const templates = new Map(allBoards.filter(b => b.is_template).map(b => [b.id, b]));

@@ -8,6 +8,9 @@ export async function extractDominantColor(
 ): Promise<string> {
   return new Promise((resolve) => {
     const img = new Image();
+    // Uploaded images come from Supabase Storage; without this the canvas is
+    // tainted and getImageData throws.
+    img.crossOrigin = 'anonymous';
     img.onload = () => {
       try {
         const canvas = document.createElement('canvas');

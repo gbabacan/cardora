@@ -6,10 +6,12 @@ import { useAuth } from "@/hooks/useAuth";
 import NotFound from "@/app/not-found";
 import Analytics from "./Analytics";
 import Templates from "./Templates";
+import MediaLibrary from "./MediaLibrary";
 
 const TABS = [
   { id: "analytics", label: "Analytics" },
   { id: "templates", label: "Templates" },
+  { id: "media", label: "Media" },
 ] as const;
 type Tab = (typeof TABS)[number]["id"];
 
@@ -22,7 +24,6 @@ const subscribeHash = (onChange: () => void) => {
 
 // Sections still to build, in priority order. See ADMIN_PAGE_PLAN.md.
 const SECTIONS = [
-  { title: "Media library", detail: "Lotties, images and backgrounds, and where they are used." },
   { title: "Moderation", detail: "Find any board or card, hide messages, restore boards." },
   { title: "Deliveries", detail: "Scheduled and failed emails, resend and reschedule." },
 ];
@@ -32,7 +33,7 @@ export default function AdminPage() {
   // Result of the server-side admin check, tied to the user it was run for.
   const [check, setCheck] = useState<{ userId: string; email: string | null } | null>(null);
   const hash = useSyncExternalStore(subscribeHash, () => window.location.hash, () => "");
-  const tab: Tab = hash === "#templates" ? "templates" : "analytics";
+  const tab: Tab = TABS.find((t) => `#${t.id}` === hash)?.id ?? "analytics";
   const openTab = (next: Tab) => {
     window.history.replaceState(null, "", next === "analytics" ? window.location.pathname : `#${next}`);
     window.dispatchEvent(new HashChangeEvent("hashchange"));
@@ -85,9 +86,11 @@ export default function AdminPage() {
       </header>
 
       <main className="max-w-6xl mx-auto px-4 md:px-6 py-8 space-y-10">
-        {tab === "analytics" ? <Analytics /> : <Templates />}
+        {tab === "analytics" && <Analytics />}
+        {tab === "templates" && <Templates />}
+        {tab === "media" && <MediaLibrary />}
 
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2">
           {SECTIONS.map((section) => (
             <div key={section.title} className="bg-white rounded-xl border-2 border-[#E5EAF0] p-5">
               <div className="flex items-center justify-between gap-2 mb-2">

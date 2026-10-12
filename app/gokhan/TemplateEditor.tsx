@@ -48,19 +48,24 @@ function ColorField({ value, onChange, name }: { value: string; onChange: (v: st
 export default function TemplateEditor({
   data,
   template,
+  preset,
   onClose,
   onSaved,
 }: {
   data: TemplatesData;
   template: AdminTemplate | null;
+  /** Starting values for a new template, e.g. from the media library. */
+  preset?: { media: NonNullable<MediaChoice>; occasion: string; title: string };
   onClose: () => void;
   onSaved: () => void;
 }) {
   const isNew = template === null;
   const [formats, setFormats] = useState<Format[]>(template ? [template.format] : ["board", "card"]);
-  const [title, setTitle] = useState(template?.title ?? "");
-  const [occasion, setOccasion] = useState(template?.occasion ?? data.occasions[0]?.value ?? "");
-  const [media, setMedia] = useState<MediaChoice>(template?.media ? { kind: template.media.kind, id: template.media.id } : null);
+  const [title, setTitle] = useState(template?.title ?? preset?.title ?? "");
+  const [occasion, setOccasion] = useState(template?.occasion ?? preset?.occasion ?? data.occasions[0]?.value ?? "");
+  const [media, setMedia] = useState<MediaChoice>(
+    template?.media ? { kind: template.media.kind, id: template.media.id } : preset?.media ?? null
+  );
   const [titleFont, setTitleFont] = useState(template?.titleFont ?? "Inter");
   const [titleColor, setTitleColor] = useState(template?.titleColor ?? "#0B1F2A");
   const [envelopeColor, setEnvelopeColor] = useState(template?.envelopeColor ?? "#9d2c3e");
@@ -69,7 +74,7 @@ export default function TemplateEditor({
   const [recipient, setRecipient] = useState(template?.recipient ?? "Sarah Bennett");
   const [messages, setMessages] = useState<MessageDraft[] | null>(isNew ? [] : null);
   const [initialMessages, setInitialMessages] = useState<MessageDraft[]>([]);
-  const [mediaTab, setMediaTab] = useState<"lottie" | "image">(template?.media?.kind ?? "lottie");
+  const [mediaTab, setMediaTab] = useState<"lottie" | "image">(template?.media?.kind ?? preset?.media.kind ?? "lottie");
   const [allMedia, setAllMedia] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);

@@ -45,6 +45,22 @@ export async function getRequestAdmin(request: NextRequest): Promise<User | null
   return user;
 }
 
+// Supabase caps a select at 1000 rows, so read in pages, oldest first.
+export async function fetchAllRows<T>(table: string, columns: string): Promise<T[]> {
+  const PAGE = 1000;
+  const rows: T[] = [];
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await supabaseAdmin
+      .from(table)
+      .select(columns)
+      .order('created_at', { ascending: true })
+      .range(from, from + PAGE - 1);
+    if (error) throw new Error(`${table}: ${error.message}`);
+    rows.push(...((data ?? []) as T[]));
+    if (!data || data.length < PAGE) return rows;
+  }
+}
+
 export interface EmailBoard {
   id: string;
   user_id: string;
