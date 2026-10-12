@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getRequestAdmin, supabaseAdmin } from '@/lib/serverAuth';
+import { changes, logAdminAction, quoted } from '@/lib/auditLog';
 import {
   cleanTemplateInput,
   cleanMessages,
@@ -20,12 +21,12 @@ async function findTemplate(id: string) {
   if (!isUuid(id)) return null;
   const { data, error } = await supabaseAdmin
     .from('boards')
-    .select('id, format_type')
+    .select('id, format_type, title, occasion_type, title_font, title_font_color, template_hidden, envelope_color, effect_id')
     .eq('id', id)
     .eq('is_template', true)
     .maybeSingle();
   if (error) throw new Error(error.message);
-  return data as { id: string; format_type: 'board' | 'card' } | null;
+  return data as ({ id: string; format_type: 'board' | 'card'; title: string } & Record<string, unknown>) | null;
 }
 
 // A template's messages as plain text, for the edit form.
@@ -56,7 +57,8 @@ export async function GET(request: NextRequest, { params }: Params) {
 }
 
 export async function PATCH(request: NextRequest, { params }: Params) {
-  if (!(await getRequestAdmin(request))) return notFound();
+  const admin = await getRequestAdmin(request);
+  if (!admin) return notFound();
   const { id } = await params;
 
   try {
@@ -89,6 +91,28 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     if (input.recipient !== undefined) await setRecipient(id, input.recipient);
     if (messages) await syncMessages(id, messages);
 
+    // Plain fields as before/after; background and colour rows as what was
+    // picked; recipient and messages as given.
+    const plain = Object.fromEntries(
+      Object.entries(update).filter(([key]) => !['card_background_id', 'background_id', 'template_order'].includes(key))
+    );
+    const details: Record<string, unknown> = changes(template, plain);
+    if (input.media) details.media = input.media;
+    if ('background_id' in update) details.page_color = input.page_color ?? null;
+    if (input.recipient !== undefined) details.recipient = input.recipient;
+    if (messages) details.messages = messages.length;
+    const onlyHidden = Object.keys(details).length === 1 && 'template_hidden' in details;
+    await logAdminAction(admin, {
+      action: onlyHidden ? (input.hidden ? 'template.hide' : 'template.show') : 'template.update',
+      targetType: 'template',
+      targetId: id,
+      boardId: id,
+      summary: onlyHidden
+        ? `${input.hidden ? 'Hid' : 'Showed'} ${template.format_type} template ${quoted(template.title)}`
+        : `Edited ${template.format_type} template ${quoted(input.title ?? template.title)}: ${Object.keys(details).join(', ') || 'no changes'}`,
+      details,
+    });
+
     return NextResponse.json({ ok: true });
   } catch (err) {
     if (err instanceof InputError) return NextResponse.json({ error: err.message }, { status: 400 });
@@ -101,13 +125,22 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 // recipients (all cascade). Boards made from it keep working; their
 // source_template_id is cleared.
 export async function DELETE(request: NextRequest, { params }: Params) {
-  if (!(await getRequestAdmin(request))) return notFound();
+  const admin = await getRequestAdmin(request);
+  if (!admin) return notFound();
   const { id } = await params;
 
   try {
-    if (!(await findTemplate(id))) return notFound();
+    const template = await findTemplate(id);
+    if (!template) return notFound();
     const { error } = await supabaseAdmin.from('boards').delete().eq('id', id).eq('is_template', true);
     if (error) throw new Error(error.message);
+    await logAdminAction(admin, {
+      action: 'template.delete',
+      targetType: 'template',
+      targetId: id,
+      summary: `Deleted ${template.format_type} template ${quoted(template.title)}`,
+      details: { occasion: template.occasion_type },
+    });
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error('Admin template delete failed:', err);

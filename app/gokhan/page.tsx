@@ -9,6 +9,7 @@ import Templates from "./Templates";
 import MediaLibrary from "./MediaLibrary";
 import Moderation from "./Moderation";
 import Deliveries from "./Deliveries";
+import AuditLog from "./AuditLog";
 
 const TABS = [
   { id: "analytics", label: "Analytics" },
@@ -16,6 +17,7 @@ const TABS = [
   { id: "media", label: "Media" },
   { id: "moderation", label: "Moderation" },
   { id: "deliveries", label: "Deliveries" },
+  { id: "audit", label: "Audit log" },
 ] as const;
 type Tab = (typeof TABS)[number]["id"];
 
@@ -90,6 +92,7 @@ export default function AdminPage() {
         {tab === "media" && <MediaLibrary />}
         {tab === "moderation" && <Moderation />}
         {tab === "deliveries" && <Deliveries />}
+        {tab === "audit" && <AuditLog />}
       </main>
     </div>
   );

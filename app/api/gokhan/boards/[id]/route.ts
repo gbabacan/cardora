@@ -3,6 +3,7 @@ import { getRequestAdmin, supabaseAdmin } from '@/lib/serverAuth';
 import { formatOccasionLabel } from '@/lib/occasionLabels';
 import { htmlToText, isUuid } from '@/lib/adminTemplates';
 import { BOARD_STATUSES, listAllUsers, type BoardStatus } from '@/lib/adminModeration';
+import { logAdminAction, quoted } from '@/lib/auditLog';
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -87,7 +88,8 @@ export async function GET(request: NextRequest, { params }: Params) {
 // Sets the status (DELETED to remove from the owner's dashboard, anything
 // else to restore) and/or moves the board to another user by email.
 export async function PATCH(request: NextRequest, { params }: Params) {
-  if (!(await getRequestAdmin(request))) return notFound();
+  const admin = await getRequestAdmin(request);
+  if (!admin) return notFound();
   const { id } = await params;
 
   try {
@@ -104,18 +106,48 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       update.status = body.status;
     }
 
+    let previousOwner = '';
+    let newOwner = '';
     if ('owner_email' in body) {
       const email = typeof body.owner_email === 'string' ? body.owner_email.trim().toLowerCase() : '';
-      const user = email ? (await listAllUsers()).find(u => u.email?.toLowerCase() === email) : undefined;
+      const users = email ? await listAllUsers() : [];
+      const user = users.find(u => u.email?.toLowerCase() === email);
       if (!user) {
         return NextResponse.json({ error: 'No Cardora account uses that email' }, { status: 400 });
       }
       update.user_id = user.id;
+      newOwner = user.email ?? email;
+      previousOwner = users.find(u => u.id === board.user_id)?.email ?? board.user_id ?? '';
     }
 
     if (Object.keys(update).length) {
       const { error } = await supabaseAdmin.from('boards').update(update).eq('id', id).eq('is_template', false);
       if (error) throw new Error(error.message);
+    }
+
+    const what = board.format_type === 'card' ? 'card' : 'board';
+    if (update.status && update.status !== board.status) {
+      await logAdminAction(admin, {
+        action: 'board.status',
+        targetType: 'board',
+        targetId: id,
+        boardId: id,
+        summary:
+          update.status === 'DELETED'
+            ? `Deleted ${what} ${quoted(board.title)} for its owner`
+            : `Set ${what} ${quoted(board.title)} to ${update.status.toLowerCase()}`,
+        details: { status: { from: board.status, to: update.status } },
+      });
+    }
+    if (update.user_id && update.user_id !== board.user_id) {
+      await logAdminAction(admin, {
+        action: 'board.owner',
+        targetType: 'board',
+        targetId: id,
+        boardId: id,
+        summary: `Moved ${what} ${quoted(board.title)} from ${previousOwner || 'no owner'} to ${newOwner}`,
+        details: { owner: { from: previousOwner || null, to: newOwner } },
+      });
     }
     return NextResponse.json({ ok: true });
   } catch (err) {

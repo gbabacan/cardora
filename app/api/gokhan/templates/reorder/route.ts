@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getRequestAdmin, supabaseAdmin } from '@/lib/serverAuth';
 import { isUuid } from '@/lib/adminTemplates';
+import { logAdminAction } from '@/lib/auditLog';
 
 // Sets template_order to 1..n in the given order. The client sends one
 // occasion's templates of one format at a time.
 export async function POST(request: NextRequest) {
-  if (!(await getRequestAdmin(request))) {
+  const admin = await getRequestAdmin(request);
+  if (!admin) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
 
@@ -22,6 +24,13 @@ export async function POST(request: NextRequest) {
     );
     const failed = results.find(r => r.error);
     if (failed?.error) throw new Error(failed.error.message);
+
+    await logAdminAction(admin, {
+      action: 'template.reorder',
+      targetType: 'template',
+      summary: `Reordered ${ids.length} templates`,
+      details: { ids },
+    });
 
     return NextResponse.json({ ok: true });
   } catch (err) {

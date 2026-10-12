@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { adminFetch } from "./adminFetch";
 import { viewPath } from "./templateTypes";
+import { AuditEntryRow, type AuditEntry } from "./AuditLog";
 
 interface BoardResult {
   id: string;
@@ -82,6 +83,7 @@ export default function Moderation() {
   const [error, setError] = useState<string | null>(null);
   const [newStatus, setNewStatus] = useState("");
   const [newOwner, setNewOwner] = useState("");
+  const [history, setHistory] = useState<AuditEntry[]>([]);
 
   const search = useCallback(() => {
     const params = new URLSearchParams({ q: query, ...(status && { status }), ...(format && { format }) });
@@ -99,10 +101,15 @@ export default function Moderation() {
   }, [search]);
 
   const loadDetail = useCallback((id: string) => {
-    return adminFetch<BoardDetail>(`/api/gokhan/boards/${id}`)
-      .then((d) => {
+    return Promise.all([
+      adminFetch<BoardDetail>(`/api/gokhan/boards/${id}`),
+      // History is a nice-to-have: an empty list if the log isn't set up.
+      adminFetch<{ entries: AuditEntry[] }>(`/api/gokhan/audit?board=${id}`).catch(() => ({ entries: [] })),
+    ])
+      .then(([d, h]) => {
         setDetail(d);
         setNewStatus(d.board.status);
+        setHistory(h.entries);
       })
       .catch((e: Error) => setError(e.message));
   }, []);
@@ -110,6 +117,7 @@ export default function Moderation() {
   const open = (id: string) => {
     setSelected(id);
     setDetail(null);
+    setHistory([]);
     setNewOwner("");
     setError(null);
     loadDetail(id);
@@ -387,6 +395,17 @@ export default function Moderation() {
                   ))}
                 </ul>
               </div>
+
+              {history.length > 0 && (
+                <div className="border-t border-[#E5EAF0]">
+                  <h4 className="px-5 pt-4 text-sm font-semibold text-[#0B1F2A]">Admin history</h4>
+                  <ul className="[&>li]:px-5">
+                    {history.map((entry) => (
+                      <AuditEntryRow key={entry.id} entry={entry} />
+                    ))}
+                  </ul>
+                </div>
+              )}
             </>
           )}
         </section>

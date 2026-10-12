@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getRequestAdmin, supabaseAdmin } from '@/lib/serverAuth';
+import { logAdminAction, quoted } from '@/lib/auditLog';
 import { formatOccasionLabel } from '@/lib/occasionLabels';
 import {
   cleanTemplateInput,
@@ -147,7 +148,8 @@ export async function GET(request: NextRequest) {
 // Creates one template per requested format, sharing the same animation or
 // image, recipient and messages. Cards show only the first message.
 export async function POST(request: NextRequest) {
-  if (!(await getRequestAdmin(request))) return notFound();
+  const admin = await getRequestAdmin(request);
+  if (!admin) return notFound();
 
   try {
     const body = await request.json();
@@ -200,6 +202,14 @@ export async function POST(request: NextRequest) {
       await setRecipient(data.id, input.recipient ?? '');
       await syncMessages(data.id, format === 'card' ? messages.slice(0, 1) : messages);
       created.push({ id: data.id, format });
+      await logAdminAction(admin, {
+        action: 'template.create',
+        targetType: 'template',
+        targetId: data.id,
+        boardId: data.id,
+        summary: `Created ${format} template ${quoted(input.title)}`,
+        details: { occasion: input.occasion_type, media: input.media, messages: format === 'card' ? Math.min(1, messages.length) : messages.length },
+      });
     }
 
     return NextResponse.json({ created });

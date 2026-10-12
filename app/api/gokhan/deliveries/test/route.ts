@@ -4,6 +4,7 @@ import { render } from '@react-email/render';
 import DeliveryEmail from '@/emails/DeliveryEmail';
 import { EMAIL_FROM } from '@/lib/email';
 import { sendLogged } from '@/lib/emailLog';
+import { logAdminAction, quoted } from '@/lib/auditLog';
 import { getRequestAdmin, getEmailBoard, recipientNamesOf, boardViewLink } from '@/lib/serverAuth';
 
 // Sends the recipient delivery email to the signed-in admin only, either
@@ -37,6 +38,13 @@ export async function POST(request: NextRequest) {
       { kind: 'test', trigger: 'admin', boardId: board?.id ?? null }
     );
     if (result.error) return NextResponse.json({ error: result.error.message }, { status: 502 });
+    await logAdminAction(admin, {
+      action: 'email.test',
+      targetType: 'email',
+      targetId: result.data?.id ?? null,
+      boardId: board?.id ?? null,
+      summary: board ? `Sent a test of ${quoted(board.title)}'s delivery email to ${admin.email}` : `Sent a sample delivery email to ${admin.email}`,
+    });
     return NextResponse.json({ ok: true, to: admin.email });
   } catch (err) {
     console.error('Admin test email failed:', err);

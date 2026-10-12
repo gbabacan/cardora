@@ -2,22 +2,25 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getRequestAdmin, supabaseAdmin } from '@/lib/serverAuth';
 import { InputError, isUuid } from '@/lib/adminTemplates';
 import { MEDIA_BUCKET, MEDIA_TABLE, bucketPathOf, cleanMediaFields, isMediaKind } from '@/lib/adminMedia';
+import { changes, logAdminAction, quoted } from '@/lib/auditLog';
 
 type Params = { params: Promise<{ kind: string; id: string }> };
 
 const notFound = () => NextResponse.json({ error: 'Not found' }, { status: 404 });
 
 async function resolve(request: NextRequest, params: Params['params']) {
-  if (!(await getRequestAdmin(request))) return null;
+  const admin = await getRequestAdmin(request);
+  if (!admin) return null;
   const { kind, id } = await params;
   if (!isMediaKind(kind) || !isUuid(id)) return null;
   const { data, error } = await supabaseAdmin
     .from(MEDIA_TABLE[kind])
-    .select('id, file_path, remote_url')
+    .select('id, name, occasion_type, helper_color, is_active, file_path, remote_url')
     .eq('id', id)
     .maybeSingle();
   if (error) throw new Error(error.message);
-  return data ? { kind, row: data as { id: string; file_path: string | null; remote_url: string | null } } : null;
+  type Row = { id: string; name: string | null; file_path: string | null; remote_url: string | null } & Record<string, unknown>;
+  return data ? { admin, kind, row: data as Row } : null;
 }
 
 // Name, occasion, helper colour and active flag. Deactivating only hides
@@ -31,6 +34,15 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
     const { error } = await supabaseAdmin.from(MEDIA_TABLE[found.kind]).update(fields).eq('id', found.row.id);
     if (error) throw new Error(error.message);
+
+    const details = changes(found.row, { ...fields });
+    await logAdminAction(found.admin, {
+      action: 'media.update',
+      targetType: 'media',
+      targetId: found.row.id,
+      summary: `Edited ${found.kind === 'lottie' ? 'animation' : 'image'} ${quoted(fields.name ?? found.row.name)}: ${Object.keys(details).join(', ') || 'no changes'}`,
+      details: { kind: found.kind, ...details },
+    });
     return NextResponse.json({ ok: true });
   } catch (err) {
     if (err instanceof InputError) return NextResponse.json({ error: err.message }, { status: 400 });
@@ -64,6 +76,14 @@ export async function DELETE(request: NextRequest, { params }: Params) {
 
     const path = bucketPathOf(found.row.remote_url) ?? bucketPathOf(found.row.file_path);
     if (path) await supabaseAdmin.storage.from(MEDIA_BUCKET).remove([path]);
+
+    await logAdminAction(found.admin, {
+      action: 'media.delete',
+      targetType: 'media',
+      targetId: found.row.id,
+      summary: `Deleted ${found.kind === 'lottie' ? 'animation' : 'image'} ${quoted(found.row.name)}`,
+      details: { kind: found.kind, occasion: found.row.occasion_type, url: found.row.remote_url ?? found.row.file_path, fileRemoved: !!path },
+    });
 
     return NextResponse.json({ ok: true });
   } catch (err) {

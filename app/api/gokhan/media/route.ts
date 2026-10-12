@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getRequestAdmin, supabaseAdmin, fetchAllRows } from '@/lib/serverAuth';
 import { formatOccasionLabel } from '@/lib/occasionLabels';
 import { InputError } from '@/lib/adminTemplates';
+import { logAdminAction, quoted } from '@/lib/auditLog';
 import {
   MEDIA_BUCKET,
   MEDIA_TABLE,
@@ -139,7 +140,8 @@ export async function GET(request: NextRequest) {
 
 // Registers a file the browser has just uploaded through a signed URL.
 export async function POST(request: NextRequest) {
-  if (!(await getRequestAdmin(request))) return notFound();
+  const admin = await getRequestAdmin(request);
+  if (!admin) return notFound();
 
   try {
     const body = await request.json();
@@ -169,6 +171,14 @@ export async function POST(request: NextRequest) {
       .select('id')
       .single();
     if (error) throw new Error(error.message);
+
+    await logAdminAction(admin, {
+      action: 'media.upload',
+      targetType: 'media',
+      targetId: data.id,
+      summary: `Uploaded ${type.kind === 'lottie' ? 'animation' : 'image'} ${quoted(fields.name)}`,
+      details: { kind: type.kind, occasion: fields.occasion_type, url },
+    });
 
     return NextResponse.json({ id: data.id, kind: type.kind, url });
   } catch (err) {
