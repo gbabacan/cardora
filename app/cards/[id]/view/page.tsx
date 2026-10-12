@@ -370,6 +370,7 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
           delivery_type: 'ON_DEMAND',
           notify_contributors: true,
           is_template: false,
+          source_template_id: board.id,
         })
         .select()
         .single();

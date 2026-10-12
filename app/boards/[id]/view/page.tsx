@@ -188,6 +188,7 @@ export default function RecipientViewPage({ params }: { params: Promise<{ id: st
           delivery_type: 'ON_DEMAND',
           notify_contributors: true,
           is_template: false,
+          source_template_id: board.id,
         })
         .select()
         .single();

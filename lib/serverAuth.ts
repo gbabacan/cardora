@@ -25,6 +25,26 @@ export async function getRequestUser(request: NextRequest): Promise<User | null>
   return data.user;
 }
 
+// Admins are listed in ADMIN_EMAILS (comma-separated). It has no
+// NEXT_PUBLIC_ prefix, so the list never reaches the browser bundle
+function adminEmails(): Set<string> {
+  return new Set(
+    (process.env.ADMIN_EMAILS ?? '')
+      .split(',')
+      .map(email => email.trim().toLowerCase())
+      .filter(Boolean)
+  );
+}
+
+// The request's user, but only when they are an admin. Every admin API
+// route must call this; the admin page itself holds no data
+export async function getRequestAdmin(request: NextRequest): Promise<User | null> {
+  const user = await getRequestUser(request);
+  const email = user?.email?.toLowerCase();
+  if (!user || !email || !adminEmails().has(email)) return null;
+  return user;
+}
+
 export interface EmailBoard {
   id: string;
   user_id: string;
