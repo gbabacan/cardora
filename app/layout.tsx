@@ -84,12 +84,13 @@ export default function RootLayout({
       className="h-full antialiased"
     >
       <body className={`${openSans.className} min-h-full flex flex-col`}>
-        {/* Google Analytics */}
+        {/* Google Analytics, loaded after the page so its ~180 KB script
+            doesn't compete with the first paint on slow connections. */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-V4C48609B9"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
-        <Script id="google-analytics" strategy="afterInteractive">
+        <Script id="google-analytics" strategy="lazyOnload">
           {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}

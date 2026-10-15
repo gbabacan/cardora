@@ -66,33 +66,25 @@ export async function getOccasions(limit?: number) {
       throw error;
     }
 
-    // Manually fetch default_lottie for each occasion
-    const occasionsWithDefaults = await Promise.all(
-      (occasions || []).map(async (occasion) => {
-        let default_lottie = null;
-        if (occasion.default_lottie) {
-          const { data: lottie, error: lottieError } = await supabase
-            .from('lottie_animations')
-            .select('id, name, occasion_type, source_type, file_path, remote_url, helper_color')
-            .eq('id', occasion.default_lottie)
-            .single();
+    // Fetch every occasion's default_lottie in one query rather than one
+    // request per occasion.
+    const lottieIds = [...new Set((occasions || []).map(o => o.default_lottie).filter(Boolean))];
+    const lottiesById = new Map<string, Occasion['default_lottie']>();
+    if (lottieIds.length) {
+      const { data: lotties, error: lottieError } = await supabase
+        .from('lottie_animations')
+        .select('id, name, occasion_type, source_type, file_path, remote_url, helper_color')
+        .in('id', lottieIds);
+      if (lottieError) {
+        console.error('Error fetching occasion lotties', lottieError);
+      }
+      for (const lottie of lotties ?? []) lottiesById.set(lottie.id, lottie as Occasion['default_lottie']);
+    }
 
-          if (lottieError) {
-            console.error('Error fetching lottie for occasion', occasion.name, lottieError);
-          } else {
-            default_lottie = lottie;
-          }
-        }
-
-        return {
-          ...occasion,
-          default_lottie
-        };
-      })
-    );
-
-    console.log('Occasions fetched successfully:', occasionsWithDefaults?.length);
-    console.log('First occasion with lottie:', occasionsWithDefaults[0]);
+    const occasionsWithDefaults = (occasions || []).map(occasion => ({
+      ...occasion,
+      default_lottie: (occasion.default_lottie && lottiesById.get(occasion.default_lottie)) || null,
+    }));
 
     return { occasions: occasionsWithDefaults || [], error: null };
   } catch (error: any) {

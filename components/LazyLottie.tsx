@@ -1,9 +1,13 @@
 "use client";
 
 import { useContext, useEffect, useRef, useState } from "react";
-import LottieAnimation from "@/components/LottieAnimation";
+import dynamic from "next/dynamic";
 import { isLottieFile } from "@/lib/lotties";
 import { ScrollRowContext } from "@/app/HorizontalScrollRow";
+
+// The player (lottie-web and dotLottie) is only downloaded once a tile first
+// comes into view, not with the page.
+const LottieAnimation = dynamic(() => import("@/components/LottieAnimation"), { ssr: false });
 
 // Shared across tiles, so several templates on one animation fetch it once.
 const animationCache = new Map<string, Promise<unknown>>();

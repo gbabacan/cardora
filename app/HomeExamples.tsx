@@ -2,7 +2,11 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import LottieSafe from "@/components/LottieSafe";
+import dynamic from "next/dynamic";
+
+// lottie-web is ~300 KB of JavaScript; load it only when an animation is
+// about to play rather than with the page.
+const LottieSafe = dynamic(() => import("@/components/LottieSafe"), { ssr: false });
 
 function FormatModal({
   title,
@@ -198,7 +202,7 @@ export default function HomeExamples() {
             </div>
 
             <div className="text-center">
-              <Link href="/templates">
+              <Link href="/templates" prefetch={false}>
                 <button className="px-10 py-4 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white text-lg rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl">
                   Explore All Templates
                 </button>

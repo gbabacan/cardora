@@ -73,7 +73,7 @@ export default function HomeNav() {
             </div>
             <OccasionsDropdown />
             <Link href="/pricing" className="text-[#5B6B75] hover:text-[#0B1F2A] transition-colors font-bold">Pricing</Link>
-            <Link href="/templates" className="text-[#5B6B75] hover:text-[#0B1F2A] transition-colors font-bold">Templates</Link>
+            <Link href="/templates" prefetch={false} className="text-[#5B6B75] hover:text-[#0B1F2A] transition-colors font-bold">Templates</Link>
             <Link href="/contact" className="text-[#5B6B75] hover:text-[#0B1F2A] transition-colors font-bold">Contact Us</Link>
           </nav>
 

@@ -2,7 +2,11 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Lottie from "lottie-react";
+import dynamic from "next/dynamic";
+
+// lottie-web is ~300 KB of JavaScript; load it only when an animation is
+// about to play rather than with the page.
+const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 
 export default function HomeHowItWorks() {
   const [activeStep, setActiveStep] = useState(0);
@@ -11,11 +15,22 @@ export default function HomeHowItWorks() {
   const [howItWorksLottie3, setHowItWorksLottie3] = useState<any>(null);
   const [howItWorksLottie4, setHowItWorksLottie4] = useState<any>(null);
 
+  // The four decorative Lotties only show from md up (hidden md:block), so
+  // phones skip them entirely; on wider screens they load after the page.
   useEffect(() => {
-    fetch('/lotties/love/love1.json').then(r => r.json()).then(setHowItWorksLottie1).catch(() => {});
-    fetch('/lotties/love/love5.json').then(r => r.json()).then(setHowItWorksLottie2).catch(() => {});
-    fetch('/lotties/newbaby/baby4.json').then(r => r.json()).then(setHowItWorksLottie3).catch(() => {});
-    fetch('/lotties/christmas/christmas1.json').then(r => r.json()).then(setHowItWorksLottie4).catch(() => {});
+    if (!window.matchMedia('(min-width: 768px)').matches) return;
+    const load = () => {
+      fetch('/lotties/love/love1.json').then(r => r.json()).then(setHowItWorksLottie1).catch(() => {});
+      fetch('/lotties/love/love5.json').then(r => r.json()).then(setHowItWorksLottie2).catch(() => {});
+      fetch('/lotties/newbaby/baby4.json').then(r => r.json()).then(setHowItWorksLottie3).catch(() => {});
+      fetch('/lotties/christmas/christmas1.json').then(r => r.json()).then(setHowItWorksLottie4).catch(() => {});
+    };
+    if (document.readyState === 'complete') {
+      load();
+      return;
+    }
+    window.addEventListener('load', load, { once: true });
+    return () => window.removeEventListener('load', load);
   }, []);
 
   return (

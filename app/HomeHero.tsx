@@ -3,7 +3,11 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import LottieSafe from "@/components/LottieSafe";
+import dynamic from "next/dynamic";
+
+// lottie-web is ~300 KB of JavaScript; load it only when an animation is
+// about to play rather than with the page.
+const LottieSafe = dynamic(() => import("@/components/LottieSafe"), { ssr: false });
 
 // The demo image is the largest thing on first paint. Every copy of it
 // uses the same `sizes`, so phone and desktop layouts share one download.
@@ -86,7 +90,7 @@ export default function HomeHero() {
                   Create a Cardora
                 </button>
               </Link>
-              <Link href="/templates">
+              <Link href="/templates" prefetch={false}>
                 <button className="px-6 md:px-8 py-3 md:py-3.5 bg-white hover:bg-[#F7FAFC] text-[#2CB1A6] border-2 border-[#2CB1A6] hover:border-[#1F8F86] rounded-lg font-semibold transition-all">
                   Explore templates
                 </button>
