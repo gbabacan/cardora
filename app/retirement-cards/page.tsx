@@ -72,7 +72,7 @@ export default function RetirementCardsPage() {
                 { emoji: "🏢", title: "From leadership or HR", description: "A retirement card from the organisation's leadership carries real weight. Acknowledge the career, the contribution, and the person behind the role." },
                 { emoji: "🌍", title: "For a remote colleague", description: "They may have worked from a different city or country — but their retirement deserves just as warm a send-off. One link, everyone contributes." },
                 { emoji: "🎓", title: "Long-service recognition", description: "20, 30, 40 years of loyalty and hard work — celebrate the length of the journey as much as the destination." },
-                { emoji: "🥂", title: "Alongside a retirement party", description: "Whether there&apos;s a party or not, a card filled with personal messages is the one retirement gift that lasts well beyond the day itself." },
+                { emoji: "🥂", title: "Alongside a retirement party", description: "Whether there's a party or not, a card filled with personal messages is the one retirement gift that lasts well beyond the day itself." },
               ].map((item) => (
                 <div key={item.title} className="bg-white rounded-2xl p-6 shadow-sm border border-[#E5EAF0]">
                   <div className="text-3xl mb-3">{item.emoji}</div>
@@ -95,7 +95,7 @@ export default function RetirementCardsPage() {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
                 { emoji: "✍️", title: "Solo or group — your choice", description: "Write a personal farewell yourself or collect memories and messages from the whole team. Both create something truly meaningful." },
-                { emoji: "📸", title: "Photos, GIFs & videos", description: "Add team photos, throwbacks, or a heartfelt video message. Turn the card into a keepsake they&apos;ll return to for years." },
+                { emoji: "📸", title: "Photos, GIFs & videos", description: "Add team photos, throwbacks, or a heartfelt video message. Turn the card into a keepsake they'll return to for years." },
                 { emoji: "⏰", title: "Schedule for their last day", description: "Set it up ahead of time and schedule delivery for their final morning — a warm surprise to start the next chapter." },
                 { emoji: "🌍", title: "Works across any distance", description: "Team or family spread across the globe? One link, everyone contributes at their own pace." },
                 { emoji: "🎨", title: "Beautiful templates", description: "Choose from professionally designed retirement card templates and personalise fonts, colours, and layout." },

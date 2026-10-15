@@ -73,8 +73,8 @@ export default function ChristmasCardsPage() {
               {[
                 { emoji: "💼", title: "Team Christmas card", description: "Get everyone in the office to sign one beautiful card — for a manager, a colleague, or the whole team. Share one link, messages pour in, no chasing anyone." },
                 { emoji: "👨‍👩‍👧", title: "Family Christmas card", description: "Gather the whole family in one card. Grandparents, cousins, siblings spread across the country — all signing one heartfelt message for someone they love." },
-                { emoji: "🎅", title: "Secret Santa card", description: "Going along with a Secret Santa? Send a warm Christmas card alongside the gift — or instead of one — for a personal touch that&apos;ll be remembered." },
-                { emoji: "🏢", title: "Company-wide holiday message", description: "Leadership sending season&apos;s greetings to the whole company? Collect personal messages from the leadership team and deliver something that feels genuinely warm." },
+                { emoji: "🎅", title: "Secret Santa card", description: "Going along with a Secret Santa? Send a warm Christmas card alongside the gift — or instead of one — for a personal touch that'll be remembered." },
+                { emoji: "🏢", title: "Company-wide holiday message", description: "Leadership sending season's greetings to the whole company? Collect personal messages from the leadership team and deliver something that feels genuinely warm." },
                 { emoji: "🌍", title: "Remote team Christmas card", description: "Your team is spread across time zones. One link, everyone contributes — a group Christmas card that brings the whole distributed team together for a moment." },
                 { emoji: "💌", title: "A personal Christmas message", description: "Sometimes you just want to write something personal and beautiful for someone who matters. No group needed — just you, your words, and a stunning design." },
               ].map((item) => (

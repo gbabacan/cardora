@@ -182,9 +182,9 @@ export default function PromotionCardsPage() {
                 { emoji: "👔", title: "Manager celebrating a team member", description: "A personal message from a manager acknowledging the hard work, growth, and dedication that earned the promotion. This kind of recognition stays with people for years." },
                 { emoji: "👥", title: "Team celebrating a colleague", description: "Get the whole team to sign. Each person adds what they know — a shared memory, a specific moment, something they admire. The result is a card unlike any other." },
                 { emoji: "🏢", title: "HR or leadership team recognition", description: "Formal recognition from leadership carries extra weight. A beautifully designed card with messages from across the organisation shows the promoted employee they truly matter." },
-                { emoji: "🌍", title: "Remote team promotion", description: "Distance shouldn&apos;t diminish the celebration. One link, your whole distributed team contributes — creating a card that feels as warm as being in the same room." },
+                { emoji: "🌍", title: "Remote team promotion", description: "Distance shouldn't diminish the celebration. One link, your whole distributed team contributes — creating a card that feels as warm as being in the same room." },
                 { emoji: "💼", title: "Internal move to new department", description: "Celebrating a cross-department promotion or internal transfer? Collect messages from both the old team and the new one — a unique send-off and welcome rolled into one." },
-                { emoji: "🏆", title: "Long-deserved recognition", description: "For the person who&apos;s been putting in the work, waiting their turn, and finally getting the recognition they deserve. Make it count with a card that says exactly that." },
+                { emoji: "🏆", title: "Long-deserved recognition", description: "For the person who's been putting in the work, waiting their turn, and finally getting the recognition they deserve. Make it count with a card that says exactly that." },
               ].map((item) => (
                 <div key={item.title} className="bg-white rounded-2xl p-6 shadow-sm border border-[#E5EAF0]">
                   <div className="text-3xl mb-3">{item.emoji}</div>

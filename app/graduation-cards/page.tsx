@@ -183,7 +183,7 @@ export default function GraduationCardsPage() {
                 { emoji: "🏫", title: "From the whole class", description: "Organise a group card from all classmates. Share one link and everyone adds their message, a favourite memory, or a funny inside joke — no chasing anyone down." },
                 { emoji: "👨‍👩‍👧", title: "From family & friends", description: "Grandparents, siblings, old friends — gather everyone's pride and well-wishes in one beautiful card. A keepsake they'll return to long after the ceremony." },
                 { emoji: "👩‍🏫", title: "From teachers or mentors", description: "A card from the people who helped them get there. Teachers, tutors, mentors — collect their words of wisdom and congratulations in one meaningful place." },
-                { emoji: "💼", title: "From work colleagues", description: "A colleague just finished their degree while working. Celebrate their dedication with a card from the whole team — they&apos;ll never forget that their effort was noticed." },
+                { emoji: "💼", title: "From work colleagues", description: "A colleague just finished their degree while working. Celebrate their dedication with a card from the whole team — they'll never forget that their effort was noticed." },
                 { emoji: "🎓", title: "For any degree or milestone", description: "High school, university, MBA, PhD — every graduation is worth celebrating. Cardora works for any level, any subject, any achievement." },
               ].map((item) => (
                 <div key={item.title} className="bg-white rounded-2xl p-6 shadow-sm border border-[#E5EAF0]">

@@ -67,12 +67,12 @@ export default function TeamCelebrationCardsPage() {
             </div>
             <div className="grid md:grid-cols-3 gap-6">
               {[
-                { emoji: "🚀", title: "Product or project launch", description: "The team just shipped something. Acknowledge everyone&apos;s contribution with a card that names what they did and why it mattered." },
+                { emoji: "🚀", title: "Product or project launch", description: "The team just shipped something. Acknowledge everyone's contribution with a card that names what they did and why it mattered." },
                 { emoji: "🏆", title: "Hitting a big target", description: "Sales target smashed. Revenue record broken. Milestone reached. Celebrate the shared effort with a card signed by everyone who made it happen." },
                 { emoji: "🎯", title: "End of quarter celebration", description: "Close out a great quarter with team recognition that goes beyond a Slack message. A card everyone signs turns the moment into a memory." },
-                { emoji: "👏", title: "Recognising an individual win", description: "One person did something exceptional. Get the whole team to co-sign a card that says: we all saw it, and we&apos;re all proud." },
+                { emoji: "👏", title: "Recognising an individual win", description: "One person did something exceptional. Get the whole team to co-sign a card that says: we all saw it, and we're all proud." },
                 { emoji: "🌍", title: "Remote team wins", description: "Distributed teams rarely get the office moment. A group card brings everyone together digitally — just as meaningful, with no timezone headaches." },
-                { emoji: "🎊", title: "Company or team anniversary", description: "Celebrate a year, five years, or ten of building something together. A team celebration card captures the collective pride in how far you&apos;ve come." },
+                { emoji: "🎊", title: "Company or team anniversary", description: "Celebrate a year, five years, or ten of building something together. A team celebration card captures the collective pride in how far you've come." },
               ].map((item) => (
                 <div key={item.title} className="bg-white rounded-2xl p-6 shadow-sm border border-[#E5EAF0]">
                   <div className="text-3xl mb-3">{item.emoji}</div>

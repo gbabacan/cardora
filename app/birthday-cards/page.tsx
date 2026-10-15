@@ -186,7 +186,7 @@ export default function BirthdayCardsPage() {
                 { emoji: "💼", title: "Coworker birthday", description: "Get the whole office to sign without chasing anyone down. Share one link on Slack or Teams and watch the messages roll in." },
                 { emoji: "🌍", title: "Remote team birthday", description: "Your team is spread across time zones? No problem. Everyone contributes at their own pace from anywhere in the world." },
                 { emoji: "👨‍👩‍👧", title: "Family & friends", description: "Bring the whole family together for a surprise birthday card. Cousins, grandparents, old school friends — one link reaches everyone." },
-                { emoji: "🏫", title: "Teacher or mentor", description: "The whole class signs one beautiful card for a teacher&apos;s birthday. Personal, meaningful, and so much better than a generic gift." },
+                { emoji: "🏫", title: "Teacher or mentor", description: "The whole class signs one beautiful card for a teacher's birthday. Personal, meaningful, and so much better than a generic gift." },
               ].map((item) => (
                 <div key={item.title} className="bg-white rounded-2xl p-6 shadow-sm border border-[#E5EAF0]">
                   <div className="text-3xl mb-3">{item.emoji}</div>

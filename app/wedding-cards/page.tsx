@@ -72,7 +72,7 @@ export default function WeddingCardsPage() {
                 { emoji: "🌍", title: "For guests who can't attend", answer: "Some guests can't make it in person. A group digital card lets them still send their love — contributing just as meaningfully from anywhere in the world." },
                 { emoji: "💐", title: "From the wedding party", description: "The bridesmaids, groomsmen, or closest friends sign one beautiful card together — a personal keepsake from the people who stood beside them on the day." },
                 { emoji: "🎉", title: "Bridal shower or hen party card", description: "Organise the whole group to sign a card for the bride-to-be. Share one link, everyone adds their message and a fun GIF — delivered right to her." },
-                { emoji: "💑", title: "From the whole family", description: "Grandparents, parents, cousins — gather the whole family&apos;s love and wishes in one card. A family wedding card they&apos;ll treasure alongside the photos." },
+                { emoji: "💑", title: "From the whole family", description: "Grandparents, parents, cousins — gather the whole family's love and wishes in one card. A family wedding card they'll treasure alongside the photos." },
               ].map((item) => (
                 <div key={item.title} className="bg-white rounded-2xl p-6 shadow-sm border border-[#E5EAF0]">
                   <div className="text-3xl mb-3">{item.emoji}</div>

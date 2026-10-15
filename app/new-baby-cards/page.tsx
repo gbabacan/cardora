@@ -183,7 +183,7 @@ export default function NewBabyCardsPage() {
                 { emoji: "💼", title: "From the whole team at work", description: "A colleague just had a baby. Share one link with the office and collect messages, advice, and well-wishes from everyone — no chasing people down." },
                 { emoji: "👨‍👩‍👧‍👦", title: "From family & friends", description: "Gather warm wishes from grandparents, aunties, uncles, and old friends all in one beautiful card. Everyone adds their own message at their own pace." },
                 { emoji: "🌍", title: "For a remote colleague", description: "Distance doesn't make the arrival any less worth celebrating. One link, your whole distributed team sends their love — no timezone headaches." },
-                { emoji: "👶", title: "Baby shower alternative", description: "Can&apos;t all be in the same room? A digital group card is the perfect way to celebrate a baby shower virtually with everyone who matters." },
+                { emoji: "👶", title: "Baby shower alternative", description: "Can't all be in the same room? A digital group card is the perfect way to celebrate a baby shower virtually with everyone who matters." },
                 { emoji: "🏥", title: "Welcome home card", description: "Time it just right — schedule the card to arrive the day they bring the baby home. A warm welcome waiting for them when they walk through the door." },
               ].map((item) => (
                 <div key={item.title} className="bg-white rounded-2xl p-6 shadow-sm border border-[#E5EAF0]">
