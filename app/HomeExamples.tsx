@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import LottieSafe from "@/components/LottieSafe";
 
@@ -81,13 +81,27 @@ export default function HomeExamples() {
   const [showFarewellModal, setShowFarewellModal] = useState(false);
   const [showTeamCelebrationModal, setShowTeamCelebrationModal] = useState(false);
 
+  // The six example Lotties (~0.9 MB) are far below the fold, so fetch them
+  // only once the section comes near the screen.
+  const sectionRef = useRef<HTMLElement>(null);
   useEffect(() => {
-    fetch('/lotties/birthday/birthday1.json').then(r => r.json()).then(setBirthdayLottie).catch(() => {});
-    fetch('/lotties/wedding/wedding2.json').then(r => r.json()).then(setWeddingLottie).catch(() => {});
-    fetch('/lotties/newbaby/baby1.json').then(r => r.json()).then(setNewBabyLottie).catch(() => {});
-    fetch('/lotties/congratulations/congratulations3.json').then(r => r.json()).then(setCongratulationsLottie).catch(() => {});
-    fetch('/lotties/farewell/farewell4.json').then(r => r.json()).then(setFarewellLottie).catch(() => {});
-    fetch('/lotties/teamcelebration/teamCelebration1.json').then(r => r.json()).then(setTeamCelebrationLottie).catch(() => {});
+    const section = sectionRef.current;
+    if (!section) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        observer.disconnect();
+        fetch('/lotties/birthday/birthday1.json').then(r => r.json()).then(setBirthdayLottie).catch(() => {});
+        fetch('/lotties/wedding/wedding2.json').then(r => r.json()).then(setWeddingLottie).catch(() => {});
+        fetch('/lotties/newbaby/baby1.json').then(r => r.json()).then(setNewBabyLottie).catch(() => {});
+        fetch('/lotties/congratulations/congratulations3.json').then(r => r.json()).then(setCongratulationsLottie).catch(() => {});
+        fetch('/lotties/farewell/farewell4.json').then(r => r.json()).then(setFarewellLottie).catch(() => {});
+        fetch('/lotties/teamcelebration/teamCelebration1.json').then(r => r.json()).then(setTeamCelebrationLottie).catch(() => {});
+      },
+      { rootMargin: '400px 0px' }
+    );
+    observer.observe(section);
+    return () => observer.disconnect();
   }, []);
 
   const EXAMPLES = [
@@ -140,7 +154,7 @@ export default function HomeExamples() {
       {showTeamCelebrationModal && <FormatModal title="Team Celebration" description="Select which type of team celebration sample you'd like to view" boardHref="/boards/3d06eddd/view" cardHref="/cards/ea80cbc1/view" onClose={() => setShowTeamCelebrationModal(false)} />}
 
       {/* Examples Section */}
-      <section id="templates" className="py-20 bg-[#F7FAFC]">
+      <section ref={sectionRef} id="templates" className="py-20 bg-[#F7FAFC]">
         <div className="container mx-auto px-6">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">

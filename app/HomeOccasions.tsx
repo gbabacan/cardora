@@ -2,18 +2,26 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Lottie from "lottie-react";
-import { getOccasionsWithLottieData } from "@/lib/occasions";
+import LazyLottie from "@/components/LazyLottie";
+import { getOccasions, type Occasion } from "@/lib/occasions";
+
+const lottieUrl = (occasion: Occasion) => {
+  const lottie = occasion.default_lottie;
+  if (!lottie) return null;
+  return (lottie.source_type === "local" ? lottie.file_path : lottie.remote_url) || null;
+};
 
 export default function HomeOccasions() {
-  const [occasions, setOccasions] = useState<any[]>([]);
+  const [occasions, setOccasions] = useState<Occasion[]>([]);
   const [occasionsLoading, setOccasionsLoading] = useState(true);
 
   useEffect(() => {
     async function fetchOccasions() {
       setOccasionsLoading(true);
       try {
-        const { occasions, error } = await getOccasionsWithLottieData(15);
+        // Just the list; each tile loads its own animation when it scrolls
+        // near the screen (LazyLottie), instead of all 15 up front.
+        const { occasions, error } = await getOccasions(15);
         if (!error) setOccasions(occasions);
       } catch {}
       finally {
@@ -50,10 +58,8 @@ export default function HomeOccasions() {
                 href={`/boards/create?occasion=${occasion.short_id}`}
                 className="bg-white rounded-2xl p-6 flex flex-col items-center justify-center gap-4 hover:shadow-xl transition-all hover:scale-105"
               >
-                {occasion.lottieData ? (
-                  <div className="w-20 h-20">
-                    <Lottie animationData={occasion.lottieData} loop={true} style={{ width: '100%', height: '100%' }} />
-                  </div>
+                {lottieUrl(occasion) ? (
+                  <LazyLottie filePath={lottieUrl(occasion)!} className="w-20 h-20" />
                 ) : (
                   <div className="w-20 h-20 bg-[#F7FAFC] rounded-full flex items-center justify-center">
                     <svg className="w-10 h-10 text-[#2CB1A6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">

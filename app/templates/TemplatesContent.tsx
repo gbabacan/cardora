@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
 import { getImageUrl } from "@/lib/images";
 import LazyLottie from "@/components/LazyLottie";
 import HorizontalScrollRow from "../HorizontalScrollRow";
 import type { Board } from "@/lib/boards";
 import { formatOccasionLabel } from "@/lib/occasionLabels";
+import { fetchPublicTemplates } from "@/lib/publicTemplates";
 
 /**
  * Within an occasion row: animation-backed templates first, then
@@ -31,35 +31,26 @@ const placeholderIcon = (
   </div>
 );
 
-export default function TemplatesContent() {
-  const [templates, setTemplates] = useState<Board[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function TemplatesContent({ initialTemplates }: { initialTemplates?: Board[] | null }) {
+  // Server-rendered with the templates already in place (so search engines
+  // see them), then refreshed in the browser in case the cached copy is stale.
+  const [templates, setTemplates] = useState<Board[]>(initialTemplates ?? []);
+  const [loading, setLoading] = useState(!initialTemplates);
   const [filterFormat, setFilterFormat] = useState<"all" | "board" | "card">("board");
   const [filterOccasion, setFilterOccasion] = useState<string>("all");
 
   useEffect(() => {
-    const loadTemplates = async () => {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("boards")
-        .select(`*, card_background_data:card_background_id(id, type, lottie_animation:lottie_animation_id(id, name, file_path), image:image_id(id, name, file_path, source_type, remote_url))`)
-        .eq("is_template", true)
-        .eq("template_hidden", false)
-        .order("occasion_type")
-        .order("template_order", { ascending: true, nullsFirst: false });
-
-      if (error || !data) {
-        setLoading(false);
-        return;
-      }
-
-      // Animations load per tile as they scroll into view (LazyLottie),
-      // so the page can render as soon as the rows are known.
-      setTemplates(data as Board[]);
+    let cancelled = false;
+    // Animations load per tile as they scroll into view (LazyLottie), so the
+    // grid can render as soon as the rows are known.
+    fetchPublicTemplates().then((fresh) => {
+      if (cancelled) return;
+      if (fresh) setTemplates(fresh);
       setLoading(false);
+    });
+    return () => {
+      cancelled = true;
     };
-
-    loadTemplates();
   }, []);
 
   // Occasion chips reflect the chosen format, so a chip never yields an empty page.
@@ -168,6 +159,11 @@ export default function TemplatesContent() {
                 }`}
                 style={isSingleOccasion ? undefined : { scrollSnapAlign: "start" }}
               >
+                {/* The tile shows only artwork, so name it for screen readers
+                    (and search engines): "Merry Christmas – Christmas board template". */}
+                <span className="sr-only">
+                  {template.title} – {occasionLabel} {template.format_type === "card" ? "card" : "board"} template
+                </span>
                 {/* 3/4 matches the 1200x1600 occasion images, so object-cover
                     crops nothing. Animations letterbox inside the same box. */}
                 <div

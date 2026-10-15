@@ -5,6 +5,10 @@ import Link from "next/link";
 import Image from "next/image";
 import LottieSafe from "@/components/LottieSafe";
 
+// The demo image is the largest thing on first paint. Every copy of it
+// uses the same `sizes`, so phone and desktop layouts share one download.
+const DEMO_SIZES = "(min-width: 1024px) 45vw, 90vw";
+
 export default function HomeHero() {
   const [alternateText, setAlternateText] = useState<'together' | 'individually'>('together');
   const [currentHeroItem, setCurrentHeroItem] = useState(0);
@@ -22,13 +26,23 @@ export default function HomeHero() {
     return () => clearInterval(interval);
   }, []);
 
-  // Load hero Lottie files
+  // Load the hero Lotties (~0.7 MB) only after the page has loaded, so they
+  // don't compete with the demo image for the first paint. The first one
+  // isn't shown until the rotation reaches it 3 seconds in.
   useEffect(() => {
-    fetch('/lotties/birthday/birthday1.json').then(r => r.json()).then(setHeroLottie1).catch(() => {});
-    fetch('/lotties/welcome/welcome4.json').then(r => r.json()).then(setHeroLottie2).catch(() => {});
-    fetch('/lotties/love/love3.json').then(r => r.json()).then(setHeroLottie3).catch(() => {});
-    fetch('/lotties/newbaby/baby1.json').then(r => r.json()).then(setHeroLottie4).catch(() => {});
-    fetch('/lotties/love/love2.json').then(r => r.json()).then(setHeroLottie5).catch(() => {});
+    const load = () => {
+      fetch('/lotties/birthday/birthday1.json').then(r => r.json()).then(setHeroLottie1).catch(() => {});
+      fetch('/lotties/welcome/welcome4.json').then(r => r.json()).then(setHeroLottie2).catch(() => {});
+      fetch('/lotties/love/love3.json').then(r => r.json()).then(setHeroLottie3).catch(() => {});
+      fetch('/lotties/newbaby/baby1.json').then(r => r.json()).then(setHeroLottie4).catch(() => {});
+      fetch('/lotties/love/love2.json').then(r => r.json()).then(setHeroLottie5).catch(() => {});
+    };
+    if (document.readyState === 'complete') {
+      load();
+      return;
+    }
+    window.addEventListener('load', load, { once: true });
+    return () => window.removeEventListener('load', load);
   }, []);
 
   // Rotate hero items every 3 seconds
@@ -58,7 +72,7 @@ export default function HomeHero() {
                     </span>
                     <span className="invisible">Individually.</span>
                   </span>
-                  <Image src="/cardoraHeart.png" alt="heart" width={80} height={80} className="inline-block w-10 h-10 md:w-16 md:h-16 lg:w-20 lg:h-20" unoptimized />
+                  <Image src="/cardoraHeart.png" alt="heart" width={80} height={80} sizes="80px" priority className="inline-block w-10 h-10 md:w-16 md:h-16 lg:w-20 lg:h-20" />
                 </span>
               </h1>
               <p className="text-base md:text-lg text-[#5B6B75] leading-relaxed max-w-lg mx-auto lg:mx-0">
@@ -112,7 +126,7 @@ export default function HomeHero() {
               )
             ))}
             <div className={`absolute inset-0 transition-opacity duration-500 ${currentHeroItem === 0 ? 'opacity-100' : 'opacity-0'} flex items-center justify-center`}>
-              <Image src="/cardoraDemo.png" alt="Cardora Demo" width={400} height={400} className="w-full h-auto max-h-full object-contain" unoptimized />
+              <Image src="/cardoraDemo.png" alt="Cardora Demo" width={700} height={700} sizes={DEMO_SIZES} priority className="w-full h-auto max-h-full object-contain" />
             </div>
           </div>
 
@@ -120,11 +134,11 @@ export default function HomeHero() {
           <div className="hidden lg:block relative overflow-visible">
             <div className="relative scale-125 origin-center">
               <div className="invisible">
-                <Image src="/cardoraDemo.png" alt="Cardora Demo" width={700} height={700} className="w-full h-auto" unoptimized />
+                <Image src="/cardoraDemo.png" alt="Cardora Demo" width={700} height={700} sizes={DEMO_SIZES} priority className="w-full h-auto" />
               </div>
 
               <div className={`transition-opacity duration-500 absolute inset-0 ${currentHeroItem === 0 ? 'opacity-100' : 'opacity-0'}`}>
-                <Image src="/cardoraDemo.png" alt="Cardora Demo" width={700} height={700} className="w-full h-auto" unoptimized />
+                <Image src="/cardoraDemo.png" alt="Cardora Demo" width={700} height={700} sizes={DEMO_SIZES} priority className="w-full h-auto" />
               </div>
 
               {heroLottie1 && (

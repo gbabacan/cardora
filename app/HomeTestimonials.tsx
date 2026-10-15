@@ -73,7 +73,7 @@ export default function HomeTestimonials() {
         <div className="flex flex-col md:hidden gap-4">
           <div className={`flex items-start gap-4 transition-all duration-500 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}>
             <div className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0">
-              <img src={TESTIMONIALS[currentTestimonial].image} alt={TESTIMONIALS[currentTestimonial].name} className="w-full h-full object-cover" />
+              <img src={TESTIMONIALS[currentTestimonial].image} alt={TESTIMONIALS[currentTestimonial].name} loading="lazy" className="w-full h-full object-cover" />
             </div>
             <div className="flex-1">
               <svg className="w-8 h-8 text-[#2CB1A6] mb-2" fill="currentColor" viewBox="0 0 24 24">
@@ -106,7 +106,7 @@ export default function HomeTestimonials() {
         <div className="hidden md:flex items-center gap-8 h-48">
           <div className="flex-shrink-0">
             <div className={`w-28 h-28 rounded-full overflow-hidden transition-all duration-500 ${isAnimating ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
-              <img src={TESTIMONIALS[currentTestimonial].image} alt={TESTIMONIALS[currentTestimonial].name} className="w-full h-full object-cover" />
+              <img src={TESTIMONIALS[currentTestimonial].image} alt={TESTIMONIALS[currentTestimonial].name} loading="lazy" className="w-full h-full object-cover" />
             </div>
           </div>
 
