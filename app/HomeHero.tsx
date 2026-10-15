@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
@@ -13,14 +13,33 @@ const LottieSafe = dynamic(() => import("@/components/LottieSafe"), { ssr: false
 // uses the same `sizes`, so phone and desktop layouts share one download.
 const DEMO_SIZES = "(min-width: 1024px) 45vw, 90vw";
 
+const HERO_LOTTIES = [
+  '/lotties/birthday/birthday1.json',
+  '/lotties/welcome/welcome4.json',
+  '/lotties/love/love3.json',
+  '/lotties/newbaby/baby1.json',
+  '/lotties/love/love2.json',
+];
+
+// The hero has separate phone and desktop layouts; only the one on screen
+// plays animations. Null on the server and before hydration.
+const DESKTOP_QUERY = '(min-width: 1024px)';
+const subscribeDesktop = (onChange: () => void) => {
+  const query = window.matchMedia(DESKTOP_QUERY);
+  query.addEventListener('change', onChange);
+  return () => query.removeEventListener('change', onChange);
+};
+const useIsDesktop = () =>
+  useSyncExternalStore(subscribeDesktop, () => window.matchMedia(DESKTOP_QUERY).matches, () => null);
+
 export default function HomeHero() {
   const [alternateText, setAlternateText] = useState<'together' | 'individually'>('together');
-  const [currentHeroItem, setCurrentHeroItem] = useState(0);
-  const [heroLottie1, setHeroLottie1] = useState<any>(null);
-  const [heroLottie2, setHeroLottie2] = useState<any>(null);
-  const [heroLottie3, setHeroLottie3] = useState<any>(null);
-  const [heroLottie4, setHeroLottie4] = useState<any>(null);
-  const [heroLottie5, setHeroLottie5] = useState<any>(null);
+  // 0 is the demo image, 1–5 the animations. `previousHeroItem` stays
+  // mounted while it fades out; every other animation is unmounted so only
+  // what's visible runs.
+  const [{ current: currentHeroItem, previous: previousHeroItem }, setHeroItem] = useState<{ current: number; previous: number | null }>({ current: 0, previous: null });
+  const [heroLotties, setHeroLotties] = useState<any[]>([]);
+  const isDesktop = useIsDesktop();
 
   // Alternate "Together" / "Individually" every 2 seconds
   useEffect(() => {
@@ -35,11 +54,16 @@ export default function HomeHero() {
   // isn't shown until the rotation reaches it 3 seconds in.
   useEffect(() => {
     const load = () => {
-      fetch('/lotties/birthday/birthday1.json').then(r => r.json()).then(setHeroLottie1).catch(() => {});
-      fetch('/lotties/welcome/welcome4.json').then(r => r.json()).then(setHeroLottie2).catch(() => {});
-      fetch('/lotties/love/love3.json').then(r => r.json()).then(setHeroLottie3).catch(() => {});
-      fetch('/lotties/newbaby/baby1.json').then(r => r.json()).then(setHeroLottie4).catch(() => {});
-      fetch('/lotties/love/love2.json').then(r => r.json()).then(setHeroLottie5).catch(() => {});
+      HERO_LOTTIES.forEach((url, index) => {
+        fetch(url)
+          .then(r => r.json())
+          .then(data => setHeroLotties(prev => {
+            const next = [...prev];
+            next[index] = data;
+            return next;
+          }))
+          .catch(() => {});
+      });
     };
     if (document.readyState === 'complete') {
       load();
@@ -52,10 +76,32 @@ export default function HomeHero() {
   // Rotate hero items every 3 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentHeroItem(prev => (prev + 1) % 6);
+      setHeroItem(({ current }) => ({ current: (current + 1) % 6, previous: current }));
     }, 3000);
     return () => clearInterval(interval);
   }, []);
+
+  // Unmount the previous animation once its 500 ms fade-out has finished.
+  useEffect(() => {
+    if (previousHeroItem === null) return;
+    const timer = setTimeout(() => setHeroItem(item => ({ ...item, previous: null })), 600);
+    return () => clearTimeout(timer);
+  }, [previousHeroItem, currentHeroItem]);
+
+  // The animation slides for one layout. Each slide's container stays so the
+  // fade works, but the animation inside only mounts while it's shown or
+  // fading out.
+  const lottieSlides = (className: string) =>
+    HERO_LOTTIES.map((url, index) => {
+      const item = index + 1;
+      const data = heroLotties[index];
+      const mounted = data && (item === currentHeroItem || item === previousHeroItem);
+      return (
+        <div key={url} className={`${className} transition-opacity duration-500 ${currentHeroItem === item ? 'opacity-100' : 'opacity-0'}`}>
+          {mounted && <LottieSafe animationData={data} loop={true} style={{ width: '100%', height: '100%' }} />}
+        </div>
+      );
+    });
 
   return (
     <section className="bg-[#F7FAFC] py-10 md:py-20 lg:py-24">
@@ -76,7 +122,7 @@ export default function HomeHero() {
                     </span>
                     <span className="invisible">Individually.</span>
                   </span>
-                  <Image src="/cardoraHeart.png" alt="heart" width={80} height={80} sizes="80px" priority className="inline-block w-10 h-10 md:w-16 md:h-16 lg:w-20 lg:h-20" />
+                  <Image src="/cardoraHeart.png" alt="" width={80} height={80} sizes="80px" className="inline-block w-10 h-10 md:w-16 md:h-16 lg:w-20 lg:h-20" />
                 </span>
               </h1>
               <p className="text-base md:text-lg text-[#5B6B75] leading-relaxed max-w-lg mx-auto lg:mx-0">
@@ -85,15 +131,11 @@ export default function HomeHero() {
             </div>
 
             <div className="flex flex-wrap justify-center lg:justify-start gap-3 md:gap-4">
-              <Link href="/boards/create">
-                <button className="px-6 md:px-8 py-3 md:py-3.5 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl">
-                  Create a Cardora
-                </button>
+              <Link href="/boards/create" className="px-5 md:px-8 py-3 md:py-3.5 bg-[#1A7F77] hover:bg-[#156C65] text-white rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl">
+                Create a Cardora
               </Link>
-              <Link href="/templates" prefetch={false}>
-                <button className="px-6 md:px-8 py-3 md:py-3.5 bg-white hover:bg-[#F7FAFC] text-[#2CB1A6] border-2 border-[#2CB1A6] hover:border-[#1F8F86] rounded-lg font-semibold transition-all">
-                  Explore templates
-                </button>
+              <Link href="/templates" prefetch={false} className="px-5 md:px-8 py-3 md:py-3.5 bg-white hover:bg-[#F7FAFC] text-[#1A7F77] border-2 border-[#1A7F77] hover:border-[#156C65] rounded-lg font-semibold transition-all">
+                Explore templates
               </Link>
             </div>
 
@@ -122,54 +164,24 @@ export default function HomeHero() {
 
           {/* Mobile Lottie */}
           <div className="lg:hidden flex items-center justify-center h-56 sm:h-72 relative">
-            {[heroLottie1, heroLottie2, heroLottie3, heroLottie4, heroLottie5].map((lottie, index) => (
-              lottie && (
-                <div key={index} className={`absolute inset-0 transition-opacity duration-500 ${currentHeroItem === index + 1 ? 'opacity-100' : 'opacity-0'}`}>
-                  <LottieSafe animationData={lottie} loop={true} style={{ width: '100%', height: '100%' }} />
-                </div>
-              )
-            ))}
+            {isDesktop === false && lottieSlides('absolute inset-0')}
             <div className={`absolute inset-0 transition-opacity duration-500 ${currentHeroItem === 0 ? 'opacity-100' : 'opacity-0'} flex items-center justify-center`}>
-              <Image src="/cardoraDemo.png" alt="Cardora Demo" width={700} height={700} sizes={DEMO_SIZES} priority className="w-full h-auto max-h-full object-contain" />
+              <Image src="/cardoraDemo.png" alt="Cardora Demo" width={1536} height={1024} sizes={DEMO_SIZES} priority fetchPriority="high" className="w-full h-auto max-h-full object-contain" />
             </div>
           </div>
 
           {/* Right Content — desktop rotating display */}
           <div className="hidden lg:block relative overflow-visible">
             <div className="relative scale-125 origin-center">
-              <div className="invisible">
-                <Image src="/cardoraDemo.png" alt="Cardora Demo" width={700} height={700} sizes={DEMO_SIZES} priority className="w-full h-auto" />
+              <div className="invisible" aria-hidden="true">
+                <Image src="/cardoraDemo.png" alt="" width={1536} height={1024} sizes={DEMO_SIZES} priority fetchPriority="high" className="w-full h-auto" />
               </div>
 
               <div className={`transition-opacity duration-500 absolute inset-0 ${currentHeroItem === 0 ? 'opacity-100' : 'opacity-0'}`}>
-                <Image src="/cardoraDemo.png" alt="Cardora Demo" width={700} height={700} sizes={DEMO_SIZES} priority className="w-full h-auto" />
+                <Image src="/cardoraDemo.png" alt="Cardora Demo" width={1536} height={1024} sizes={DEMO_SIZES} priority fetchPriority="high" className="w-full h-auto" />
               </div>
 
-              {heroLottie1 && (
-                <div className={`transition-opacity duration-500 absolute inset-0 ${currentHeroItem === 1 ? 'opacity-100' : 'opacity-0'}`}>
-                  <LottieSafe animationData={heroLottie1} loop={true} style={{ width: '100%', height: '100%' }} />
-                </div>
-              )}
-              {heroLottie2 && (
-                <div className={`transition-opacity duration-500 absolute inset-0 ${currentHeroItem === 2 ? 'opacity-100' : 'opacity-0'}`}>
-                  <LottieSafe animationData={heroLottie2} loop={true} style={{ width: '100%', height: '100%' }} />
-                </div>
-              )}
-              {heroLottie3 && (
-                <div className={`transition-opacity duration-500 absolute inset-0 ${currentHeroItem === 3 ? 'opacity-100' : 'opacity-0'}`}>
-                  <LottieSafe animationData={heroLottie3} loop={true} style={{ width: '100%', height: '100%' }} />
-                </div>
-              )}
-              {heroLottie4 && (
-                <div className={`transition-opacity duration-500 absolute inset-0 ${currentHeroItem === 4 ? 'opacity-100' : 'opacity-0'}`}>
-                  <LottieSafe animationData={heroLottie4} loop={true} style={{ width: '100%', height: '100%' }} />
-                </div>
-              )}
-              {heroLottie5 && (
-                <div className={`transition-opacity duration-500 absolute inset-0 ${currentHeroItem === 5 ? 'opacity-100' : 'opacity-0'}`}>
-                  <LottieSafe animationData={heroLottie5} loop={true} style={{ width: '100%', height: '100%' }} />
-                </div>
-              )}
+              {isDesktop && lottieSlides('absolute inset-0')}
             </div>
 
             <div className="absolute -top-4 -right-4 w-20 h-20 bg-[#A7E8E2] rounded-full opacity-50 blur-2xl" />

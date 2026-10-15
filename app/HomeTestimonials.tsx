@@ -89,11 +89,13 @@ export default function HomeTestimonials() {
             <button onClick={prevTestimonial} className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm border border-[#E5EAF0]" aria-label="Previous">
               <svg className="w-5 h-5 text-[#5B6B75]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg>
             </button>
-            <div className="flex gap-2">
+            <div className="flex">
               {TESTIMONIALS.map((_, index) => (
                 <button key={index} onClick={() => setCurrentTestimonial(index)}
-                  className={`w-2.5 h-2.5 rounded-full transition-colors ${index === currentTestimonial ? 'bg-[#2CB1A6]' : 'bg-[#E5EAF0]'}`}
-                  aria-label={`Go to testimonial ${index + 1}`} />
+                  className="w-6 h-6 flex items-center justify-center"
+                  aria-label={`Go to testimonial ${index + 1}`}>
+                  <span className={`w-2.5 h-2.5 rounded-full transition-colors ${index === currentTestimonial ? 'bg-[#2CB1A6]' : 'bg-[#CBD5DD]'}`} />
+                </button>
               ))}
             </div>
             <button onClick={nextTestimonial} className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm border border-[#E5EAF0]" aria-label="Next">
@@ -125,11 +127,13 @@ export default function HomeTestimonials() {
             <button onClick={prevTestimonial} className="w-12 h-12 rounded-full bg-white hover:bg-[#F7FAFC] flex items-center justify-center transition-colors shadow-sm border border-[#E5EAF0]" aria-label="Previous testimonial">
               <svg className="w-6 h-6 text-[#5B6B75]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg>
             </button>
-            <div className="flex gap-2">
+            <div className="flex">
               {TESTIMONIALS.map((_, index) => (
                 <button key={index} onClick={() => setCurrentTestimonial(index)}
-                  className={`w-2.5 h-2.5 rounded-full transition-colors ${index === currentTestimonial ? 'bg-[#2CB1A6]' : 'bg-[#E5EAF0]'}`}
-                  aria-label={`Go to testimonial ${index + 1}`} />
+                  className="w-6 h-6 flex items-center justify-center"
+                  aria-label={`Go to testimonial ${index + 1}`}>
+                  <span className={`w-2.5 h-2.5 rounded-full transition-colors ${index === currentTestimonial ? 'bg-[#2CB1A6]' : 'bg-[#CBD5DD]'}`} />
+                </button>
               ))}
             </div>
             <button onClick={nextTestimonial} className="w-12 h-12 rounded-full bg-white hover:bg-[#F7FAFC] flex items-center justify-center transition-colors shadow-sm border border-[#E5EAF0]" aria-label="Next testimonial">

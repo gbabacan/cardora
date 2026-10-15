@@ -247,7 +247,7 @@ export default function BoardViewPage({ params }: { params: Promise<{ id: string
           <h1 className="text-2xl font-bold text-[#0B1F2A] mb-4">Board Not Found</h1>
           <p className="text-[#5B6B75] mb-6">This board doesn't exist or has been deleted.</p>
           <Link href="/">
-            <button className="px-6 py-3 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white font-semibold rounded-lg transition-colors">
+            <button className="px-6 py-3 bg-[#1A7F77] hover:bg-[#156C65] text-white font-semibold rounded-lg transition-colors">
               Go Home
             </button>
           </Link>
@@ -390,7 +390,7 @@ export default function BoardViewPage({ params }: { params: Promise<{ id: string
                     {/* Add Your Message — always shows text */}
                     <button
                       onClick={() => setShowAddMessageModal(true)}
-                      className="px-3 py-2 md:px-5 md:py-2.5 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white font-semibold rounded-full transition-colors shadow-lg flex items-center gap-1.5 text-sm md:text-base whitespace-nowrap"
+                      className="px-3 py-2 md:px-5 md:py-2.5 bg-[#1A7F77] hover:bg-[#156C65] text-white font-semibold rounded-full transition-colors shadow-lg flex items-center gap-1.5 text-sm md:text-base whitespace-nowrap"
                     >
                       <svg className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -460,7 +460,7 @@ export default function BoardViewPage({ params }: { params: Promise<{ id: string
             {!isDelivered && (
               <button
                 onClick={() => setShowAddMessageModal(true)}
-                className="px-8 py-3 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white font-semibold rounded-full transition-colors shadow-lg"
+                className="px-8 py-3 bg-[#1A7F77] hover:bg-[#156C65] text-white font-semibold rounded-full transition-colors shadow-lg"
               >
                 Add the First Message
               </button>

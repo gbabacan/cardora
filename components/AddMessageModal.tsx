@@ -927,7 +927,7 @@ export default function AddMessageModal({
                               type="button"
                               onClick={() => searchUnsplash(unsplashSearchQuery)}
                               disabled={isSearchingUnsplash}
-                              className="px-4 py-2 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-medium transition-colors disabled:bg-gray-400"
+                              className="px-4 py-2 bg-[#1A7F77] hover:bg-[#156C65] text-white rounded-lg font-medium transition-colors disabled:bg-gray-400"
                             >
                               {isSearchingUnsplash ? (
                                 <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -1100,7 +1100,7 @@ export default function AddMessageModal({
                           type="button"
                           onClick={() => searchGiphy(gifSearchQuery)}
                           disabled={isSearchingGifs}
-                          className="px-4 py-2 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-medium transition-colors disabled:bg-gray-400"
+                          className="px-4 py-2 bg-[#1A7F77] hover:bg-[#156C65] text-white rounded-lg font-medium transition-colors disabled:bg-gray-400"
                         >
                           {isSearchingGifs ? (
                             <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -1276,7 +1276,7 @@ export default function AddMessageModal({
                         <button
                           type="button"
                           onClick={startRecording}
-                          className="px-6 py-3 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold transition-colors shadow-lg flex items-center justify-center gap-2 mx-auto"
+                          className="px-6 py-3 bg-[#1A7F77] hover:bg-[#156C65] text-white rounded-lg font-semibold transition-colors shadow-lg flex items-center justify-center gap-2 mx-auto"
                         >
                           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                             <circle cx="12" cy="12" r="10" />
@@ -1303,7 +1303,7 @@ export default function AddMessageModal({
               <button
                 type="submit"
                 disabled={isSubmitting || (!editMode && !contributorName.trim()) || !messageContent.trim()}
-                className="flex-1 px-6 py-3 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold transition-colors shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="flex-1 px-6 py-3 bg-[#1A7F77] hover:bg-[#156C65] text-white rounded-lg font-semibold transition-colors shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isSubmitting ? (
                   <>

@@ -235,7 +235,7 @@ export default function AccountPage() {
                 <button
                   type="submit"
                   disabled={savingProfile}
-                  className="px-8 py-3 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold transition-colors shadow-sm disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  className="px-8 py-3 bg-[#1A7F77] hover:bg-[#156C65] text-white rounded-lg font-semibold transition-colors shadow-sm disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
                   {savingProfile ? 'Saving...' : 'Save Changes'}
                 </button>
@@ -298,7 +298,7 @@ export default function AccountPage() {
                 <button
                   type="submit"
                   disabled={savingPassword}
-                  className="px-8 py-3 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold transition-colors shadow-sm disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  className="px-8 py-3 bg-[#1A7F77] hover:bg-[#156C65] text-white rounded-lg font-semibold transition-colors shadow-sm disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
                   {savingPassword ? 'Changing...' : 'Change Password'}
                 </button>

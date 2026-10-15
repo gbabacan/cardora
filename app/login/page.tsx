@@ -188,7 +188,7 @@ function LoginPageContent() {
               <Link href="/login?mode=forgot" className="text-xs text-[#5B6B75] hover:text-[#2CB1A6]">Forgot password?</Link>
             </div>
           )}
-          <button type="submit" disabled={loading} className="w-full py-3 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white font-semibold rounded-full transition-colors shadow-lg disabled:opacity-50 text-sm">
+          <button type="submit" disabled={loading} className="w-full py-3 bg-[#1A7F77] hover:bg-[#156C65] text-white font-semibold rounded-full transition-colors shadow-lg disabled:opacity-50 text-sm">
             {loading ? '...' : isForgotPassword ? 'Send Reset Link' : isSignUp ? 'Sign Up' : 'Sign In'}
           </button>
         </form>
@@ -315,7 +315,7 @@ function LoginPageContent() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-3 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white font-semibold rounded-full transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full py-3 bg-[#1A7F77] hover:bg-[#156C65] text-white font-semibold rounded-full transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? "SENDING..." : "SEND RESET LINK"}
                   </button>
@@ -376,7 +376,7 @@ function LoginPageContent() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white font-semibold rounded-full transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-3 bg-[#1A7F77] hover:bg-[#156C65] text-white font-semibold rounded-full transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? "SIGNING IN..." : "SIGN IN"}
                 </button>
@@ -547,7 +547,7 @@ function LoginPageContent() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white font-semibold rounded-full transition-colors shadow-lg mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-3 bg-[#1A7F77] hover:bg-[#156C65] text-white font-semibold rounded-full transition-colors shadow-lg mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? "CREATING ACCOUNT..." : "SIGN UP"}
                 </button>

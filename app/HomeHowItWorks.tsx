@@ -71,7 +71,7 @@ export default function HomeHowItWorks() {
                 onClick={() => setActiveStep(index)}
                 className={`flex-1 px-3 md:px-10 py-2 md:py-3 rounded-full font-semibold transition-all text-sm md:text-base ${
                   activeStep === index
-                    ? 'bg-[#1F8F86] text-white'
+                    ? 'bg-[#1A7F77] text-white'
                     : 'bg-white text-[#5B6B75] border-2 border-[#E5EAF0] hover:border-[#2CB1A6]'
                 }`}
               >
@@ -91,10 +91,8 @@ export default function HomeHowItWorks() {
                   <p className="text-base md:text-lg text-[#5B6B75] leading-relaxed">
                     From birthdays to farewells, choose the perfect moment to celebrate. Customize with photos, videos, and heartfelt messages in just a few clicks.
                   </p>
-                  <Link href="/boards/create">
-                    <button className="px-6 md:px-8 py-3 md:py-4 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold transition-colors text-base md:text-lg">
-                      Create a Cardora
-                    </button>
+                  <Link href="/boards/create" className="inline-block px-6 md:px-8 py-3 md:py-4 bg-[#1A7F77] hover:bg-[#156C65] text-white rounded-lg font-semibold transition-colors text-base md:text-lg">
+                    Create a Cardora
                   </Link>
                 </div>
               )}
@@ -105,10 +103,8 @@ export default function HomeHowItWorks() {
                   <p className="text-base md:text-lg text-[#5B6B75] leading-relaxed">
                     Choose the Board format to send a simple link to friends, family, or coworkers. They can contribute messages and memories instantly, without signing up.
                   </p>
-                  <Link href="/boards/create">
-                    <button className="px-6 md:px-8 py-3 md:py-4 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold transition-colors text-base md:text-lg">
-                      Create a Cardora
-                    </button>
+                  <Link href="/boards/create" className="inline-block px-6 md:px-8 py-3 md:py-4 bg-[#1A7F77] hover:bg-[#156C65] text-white rounded-lg font-semibold transition-colors text-base md:text-lg">
+                    Create a Cardora
                   </Link>
                 </div>
               )}
@@ -119,10 +115,8 @@ export default function HomeHowItWorks() {
                   <p className="text-base md:text-lg text-[#5B6B75] leading-relaxed">
                     Send your card instantly or schedule it for the perfect surprise. Share digitally, print it, or present it live—creating memories that last.
                   </p>
-                  <Link href="/boards/create">
-                    <button className="px-6 md:px-8 py-3 md:py-4 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold transition-colors text-base md:text-lg">
-                      Create a Cardora
-                    </button>
+                  <Link href="/boards/create" className="inline-block px-6 md:px-8 py-3 md:py-4 bg-[#1A7F77] hover:bg-[#156C65] text-white rounded-lg font-semibold transition-colors text-base md:text-lg">
+                    Create a Cardora
                   </Link>
                 </div>
               )}
@@ -133,10 +127,8 @@ export default function HomeHowItWorks() {
                   <p className="text-base md:text-lg text-[#5B6B75] leading-relaxed">
                     Your recipient receives a heartfelt card filled with messages, photos, and love—whether from you alone or from everyone together. A keepsake they can treasure and revisit forever.
                   </p>
-                  <Link href="/boards/create">
-                    <button className="px-6 md:px-8 py-3 md:py-4 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold transition-colors text-base md:text-lg">
-                      Create a Cardora
-                    </button>
+                  <Link href="/boards/create" className="inline-block px-6 md:px-8 py-3 md:py-4 bg-[#1A7F77] hover:bg-[#156C65] text-white rounded-lg font-semibold transition-colors text-base md:text-lg">
+                    Create a Cardora
                   </Link>
                 </div>
               )}
@@ -163,17 +155,17 @@ export default function HomeHowItWorks() {
                   <div className="bg-white rounded-xl p-6 shadow-lg">
                     <p className="text-sm font-semibold text-[#5B6B75] mb-4">Invite contributors</p>
                     <div className="flex flex-wrap gap-2 mb-6">
-                      <span className="px-4 py-2 bg-[#2CB1A6] text-white rounded-full text-sm">Emily Chen</span>
-                      <span className="px-4 py-2 bg-[#2CB1A6] text-white rounded-full text-sm">Michael Rodriguez</span>
-                      <span className="px-4 py-2 bg-[#2CB1A6] text-white rounded-full text-sm">Sarah Johnson</span>
-                      <span className="px-4 py-2 bg-[#2CB1A6] text-white rounded-full text-sm">Design Team</span>
+                      <span className="px-4 py-2 bg-[#1A7F77] text-white rounded-full text-sm">Emily Chen</span>
+                      <span className="px-4 py-2 bg-[#1A7F77] text-white rounded-full text-sm">Michael Rodriguez</span>
+                      <span className="px-4 py-2 bg-[#1A7F77] text-white rounded-full text-sm">Sarah Johnson</span>
+                      <span className="px-4 py-2 bg-[#1A7F77] text-white rounded-full text-sm">Design Team</span>
                     </div>
                     <div className="space-y-3">
                       <label className="text-sm font-semibold text-[#5B6B75]">Message</label>
                       <div className="p-4 bg-[#F7FAFC] rounded-lg">
                         <p className="text-[#0B1F2A]">Hi everyone! Let&apos;s make Alex&apos;s farewell card extra special. Please add your favorite memory or message!</p>
                       </div>
-                      <button className="w-full px-6 py-3 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold transition-colors">Send invites</button>
+                      <button className="w-full px-6 py-3 bg-[#1A7F77] hover:bg-[#156C65] text-white rounded-lg font-semibold transition-colors">Send invites</button>
                     </div>
                   </div>
                 </div>
@@ -255,7 +247,7 @@ export default function HomeHowItWorks() {
                           <div className="w-7 h-7 bg-gradient-to-br from-[#FF6B9D] to-[#FF4081] rounded-full border-2 border-white"></div>
                           <div className="w-7 h-7 bg-gradient-to-br from-[#7C4DFF] to-[#6200EA] rounded-full border-2 border-white"></div>
                         </div>
-                        <span className="text-sm font-bold text-[#2CB1A6]">+24 contributors</span>
+                        <span className="text-sm font-bold text-[#1A7F77]">+24 contributors</span>
                       </div>
                     </div>
                   </div>

@@ -85,7 +85,7 @@ export default function PricingNav() {
                   <button className="px-4 py-2 text-[#5B6B75] hover:text-[#0B1F2A] transition-colors font-medium">Sign in</button>
                 </Link>
                 <Link href="/login?mode=signup">
-                  <button className="px-4 md:px-6 py-2 md:py-2.5 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-medium transition-colors shadow-sm text-sm md:text-base">Sign up free</button>
+                  <button className="px-4 md:px-6 py-2 md:py-2.5 bg-[#1A7F77] hover:bg-[#156C65] text-white rounded-lg font-medium transition-colors shadow-sm text-sm md:text-base">Sign up free</button>
                 </Link>
               </>
             )}

@@ -2,7 +2,7 @@
 
 import { useContext, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { isLottieFile } from "@/lib/lotties";
+import { isLottieFile } from "@/lib/lottieFile";
 import { ScrollRowContext } from "@/app/HorizontalScrollRow";
 
 // The player (lottie-web and dotLottie) is only downloaded once a tile first

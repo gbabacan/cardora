@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { supabase } from "@/lib/supabase";
 import MobileMenuContent from "./MobileMenuContent";
 import OccasionsDropdown from "./OccasionsDropdown";
 
@@ -12,8 +11,31 @@ export default function HomeNav() {
   const [showFeaturesDropdown, setShowFeaturesDropdown] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
+  // Supabase keeps a signed-in session in localStorage under
+  // sb-<project>-auth-token. Without one there's no one to show, so the
+  // Supabase client (~200 KB) is only loaded for signed-in visitors, and
+  // then after the page has loaded.
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
+    let hasSession = false;
+    try {
+      hasSession = Object.keys(localStorage).some(key => key.startsWith('sb-') && key.endsWith('-auth-token'));
+    } catch {}
+    if (!hasSession) return;
+    let cancelled = false;
+    const load = () => {
+      import("@/lib/supabase")
+        .then(({ supabase }) => supabase.auth.getUser())
+        .then(({ data: { user } }) => {
+          if (!cancelled) setUser(user);
+        })
+        .catch(() => {});
+    };
+    if (document.readyState === 'complete') load();
+    else window.addEventListener('load', load, { once: true });
+    return () => {
+      cancelled = true;
+      window.removeEventListener('load', load);
+    };
   }, []);
 
   return (
@@ -22,8 +44,8 @@ export default function HomeNav() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 md:gap-4">
-            <Image src="/cardoraLogo.png" alt="Cardora" width={240} height={64} className="h-9 md:h-16 w-auto" priority />
-            <span className="text-xl md:text-3xl font-bold text-[#2CB1A6]">Cardora</span>
+            <Image src="/cardoraLogo.png" alt="" width={240} height={64} className="h-9 md:h-16 w-auto" priority />
+            <span className="whitespace-nowrap text-xl md:text-3xl font-bold text-[#1F8F86]">Cardora</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -90,11 +112,11 @@ export default function HomeNav() {
               </Link>
             ) : (
               <>
-                <Link href="/login?mode=signin" className="hidden md:block">
-                  <button className="px-4 py-2 text-[#5B6B75] hover:text-[#0B1F2A] transition-colors font-medium">Sign in</button>
+                <Link href="/login?mode=signin" className="hidden md:block px-4 py-2 text-[#5B6B75] hover:text-[#0B1F2A] transition-colors font-medium">
+                  Sign in
                 </Link>
-                <Link href="/login?mode=signup">
-                  <button className="px-4 md:px-6 py-2 md:py-2.5 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-medium transition-colors shadow-sm text-sm md:text-base">Sign up free</button>
+                <Link href="/login?mode=signup" className="whitespace-nowrap px-4 md:px-6 py-2 md:py-2.5 bg-[#1A7F77] hover:bg-[#156C65] text-white rounded-lg font-medium transition-colors shadow-sm text-sm md:text-base">
+                  Sign up free
                 </Link>
               </>
             )}

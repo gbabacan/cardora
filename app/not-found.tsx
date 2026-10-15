@@ -129,7 +129,7 @@ export default function NotFound() {
         {/* Action Buttons */}
         <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 flex gap-4 justify-center">
           <Link href="/">
-            <button className="px-8 py-3 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white font-semibold rounded-lg transition-colors shadow-lg hover:shadow-xl transform hover:scale-105">
+            <button className="px-8 py-3 bg-[#1A7F77] hover:bg-[#156C65] text-white font-semibold rounded-lg transition-colors shadow-lg hover:shadow-xl transform hover:scale-105">
               Go Home
             </button>
           </Link>

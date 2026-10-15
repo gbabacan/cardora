@@ -127,7 +127,7 @@ export default function DeliveryMessagePreview({
           <div className="bg-[#F7FAFC] border-t border-[#E5EAF0] px-6 py-4">
             <button
               onClick={onClose}
-              className="w-full py-3 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold transition-colors"
+              className="w-full py-3 bg-[#1A7F77] hover:bg-[#156C65] text-white rounded-lg font-semibold transition-colors"
             >
               Close Preview
             </button>

@@ -107,7 +107,7 @@ export default function GraduationCardsPage() {
 
                 <div className="flex flex-wrap justify-center lg:justify-start gap-3 mb-6">
                   <Link href="/boards/create?occasion=graduation">
-                    <button className="px-8 py-3.5 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white text-base lg:text-lg rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl">
+                    <button className="px-8 py-3.5 bg-[#1A7F77] hover:bg-[#156C65] text-white text-base lg:text-lg rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl">
                       Create a Graduation Card 🎓
                     </button>
                   </Link>

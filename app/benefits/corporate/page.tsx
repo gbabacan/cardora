@@ -142,7 +142,7 @@ export default function CorporateBenefitsPage() {
             <h2 className="text-4xl lg:text-5xl font-bold text-[#0B1F2A] mb-6">Ready to Transform Your Culture?</h2>
             <p className="text-xl text-[#5B6B75] mb-8">Start building a workplace where recognition is part of everyday life. Your team will thank you for it.</p>
             <Link href="/boards/create">
-              <button className="px-10 py-4 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white text-lg rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl">Create a Cardora</button>
+              <button className="px-10 py-4 bg-[#1A7F77] hover:bg-[#156C65] text-white text-lg rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl">Create a Cardora</button>
             </Link>
           </div>
         </div>

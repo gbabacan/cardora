@@ -260,7 +260,7 @@ export default function RecipientViewPage({ params }: { params: Promise<{ id: st
           <h1 className="text-2xl font-bold text-[#0B1F2A] mb-4">Board Not Found</h1>
           <p className="text-[#5B6B75] mb-6">This board doesn't exist or has been deleted.</p>
           <Link href="/">
-            <button className="px-6 py-3 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white font-semibold rounded-lg transition-colors">
+            <button className="px-6 py-3 bg-[#1A7F77] hover:bg-[#156C65] text-white font-semibold rounded-lg transition-colors">
               Go Home
             </button>
           </Link>
@@ -451,7 +451,7 @@ export default function RecipientViewPage({ params }: { params: Promise<{ id: st
                 <button
                   onClick={handleUseTemplate}
                   disabled={usingTemplate}
-                  className="no-print px-3 md:px-6 py-2 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold transition-colors flex items-center gap-1.5 shadow-md disabled:opacity-60 disabled:cursor-not-allowed text-sm md:text-base whitespace-nowrap"
+                  className="no-print px-3 md:px-6 py-2 bg-[#1A7F77] hover:bg-[#156C65] text-white rounded-lg font-semibold transition-colors flex items-center gap-1.5 shadow-md disabled:opacity-60 disabled:cursor-not-allowed text-sm md:text-base whitespace-nowrap"
                 >
                   <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

@@ -103,7 +103,7 @@ export default function DeliveryConfirmationModal({
             <button
               onClick={onConfirm}
               disabled={isDelivering}
-              className="flex-1 px-6 py-3 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold transition-colors shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 px-6 py-3 bg-[#1A7F77] hover:bg-[#156C65] text-white rounded-lg font-semibold transition-colors shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isDelivering ? (
                 <>

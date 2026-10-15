@@ -426,7 +426,7 @@ function CreateBoardPageContent() {
                 <button
                   onClick={handleNextStep}
                   disabled={!isStep1Valid()}
-                  className="w-full py-4 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white font-bold rounded-lg transition-colors shadow-lg text-lg disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:bg-gray-300"
+                  className="w-full py-4 bg-[#1A7F77] hover:bg-[#156C65] text-white font-bold rounded-lg transition-colors shadow-lg text-lg disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:bg-gray-300"
                 >
                   Next
                 </button>
@@ -539,7 +539,7 @@ function CreateBoardPageContent() {
                     }
                   }}
                   disabled={!selectedFormat || authLoadingState}
-                  className="w-full py-4 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white font-bold rounded-lg transition-colors shadow-lg text-lg disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  className="w-full py-4 bg-[#1A7F77] hover:bg-[#156C65] text-white font-bold rounded-lg transition-colors shadow-lg text-lg disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
                   {authLoadingState ? 'Creating...' : 'Next'}
                 </button>
@@ -704,7 +704,7 @@ function CreateBoardPageContent() {
                   <button
                     type="submit"
                     disabled={authLoadingState}
-                    className="w-full py-3 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white font-semibold rounded-full transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full py-3 bg-[#1A7F77] hover:bg-[#156C65] text-white font-semibold rounded-full transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {authLoadingState ? "PROCESSING..." : (isSignIn ? "SIGN IN" : "CREATE ACCOUNT")}
                   </button>

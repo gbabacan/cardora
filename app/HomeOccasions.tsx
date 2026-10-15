@@ -1,9 +1,6 @@
-"use client";
-
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import LazyLottie from "@/components/LazyLottie";
-import { getOccasions, type Occasion } from "@/lib/occasions";
+import type { Occasion } from "@/lib/occasions";
 
 const lottieUrl = (occasion: Occasion) => {
   const lottie = occasion.default_lottie;
@@ -11,26 +8,10 @@ const lottieUrl = (occasion: Occasion) => {
   return (lottie.source_type === "local" ? lottie.file_path : lottie.remote_url) || null;
 };
 
-export default function HomeOccasions() {
-  const [occasions, setOccasions] = useState<Occasion[]>([]);
-  const [occasionsLoading, setOccasionsLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchOccasions() {
-      setOccasionsLoading(true);
-      try {
-        // Just the list; each tile loads its own animation when it scrolls
-        // near the screen (LazyLottie), instead of all 15 up front.
-        const { occasions, error } = await getOccasions(15);
-        if (!error) setOccasions(occasions);
-      } catch {}
-      finally {
-        setOccasionsLoading(false);
-      }
-    }
-    fetchOccasions();
-  }, []);
-
+// Rendered on the server with the occasions already fetched, so the tiles are
+// in the HTML and the homepage doesn't need the Supabase client to show them.
+// Each tile loads its own animation when it scrolls near the screen.
+export default function HomeOccasions({ occasions }: { occasions: Occasion[] }) {
   return (
     <section className="py-20 bg-gradient-to-br from-[#2CB1A6] to-[#1F8F86]">
       <div className="container mx-auto px-6">
@@ -44,14 +25,7 @@ export default function HomeOccasions() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 max-w-7xl mx-auto mb-12">
-          {occasionsLoading ? (
-            Array.from({ length: 15 }).map((_, index) => (
-              <div key={index} className="bg-white rounded-2xl p-6 flex flex-col items-center justify-center gap-4 animate-pulse">
-                <div className="w-20 h-20 bg-[#F7FAFC] rounded-full"></div>
-                <div className="h-12 w-full bg-[#F7FAFC] rounded"></div>
-              </div>
-            ))
-          ) : occasions.length > 0 ? (
+          {occasions.length > 0 ? (
             occasions.map((occasion) => (
               <Link
                 key={occasion.id}
@@ -81,7 +55,7 @@ export default function HomeOccasions() {
 
         <div className="text-center">
           <Link href="/boards/create" className="inline-flex items-center gap-2 text-white text-lg font-semibold hover:gap-4 transition-all">
-            See all
+            See all occasions
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>

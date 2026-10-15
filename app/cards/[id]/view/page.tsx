@@ -421,7 +421,7 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
           <h1 className="text-2xl font-bold text-[#0B1F2A] mb-4">Card Not Found</h1>
           <p className="text-[#5B6B75] mb-6">This card doesn't exist or has been deleted.</p>
           <Link href="/">
-            <button className="px-6 py-3 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white font-semibold rounded-lg transition-colors">
+            <button className="px-6 py-3 bg-[#1A7F77] hover:bg-[#156C65] text-white font-semibold rounded-lg transition-colors">
               Go Home
             </button>
           </Link>

@@ -278,7 +278,7 @@ export default function CreateBoardPage() {
                 <button
                   type="submit"
                   disabled={authSubmitting}
-                  className="w-full py-3 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white font-semibold rounded-full transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-3 bg-[#1A7F77] hover:bg-[#156C65] text-white font-semibold rounded-full transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {authSubmitting ? "PROCESSING..." : (isSignIn ? "SIGN IN" : "CREATE ACCOUNT")}
                 </button>
@@ -334,7 +334,7 @@ export default function CreateBoardPage() {
                   Start Over
                 </button>
                 <Link href="/dashboard">
-                  <button className="px-6 py-3 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-full font-semibold transition-colors shadow-lg">
+                  <button className="px-6 py-3 bg-[#1A7F77] hover:bg-[#156C65] text-white rounded-full font-semibold transition-colors shadow-lg">
                     Go to Dashboard
                   </button>
                 </Link>

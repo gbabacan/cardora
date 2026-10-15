@@ -873,7 +873,7 @@ function BoardEditorPageContent() {
               <button
                 onClick={handleSaveBoard}
                 disabled={saving}
-                className="px-3 md:px-6 py-2 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-medium transition-colors shadow-sm disabled:bg-gray-400 disabled:cursor-not-allowed text-sm md:text-base"
+                className="px-3 md:px-6 py-2 bg-[#1A7F77] hover:bg-[#156C65] text-white rounded-lg font-medium transition-colors shadow-sm disabled:bg-gray-400 disabled:cursor-not-allowed text-sm md:text-base"
               >
                 {saving ? 'Saving...' : <><span className="hidden md:inline">Save & Publish</span><span className="md:hidden">Save</span></>}
               </button>
@@ -1303,7 +1303,7 @@ function BoardEditorPageContent() {
                           navigator.clipboard.writeText(`https://${boardLink}`);
                           setToast({ message: 'Link Copied To Clipboard', type: 'success' });
                         }}
-                        className="px-6 py-3 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-medium transition-colors flex items-center gap-2 whitespace-nowrap"
+                        className="px-6 py-3 bg-[#1A7F77] hover:bg-[#156C65] text-white rounded-lg font-medium transition-colors flex items-center gap-2 whitespace-nowrap"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -1371,7 +1371,7 @@ function BoardEditorPageContent() {
                     <button
                       onClick={handleSendInvites}
                       disabled={sendingInvites}
-                      className="w-full px-6 py-3 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-medium transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                      className="w-full px-6 py-3 bg-[#1A7F77] hover:bg-[#156C65] text-white rounded-lg font-medium transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                     >
                       {sendingInvites ? 'Saving...' : 'Send Invites'}
                     </button>
@@ -1462,7 +1462,7 @@ function BoardEditorPageContent() {
                           link.download = `qr-code-${boardId}.png`;
                           link.click();
                         }}
-                        className="mt-4 px-6 py-2 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+                        className="mt-4 px-6 py-2 bg-[#1A7F77] hover:bg-[#156C65] text-white rounded-lg font-medium transition-colors flex items-center gap-2"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -1607,7 +1607,7 @@ function BoardEditorPageContent() {
                   <button
                     onClick={handleDeliverNowClick}
                     disabled={deliveringNow}
-                    className="w-full py-4 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-bold transition-colors shadow-lg text-base disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full py-4 bg-[#1A7F77] hover:bg-[#156C65] text-white rounded-lg font-bold transition-colors shadow-lg text-base disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
@@ -1705,7 +1705,7 @@ function BoardEditorPageContent() {
                       ) : (
                         <button
                           onClick={() => setShowScheduleModal(true)}
-                          className="w-full py-2.5 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold text-sm transition-colors"
+                          className="w-full py-2.5 bg-[#1A7F77] hover:bg-[#156C65] text-white rounded-lg font-semibold text-sm transition-colors"
                         >
                           Confirm This Schedule
                         </button>
@@ -1762,7 +1762,7 @@ function BoardEditorPageContent() {
                           </button>
                           <button
                             onClick={async () => { await autoSaveSchedule(scheduledDate, scheduledTime); setScheduleConfirmed(true); setShowScheduleModal(false); setToast({ message: 'Schedule saved! Your card will be delivered automatically.', type: 'success' }); }}
-                            className="flex-1 py-2.5 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold text-sm transition-colors"
+                            className="flex-1 py-2.5 bg-[#1A7F77] hover:bg-[#156C65] text-white rounded-lg font-semibold text-sm transition-colors"
                           >
                             Confirm Schedule
                           </button>

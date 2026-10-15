@@ -29,7 +29,7 @@ export default function PersonalBenefitsPage() {
                   Transform ordinary occasions into extraordinary memories. Cardora makes it easy to gather heartfelt messages from everyone who matters.
                 </p>
                 <Link href="/boards/create">
-                  <button className="px-8 py-4 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white text-base lg:text-lg rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl">
+                  <button className="px-8 py-4 bg-[#1A7F77] hover:bg-[#156C65] text-white text-base lg:text-lg rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl">
                     Create a Cardora
                   </button>
                 </Link>

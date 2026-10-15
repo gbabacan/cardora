@@ -212,7 +212,7 @@ export default function InviteModal({
                   />
                   <button
                     onClick={handleCopyLink}
-                    className="px-6 py-3 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-medium transition-colors flex items-center gap-2 whitespace-nowrap"
+                    className="px-6 py-3 bg-[#1A7F77] hover:bg-[#156C65] text-white rounded-lg font-medium transition-colors flex items-center gap-2 whitespace-nowrap"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -288,7 +288,7 @@ export default function InviteModal({
                 <button
                   onClick={handleSendInvites}
                   disabled={sendingInvites}
-                  className="w-full px-6 py-3 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-medium transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  className="w-full px-6 py-3 bg-[#1A7F77] hover:bg-[#156C65] text-white rounded-lg font-medium transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
                   {sendingInvites ? 'Sending...' : 'Send Invites'}
                 </button>
@@ -392,7 +392,7 @@ export default function InviteModal({
                 <a
                   href={`https://api.qrserver.com/v1/create-qr-code/?size=1000x1000&data=${encodeURIComponent(`https://${boardLink}`)}`}
                   download="board-qr-code.png"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-medium transition-colors"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-[#1A7F77] hover:bg-[#156C65] text-white rounded-lg font-medium transition-colors"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />

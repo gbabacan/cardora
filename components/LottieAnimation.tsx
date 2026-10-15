@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import Lottie, { type LottieRefCurrentProps } from "lottie-react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
-import { isLottieFileSentinel } from "@/lib/lotties";
+import { isLottieFileSentinel } from "@/lib/lottieFile";
 
 interface LottieAnimationProps {
   animationData?: any;

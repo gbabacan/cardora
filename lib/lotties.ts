@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { isLottieFile, type LottieFileSentinel } from './lottieFile';
 
 export interface LottieAnimation {
   id: string;
@@ -74,18 +75,7 @@ export async function getLottieAnimationById(id: string) {
   }
 }
 
-/** Sentinel shape returned for .lottie binary files so renderers can use DotLottieReact */
-export interface LottieFileSentinel {
-  __lottieFileSrc: string;
-}
-
-export function isLottieFileSentinel(data: any): data is LottieFileSentinel {
-  return data !== null && typeof data === 'object' && '__lottieFileSrc' in data;
-}
-
-export function isLottieFile(path: string): boolean {
-  return path.toLowerCase().endsWith('.lottie');
-}
+export { isLottieFile, isLottieFileSentinel, type LottieFileSentinel } from './lottieFile';
 
 /**
  * Get the animation data URL (local or remote)

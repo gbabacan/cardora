@@ -191,7 +191,7 @@ export default function HomeExamples() {
                       <h3 className="font-bold text-lg">{label}</h3>
                     </div>
                     <div className="absolute inset-0 bg-[#2CB1A6]/0 group-hover:bg-[#2CB1A6]/20 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
-                      <button className="px-6 py-3 bg-[#2CB1A6] text-white rounded-lg font-semibold shadow-lg flex items-center gap-2">
+                      <button className="px-6 py-3 bg-[#1A7F77] text-white rounded-lg font-semibold shadow-lg flex items-center gap-2">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">{VIEW_ICON}</svg>
                         View sample
                       </button>
@@ -202,10 +202,8 @@ export default function HomeExamples() {
             </div>
 
             <div className="text-center">
-              <Link href="/templates" prefetch={false}>
-                <button className="px-10 py-4 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white text-lg rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl">
-                  Explore All Templates
-                </button>
+              <Link href="/templates" prefetch={false} className="inline-block px-10 py-4 bg-[#1A7F77] hover:bg-[#156C65] text-white text-lg rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl">
+                Explore All Templates
               </Link>
             </div>
           </div>

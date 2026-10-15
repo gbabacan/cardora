@@ -53,7 +53,7 @@ export default function ContactFormSection() {
             <p className="text-[#5B6B75] mb-6">Thank you for contacting us. We&apos;ll get back to you soon.</p>
             <button
               onClick={() => setSubmitted(false)}
-              className="px-6 py-3 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-semibold transition-colors"
+              className="px-6 py-3 bg-[#1A7F77] hover:bg-[#156C65] text-white rounded-lg font-semibold transition-colors"
             >
               Send Another Message
             </button>
@@ -117,7 +117,7 @@ export default function ContactFormSection() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full py-4 bg-[#2CB1A6] hover:bg-[#1F8F86] text-white rounded-lg font-bold transition-colors shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="w-full py-4 bg-[#1A7F77] hover:bg-[#156C65] text-white rounded-lg font-bold transition-colors shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               {submitting ? "Sending..." : "Send Message"}
             </button>
