@@ -30,7 +30,7 @@ export default function MobileMenuContent({ user, onClose }: Props) {
   const [showOccasions, setShowOccasions] = useState(false);
 
   return (
-    <nav className="md:hidden border-t border-[#E5EAF0] pt-3 pb-2 mt-3 flex flex-col gap-0.5">
+    <nav className="lg:hidden border-t border-[#E5EAF0] pt-3 pb-2 mt-3 flex flex-col gap-0.5">
 
       {/* Features — accordion */}
       <div>

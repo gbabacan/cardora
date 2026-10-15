@@ -104,7 +104,7 @@ export default function HomeHero() {
     });
 
   return (
-    <section className="bg-[#F7FAFC] py-10 md:py-20 lg:py-24">
+    <section className="bg-[#F7FAFC] py-10 md:py-20 lg:py-24 overflow-x-clip">
       <div className="container mx-auto px-4 md:px-6">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center max-w-7xl mx-auto">
           {/* Left Content */}

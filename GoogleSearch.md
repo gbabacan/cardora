@@ -45,6 +45,12 @@ non-www groups may show "failed" — that's fine, those URLs are meant to redire
 | After `c7109b0` | 43 | 3.4 s | 7.7 s | 920 ms | 88 | 92 |
 | After `0ac9631` (14 Oct, 22:38) | 60 | 1.5 s | 4.9 s | 650 ms | 88 | 92 |
 | Round 3, local production build (not PageSpeed) | 91 | 1.1 s | 3.5 s | 10–30 ms | 100 | 100 |
+| After `23bdb4d` (14 Oct, 23:04) | 83 | 1.1 s | 3.5 s | 330 ms | 100 | 100 |
+
+The 14 Oct 23:04 run had CLS 0, Speed Index 3.0 s and Best Practices 100.
+Still flagged, none of it costly: 191 KiB unused JavaScript (mostly Next.js
+prefetching the create and sign-up pages), 2.2 s main-thread work, 7 long
+tasks, 50 KiB of image savings, DOM size and a forced reflow.
 
 The 14 Oct 22:38 run also had CLS 0, Speed Index 6.2 s and Best Practices 96.
 It still flagged 350 ms of render-blocking requests, LCP request discovery,
@@ -64,7 +70,7 @@ image download.
 | 14 Oct | `c7109b0` | **Homepage speed, round 1.** Optimised images; Lottie animations load as they scroll into view. |
 | 14 Oct | `c7109b0` | **Templates page server-rendered** (`lib/publicTemplates.ts`, revalidates every 5 min), so the templates are in the HTML Google reads. Tiles have accessible names; added a "Card ideas by occasion" section linking every occasion landing page. |
 | 14 Oct | `0ac9631` | **Homepage speed, round 2.** lottie-web (~300 KB) loads only when an animation is about to play; how-it-works animations load only on md+ screens after the page `load` event; gtag uses `lazyOnload`; no prefetch of `/templates`; occasion animations fetched in one query instead of one per occasion. |
-| 15 Oct | _uncommitted_ | **Homepage round 3.** Hero runs only the visible animation; occasions server-rendered (in the HTML, no Supabase client for guests); hero image correct size, high fetch priority, served as AVIF (82 → 23 KB); CSS inlined; accessible teal `#1A7F77` for primary buttons site-wide and the footer; `<main>` landmark, heading order, tap targets, descriptive "More on personal / team cards" and "See all occasions" links. |
+| 14 Oct | `23bdb4d` | **Homepage round 3.** Hero runs only the visible animation; occasions server-rendered (in the HTML, no Supabase client for guests); hero image correct size, high fetch priority, served as AVIF (82 → 23 KB); CSS inlined; accessible teal `#1A7F77` for primary buttons site-wide and the footer; `<main>` landmark, heading order, tap targets, descriptive "More on personal / team cards" and "See all occasions" links. |
 | 14 Oct | `9d1af5b` | **Literal `&apos;` on 8 occasion pages** (birthday, christmas, graduation, new-baby, promotion, retirement, team-celebration, wedding) — the entity was in plain JS strings, which React prints as text. |
 
 ## Search Console actions done
@@ -77,7 +83,6 @@ image download.
 
 ## To do
 
-- [ ] Rerun PageSpeed 2–3 times after the `0ac9631` deploy and record the median above.
 - [ ] Request indexing for the **www** URLs, ~10 per day (URL inspection → paste the full `https://www.cardora.cards/...` address):
   - Day 1: birthday-cards, thank-you-cards, farewell-cards, team-celebration-cards, congratulations-cards, work-anniversary-cards, retirement-cards, employee-appreciation-cards, templates, pricing
   - Day 2: wedding-cards, new-baby-cards, graduation-cards, christmas-cards, valentines-cards, promotion-cards, benefits/personal, benefits/corporate, privacy
@@ -88,7 +93,6 @@ image download.
   "Listings and reviews" below for where to start.
 - [ ] Target queries already showing up: work "card from the team" phrasing into
   the congratulations, team-celebration and thank-you pages' titles and H1s.
-- [ ] Rerun PageSpeed after the round 3 deploy and record it above.
 - [ ] Check Core Web Vitals (Search Console → Experience) once there's enough
   real-user data; that, not a single PageSpeed run, is what counts for ranking.
 

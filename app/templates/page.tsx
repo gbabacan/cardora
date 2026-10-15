@@ -36,15 +36,13 @@ export default async function TemplatesPage() {
       <TemplatesNav />
 
       <main className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12">
-        <div className="mb-5 md:mb-6">
+        <div className="mb-5 md:mb-6 flex flex-wrap items-baseline gap-x-6 gap-y-1">
           <h1 className="text-2xl md:text-3xl font-bold text-[#0B1F2A]">
             Templates
             <span className="sr-only"> — Digital Greeting Card Templates for Every Occasion</span>
           </h1>
-          <p className="mt-1 text-sm md:text-base text-[#5B6B75] max-w-3xl">
-            Pick a ready-made design for a group board or a single card: birthdays, farewells, work anniversaries,
-            weddings, new babies, holidays and more. Open any template to see it with sample messages, then use it
-            to start your own and invite others to sign.
+          <p className="text-sm md:text-base text-[#5B6B75]">
+            Choose from our pre-designed templates to get started quickly
           </p>
         </div>
 

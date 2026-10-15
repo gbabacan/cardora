@@ -27,7 +27,7 @@ export default function ContactNav() {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-12">
+          <nav className="hidden lg:flex items-center gap-12">
             <div
               className="relative"
               onMouseEnter={() => setShowFeaturesDropdown(true)}
@@ -84,13 +84,13 @@ export default function ContactNav() {
                 <div className="w-9 h-9 rounded-full bg-[#2CB1A6] text-white flex items-center justify-center font-bold text-sm">
                   {user.user_metadata?.name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase()}
                 </div>
-                <span className="hidden md:block text-[#0B1F2A] font-medium">
+                <span className="hidden lg:block text-[#0B1F2A] font-medium">
                   {user.user_metadata?.name || user.email}
                 </span>
               </Link>
             ) : (
               <>
-                <Link href="/login?mode=signin" className="hidden md:block">
+                <Link href="/login?mode=signin" className="hidden lg:block">
                   <button className="px-4 py-2 text-[#5B6B75] hover:text-[#0B1F2A] transition-colors font-medium">Sign in</button>
                 </Link>
                 <Link href="/login?mode=signup">
@@ -100,7 +100,7 @@ export default function ContactNav() {
             )}
             <button
               onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="md:hidden p-2 rounded-lg hover:bg-[#F7FAFC] transition-colors"
+              className="lg:hidden p-2 rounded-lg hover:bg-[#F7FAFC] transition-colors"
               aria-label="Toggle menu"
             >
               {showMobileMenu ? (

@@ -154,13 +154,15 @@ export default function TemplatesContent({ initialTemplates }: { initialTemplate
                 href={`/${template.format_type === "card" ? "cards" : "boards"}/${template.short_id}/view`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`group bg-white rounded-xl border-2 border-[#E5EAF0] hover:border-[#2CB1A6] hover:shadow-lg transition-all overflow-hidden ${
+                className={`group relative bg-white rounded-xl border-2 border-[#E5EAF0] hover:border-[#2CB1A6] hover:shadow-lg transition-all overflow-hidden ${
                   isSingleOccasion ? "w-full" : "flex-shrink-0 w-36 md:w-44"
                 }`}
                 style={isSingleOccasion ? undefined : { scrollSnapAlign: "start" }}
               >
                 {/* The tile shows only artwork, so name it for screen readers
-                    (and search engines): "Merry Christmas – Christmas board template". */}
+                    (and search engines): "Merry Christmas – Christmas board template".
+                    The tile is `relative` so this absolutely positioned text stays
+                    inside it; otherwise it escapes the scrolling row and widens the page. */}
                 <span className="sr-only">
                   {template.title} – {occasionLabel} {template.format_type === "card" ? "card" : "board"} template
                 </span>

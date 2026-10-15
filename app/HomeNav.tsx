@@ -49,7 +49,7 @@ export default function HomeNav() {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-12">
+          <nav className="hidden lg:flex items-center gap-12">
             <div
               className="relative"
               onMouseEnter={() => setShowFeaturesDropdown(true)}
@@ -106,13 +106,13 @@ export default function HomeNav() {
                 <div className="w-9 h-9 rounded-full bg-[#2CB1A6] text-white flex items-center justify-center font-bold text-sm">
                   {user.user_metadata?.name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase()}
                 </div>
-                <span className="hidden md:block text-[#0B1F2A] font-medium">
+                <span className="hidden lg:block text-[#0B1F2A] font-medium">
                   {user.user_metadata?.name || user.email}
                 </span>
               </Link>
             ) : (
               <>
-                <Link href="/login?mode=signin" className="hidden md:block px-4 py-2 text-[#5B6B75] hover:text-[#0B1F2A] transition-colors font-medium">
+                <Link href="/login?mode=signin" className="hidden lg:block px-4 py-2 text-[#5B6B75] hover:text-[#0B1F2A] transition-colors font-medium">
                   Sign in
                 </Link>
                 <Link href="/login?mode=signup" className="whitespace-nowrap px-4 md:px-6 py-2 md:py-2.5 bg-[#1A7F77] hover:bg-[#156C65] text-white rounded-lg font-medium transition-colors shadow-sm text-sm md:text-base">
@@ -122,7 +122,7 @@ export default function HomeNav() {
             )}
             <button
               onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="md:hidden p-2 rounded-lg hover:bg-[#F7FAFC] transition-colors"
+              className="lg:hidden p-2 rounded-lg hover:bg-[#F7FAFC] transition-colors"
               aria-label="Toggle menu"
             >
               {showMobileMenu ? (

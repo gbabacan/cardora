@@ -29,7 +29,7 @@ export default function BenefitsNav({ variant }: Props) {
             <span className="text-xl md:text-3xl font-bold text-[#2CB1A6]">Cardora</span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-12">
+          <nav className="hidden lg:flex items-center gap-12">
             <div className="relative" onMouseEnter={() => setShowFeaturesDropdown(true)} onMouseLeave={() => setShowFeaturesDropdown(false)}>
               <span className="text-[#2CB1A6] font-bold cursor-pointer">Features</span>
               {showFeaturesDropdown && (
@@ -81,11 +81,11 @@ export default function BenefitsNav({ variant }: Props) {
                 <div className="w-9 h-9 rounded-full bg-[#2CB1A6] text-white flex items-center justify-center font-bold text-sm">
                   {user.user_metadata?.name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase()}
                 </div>
-                <span className="hidden md:block text-[#0B1F2A] font-medium">{user.user_metadata?.name || user.email}</span>
+                <span className="hidden lg:block text-[#0B1F2A] font-medium">{user.user_metadata?.name || user.email}</span>
               </Link>
             ) : (
               <>
-                <Link href="/login?mode=signin" className="hidden md:block">
+                <Link href="/login?mode=signin" className="hidden lg:block">
                   <button className="px-4 py-2 text-[#5B6B75] hover:text-[#0B1F2A] transition-colors font-medium">Sign in</button>
                 </Link>
                 <Link href="/login?mode=signup">
@@ -93,7 +93,7 @@ export default function BenefitsNav({ variant }: Props) {
                 </Link>
               </>
             )}
-            <button onClick={() => setShowMobileMenu(!showMobileMenu)} className="md:hidden p-2 rounded-lg hover:bg-[#F7FAFC] transition-colors" aria-label="Toggle menu">
+            <button onClick={() => setShowMobileMenu(!showMobileMenu)} className="lg:hidden p-2 rounded-lg hover:bg-[#F7FAFC] transition-colors" aria-label="Toggle menu">
               {showMobileMenu ? (
                 <svg className="w-6 h-6 text-[#0B1F2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               ) : (
