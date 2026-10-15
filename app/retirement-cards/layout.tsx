@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_URL } from "@/lib/site";
 
 const faqSchema = {
   "@context": "https://schema.org",
@@ -14,11 +15,11 @@ const faqSchema = {
 };
 
 export const metadata: Metadata = {
-  title: "Free Retirement Card — From You or the Whole Team | Cardora",
+  title: "Free Retirement Card — From You or the Whole Team",
   description: "Create a beautiful retirement card for a colleague. Write it yourself or invite the whole team to sign — add messages, photos & GIFs. A keepsake they'll treasure forever. Free.",
-  openGraph: { title: "Free Retirement Card — From You or the Whole Team | Cardora", description: "Create a beautiful retirement card. Write it yourself or invite the whole team to sign. Free, no credit card required.", url: "https://cardora.cards/retirement-cards", images: [{ url: "/cardoraMainDemo.png", width: 1200, height: 630, alt: "Cardora retirement card" }] },
+  openGraph: { title: "Free Retirement Card — From You or the Whole Team | Cardora", description: "Create a beautiful retirement card. Write it yourself or invite the whole team to sign. Free, no credit card required.", url: `${SITE_URL}/retirement-cards`, images: [{ url: "/cardoraMainDemo.png", width: 1200, height: 630, alt: "Cardora retirement card" }] },
   twitter: { card: "summary_large_image", title: "Free Retirement Card — From You or the Whole Team | Cardora", description: "Create a beautiful retirement card. Free, instant, no sign-up needed.", images: ["/cardoraMainDemo.png"] },
-  alternates: { canonical: "https://cardora.cards/retirement-cards" },
+  alternates: { canonical: `${SITE_URL}/retirement-cards` },
 };
 
 export default function RetirementCardsLayout({ children }: { children: React.ReactNode }) {

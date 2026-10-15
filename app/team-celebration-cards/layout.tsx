@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_URL } from "@/lib/site";
 
 const faqSchema = {
   "@context": "https://schema.org",
@@ -14,11 +15,11 @@ const faqSchema = {
 };
 
 export const metadata: Metadata = {
-  title: "Free Team Celebration Card — Celebrate Every Win Together | Cardora",
+  title: "Free Team Celebration Card — Celebrate Every Win Together",
   description: "Create a beautiful team celebration card for a project win, milestone, or achievement. Invite everyone to sign — add messages, photos & GIFs. Free, no credit card needed.",
-  openGraph: { title: "Free Team Celebration Card — Celebrate Every Win Together | Cardora", description: "Celebrate a team win with a beautiful group card everyone signs. Free, no credit card required.", url: "https://cardora.cards/team-celebration-cards", images: [{ url: "/cardoraMainDemo.png", width: 1200, height: 630, alt: "Cardora team celebration card" }] },
+  openGraph: { title: "Free Team Celebration Card — Celebrate Every Win Together | Cardora", description: "Celebrate a team win with a beautiful group card everyone signs. Free, no credit card required.", url: `${SITE_URL}/team-celebration-cards`, images: [{ url: "/cardoraMainDemo.png", width: 1200, height: 630, alt: "Cardora team celebration card" }] },
   twitter: { card: "summary_large_image", title: "Free Team Celebration Card — Celebrate Every Win Together | Cardora", description: "Celebrate a team win with a beautiful group card. Free, instant, no sign-up needed.", images: ["/cardoraMainDemo.png"] },
-  alternates: { canonical: "https://cardora.cards/team-celebration-cards" },
+  alternates: { canonical: `${SITE_URL}/team-celebration-cards` },
 };
 
 export default function TeamCelebrationCardsLayout({ children }: { children: React.ReactNode }) {

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_URL } from "@/lib/site";
 
 const faqSchema = {
   "@context": "https://schema.org",
@@ -64,14 +65,14 @@ const faqSchema = {
 };
 
 export const metadata: Metadata = {
-  title: "Free Online Group Farewell Card Everyone Can Sign | Cardora",
+  title: "Free Online Group Farewell Card Everyone Can Sign",
   description:
     "Create a beautiful farewell card for a coworker or colleague. Invite your whole team to sign — add messages, photos & GIFs. Schedule delivery for their last day. Free, no credit card needed.",
   openGraph: {
     title: "Free Online Group Farewell Card Everyone Can Sign | Cardora",
     description:
       "Create a beautiful farewell card for a coworker or colleague. Invite your whole team to sign — add messages, photos & GIFs. Free with no credit card required.",
-    url: "https://cardora.cards/farewell-cards",
+    url: `${SITE_URL}/farewell-cards`,
     images: [{ url: "/cardoraMainDemo.png", width: 1200, height: 630, alt: "Cardora group farewell card" }],
   },
   twitter: {
@@ -81,7 +82,7 @@ export const metadata: Metadata = {
     images: ["/cardoraMainDemo.png"],
   },
   alternates: {
-    canonical: "https://cardora.cards/farewell-cards",
+    canonical: `${SITE_URL}/farewell-cards`,
   },
 };
 

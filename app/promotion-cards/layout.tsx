@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_URL } from "@/lib/site";
 
 const faqSchema = {
   "@context": "https://schema.org",
@@ -64,14 +65,14 @@ const faqSchema = {
 };
 
 export const metadata: Metadata = {
-  title: "Free Employee Promotion Card — From the Whole Team | Cardora",
+  title: "Free Employee Promotion Card — From the Whole Team",
   description:
     "Celebrate a colleague's promotion with a beautiful group card. Invite the whole team to sign — add messages, photos & GIFs. Write it yourself or collect everyone's congratulations. Free, no credit card needed.",
   openGraph: {
     title: "Free Employee Promotion Card — From the Whole Team | Cardora",
     description:
       "Celebrate a colleague's promotion with a beautiful card. Write it yourself or invite the whole team to sign. Free with no credit card required.",
-    url: "https://cardora.cards/promotion-cards",
+    url: `${SITE_URL}/promotion-cards`,
     images: [{ url: "/cardoraMainDemo.png", width: 1200, height: 630, alt: "Cardora employee promotion card" }],
   },
   twitter: {
@@ -81,7 +82,7 @@ export const metadata: Metadata = {
     images: ["/cardoraMainDemo.png"],
   },
   alternates: {
-    canonical: "https://cardora.cards/promotion-cards",
+    canonical: `${SITE_URL}/promotion-cards`,
   },
 };
 

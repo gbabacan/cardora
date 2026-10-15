@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_URL } from "@/lib/site";
 
 const faqSchema = {
   "@context": "https://schema.org",
@@ -64,14 +65,14 @@ const faqSchema = {
 };
 
 export const metadata: Metadata = {
-  title: "Free Online Thank You Card — From You or Your Whole Team | Cardora",
+  title: "Free Online Thank You Card — From You or Your Whole Team",
   description:
     "Create a beautiful thank you card online. Write a personal message yourself or invite your whole team to sign. Add photos & GIFs. Schedule delivery. Free, no credit card needed.",
   openGraph: {
     title: "Free Online Thank You Card — From You or Your Whole Team | Cardora",
     description:
       "Create a beautiful thank you card online. Write a personal message yourself or invite your whole team to sign. Add photos & GIFs. Free with no credit card required.",
-    url: "https://cardora.cards/thank-you-cards",
+    url: `${SITE_URL}/thank-you-cards`,
     images: [{ url: "/cardoraMainDemo.png", width: 1200, height: 630, alt: "Cardora thank you card" }],
   },
   twitter: {
@@ -81,7 +82,7 @@ export const metadata: Metadata = {
     images: ["/cardoraMainDemo.png"],
   },
   alternates: {
-    canonical: "https://cardora.cards/thank-you-cards",
+    canonical: `${SITE_URL}/thank-you-cards`,
   },
 };
 

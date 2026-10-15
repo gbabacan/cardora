@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_URL } from "@/lib/site";
 
 const faqSchema = {
   "@context": "https://schema.org",
@@ -14,11 +15,11 @@ const faqSchema = {
 };
 
 export const metadata: Metadata = {
-  title: "Free Online Wedding Card Everyone Can Sign | Cardora",
+  title: "Free Online Wedding Card Everyone Can Sign",
   description: "Create a beautiful online wedding card for the happy couple. Write it yourself or invite all guests to sign — add messages, photos & GIFs. A digital guestbook alternative. Free.",
-  openGraph: { title: "Free Online Wedding Card Everyone Can Sign | Cardora", description: "Create a beautiful wedding card everyone can sign. Add messages, photos & GIFs. Free, no credit card required.", url: "https://cardora.cards/wedding-cards", images: [{ url: "/cardoraMainDemo.png", width: 1200, height: 630, alt: "Cardora wedding card" }] },
+  openGraph: { title: "Free Online Wedding Card Everyone Can Sign | Cardora", description: "Create a beautiful wedding card everyone can sign. Add messages, photos & GIFs. Free, no credit card required.", url: `${SITE_URL}/wedding-cards`, images: [{ url: "/cardoraMainDemo.png", width: 1200, height: 630, alt: "Cardora wedding card" }] },
   twitter: { card: "summary_large_image", title: "Free Online Wedding Card Everyone Can Sign | Cardora", description: "Create a beautiful wedding card all guests can sign. Free, instant, no sign-up needed.", images: ["/cardoraMainDemo.png"] },
-  alternates: { canonical: "https://cardora.cards/wedding-cards" },
+  alternates: { canonical: `${SITE_URL}/wedding-cards` },
 };
 
 export default function WeddingCardsLayout({ children }: { children: React.ReactNode }) {

@@ -3,13 +3,14 @@ import { Open_Sans } from "next/font/google";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
+import { SITE_URL } from "@/lib/site";
 
 const openSans = Open_Sans({
   weight: ["300", "400", "600", "700", "800"],
   subsets: ["latin"],
 });
 
-const BASE_URL = "https://cardora.cards";
+const BASE_URL = SITE_URL;
 
 const organizationSchema = {
   "@context": "https://schema.org",

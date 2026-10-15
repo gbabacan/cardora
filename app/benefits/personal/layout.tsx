@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_URL } from "@/lib/site";
 
 const breadcrumbSchema = {
   "@context": "https://schema.org",
@@ -8,13 +9,13 @@ const breadcrumbSchema = {
       "@type": "ListItem",
       position: 1,
       name: "Home",
-      item: "https://cardora.cards",
+      item: SITE_URL,
     },
     {
       "@type": "ListItem",
       position: 2,
       name: "Personal Group Cards",
-      item: "https://cardora.cards/benefits/personal",
+      item: `${SITE_URL}/benefits/personal`,
     },
   ],
 };
@@ -27,7 +28,7 @@ export const metadata: Metadata = {
     title: "Personal Group Cards for Every Occasion | Cardora",
     description:
       "Send heartfelt group greeting cards for birthdays, Valentine's Day, weddings, new babies, and more. Collect messages and photos from everyone.",
-    url: "https://cardora.cards/benefits/personal",
+    url: `${SITE_URL}/benefits/personal`,
     images: [
       {
         url: "/cardoraMainDemo.png",
@@ -45,7 +46,7 @@ export const metadata: Metadata = {
     images: ["/cardoraMainDemo.png"],
   },
   alternates: {
-    canonical: "https://cardora.cards/benefits/personal",
+    canonical: `${SITE_URL}/benefits/personal`,
   },
 };
 

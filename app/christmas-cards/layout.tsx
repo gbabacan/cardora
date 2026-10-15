@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_URL } from "@/lib/site";
 
 const faqSchema = {
   "@context": "https://schema.org",
@@ -38,16 +39,16 @@ const faqSchema = {
 };
 
 export const metadata: Metadata = {
-  title: "Free Online Group Christmas Card Everyone Can Sign | Cardora",
+  title: "Free Online Group Christmas Card Everyone Can Sign",
   description: "Create a beautiful online Christmas card for your team, family, or friends. Everyone signs one card — add messages, photos & GIFs. Schedule delivery for Christmas Day. Free.",
   openGraph: {
     title: "Free Online Group Christmas Card Everyone Can Sign | Cardora",
     description: "Create a beautiful online Christmas card everyone can sign. Add messages, photos & GIFs. Free with no credit card required.",
-    url: "https://cardora.cards/christmas-cards",
+    url: `${SITE_URL}/christmas-cards`,
     images: [{ url: "/cardoraMainDemo.png", width: 1200, height: 630, alt: "Cardora group Christmas card" }],
   },
   twitter: { card: "summary_large_image", title: "Free Online Group Christmas Card Everyone Can Sign | Cardora", description: "Create a beautiful Christmas card everyone can sign. Free, instant, no sign-up needed.", images: ["/cardoraMainDemo.png"] },
-  alternates: { canonical: "https://cardora.cards/christmas-cards" },
+  alternates: { canonical: `${SITE_URL}/christmas-cards` },
 };
 
 export default function ChristmasCardsLayout({ children }: { children: React.ReactNode }) {

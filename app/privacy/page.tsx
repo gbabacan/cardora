@@ -2,15 +2,19 @@ import Link from "next/link";
 import Image from "next/image";
 import SharedFooter from "@/app/SharedFooter";
 import type { Metadata } from "next";
+import { SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | Cardora",
+  title: "Privacy Policy",
   description: "Learn how Cardora collects, uses, and protects your personal data.",
+  // Without its own canonical it would inherit the homepage's from the root
+  // layout and be dropped as a duplicate of it.
+  alternates: { canonical: `${SITE_URL}/privacy` },
 };
 
 const LAST_UPDATED = "June 23, 2026";
 const CONTACT_EMAIL = "hello@cardora.cards";
-const APP_URL = "https://cardora.cards";
+const APP_URL = SITE_URL;
 
 const sections = [
   {

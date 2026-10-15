@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_URL } from "@/lib/site";
 
 const faqSchema = {
   "@context": "https://schema.org",
@@ -64,14 +65,14 @@ const faqSchema = {
 };
 
 export const metadata: Metadata = {
-  title: "Free Online New Baby Card — From You or Your Whole Team | Cardora",
+  title: "Free Online New Baby Card — From You or Your Whole Team",
   description:
     "Create a beautiful new baby card online. Write a warm welcome message yourself or invite the whole team to sign. Add photos & GIFs. Free, no credit card needed.",
   openGraph: {
     title: "Free Online New Baby Card — From You or Your Whole Team | Cardora",
     description:
       "Welcome the new arrival with a beautiful card. Write it yourself or invite everyone to sign. Add photos & GIFs. Free with no credit card required.",
-    url: "https://cardora.cards/new-baby-cards",
+    url: `${SITE_URL}/new-baby-cards`,
     images: [{ url: "/cardoraMainDemo.png", width: 1200, height: 630, alt: "Cardora new baby card" }],
   },
   twitter: {
@@ -81,7 +82,7 @@ export const metadata: Metadata = {
     images: ["/cardoraMainDemo.png"],
   },
   alternates: {
-    canonical: "https://cardora.cards/new-baby-cards",
+    canonical: `${SITE_URL}/new-baby-cards`,
   },
 };
 

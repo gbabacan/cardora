@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Contact Us",
@@ -8,7 +9,7 @@ export const metadata: Metadata = {
     title: "Contact Us | Cardora",
     description:
       "Get in touch with the Cardora team. We're here to help with questions, feedback, and support.",
-    url: "https://cardora.cards/contact",
+    url: `${SITE_URL}/contact`,
     images: [
       {
         url: "/cardoraMainDemo.png",
@@ -26,7 +27,7 @@ export const metadata: Metadata = {
     images: ["/cardoraMainDemo.png"],
   },
   alternates: {
-    canonical: "https://cardora.cards/contact",
+    canonical: `${SITE_URL}/contact`,
   },
 };
 

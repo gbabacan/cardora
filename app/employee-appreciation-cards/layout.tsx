@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_URL } from "@/lib/site";
 
 const faqSchema = {
   "@context": "https://schema.org",
@@ -38,16 +39,16 @@ const faqSchema = {
 };
 
 export const metadata: Metadata = {
-  title: "Free Employee Appreciation Card — Solo or From the Team | Cardora",
+  title: "Free Employee Appreciation Card — Solo or From the Team",
   description: "Show your team how valued they are with a beautiful appreciation card. Write it yourself or invite everyone to sign. Perfect for Employee Appreciation Day or any time. Free.",
   openGraph: {
     title: "Free Employee Appreciation Card — Solo or From the Team | Cardora",
     description: "Show employees how valued they are with a beautiful card. Write it yourself or invite the whole team to sign. Free with no credit card required.",
-    url: "https://cardora.cards/employee-appreciation-cards",
+    url: `${SITE_URL}/employee-appreciation-cards`,
     images: [{ url: "/cardoraMainDemo.png", width: 1200, height: 630, alt: "Cardora employee appreciation card" }],
   },
   twitter: { card: "summary_large_image", title: "Free Employee Appreciation Card — Solo or From the Team | Cardora", description: "Show employees how valued they are. Beautiful appreciation cards, free, no sign-up needed.", images: ["/cardoraMainDemo.png"] },
-  alternates: { canonical: "https://cardora.cards/employee-appreciation-cards" },
+  alternates: { canonical: `${SITE_URL}/employee-appreciation-cards` },
 };
 
 export default function EmployeeAppreciationCardsLayout({ children }: { children: React.ReactNode }) {

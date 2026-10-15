@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Group Card Templates – Birthdays, Farewells & More",
@@ -8,7 +9,7 @@ export const metadata: Metadata = {
     title: "Group Card Templates – Birthdays, Farewells & More | Cardora",
     description:
       "Browse beautiful group greeting card templates for birthdays, farewells, weddings, baby showers, thank-yous, and every celebration.",
-    url: "https://cardora.cards/templates",
+    url: `${SITE_URL}/templates`,
     images: [
       {
         url: "/cardoraMainDemo.png",
@@ -26,7 +27,7 @@ export const metadata: Metadata = {
     images: ["/cardoraMainDemo.png"],
   },
   alternates: {
-    canonical: "https://cardora.cards/templates",
+    canonical: `${SITE_URL}/templates`,
   },
 };
 

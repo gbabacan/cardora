@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_URL } from "@/lib/site";
 
 const faqSchema = {
   "@context": "https://schema.org",
@@ -38,16 +39,16 @@ const faqSchema = {
 };
 
 export const metadata: Metadata = {
-  title: "Free Work Anniversary Card — From the Whole Team | Cardora",
+  title: "Free Work Anniversary Card — From the Whole Team",
   description: "Celebrate a colleague's work anniversary with a beautiful group card. Invite the whole team to sign — add messages, photos & GIFs. Schedule delivery for their exact anniversary date. Free.",
   openGraph: {
     title: "Free Work Anniversary Card — From the Whole Team | Cardora",
     description: "Celebrate a work anniversary with a beautiful card from the whole team. Free with no credit card required.",
-    url: "https://cardora.cards/work-anniversary-cards",
+    url: `${SITE_URL}/work-anniversary-cards`,
     images: [{ url: "/cardoraMainDemo.png", width: 1200, height: 630, alt: "Cardora work anniversary card" }],
   },
   twitter: { card: "summary_large_image", title: "Free Work Anniversary Card — From the Whole Team | Cardora", description: "Celebrate a work anniversary with a beautiful group card. Free, instant, no sign-up needed.", images: ["/cardoraMainDemo.png"] },
-  alternates: { canonical: "https://cardora.cards/work-anniversary-cards" },
+  alternates: { canonical: `${SITE_URL}/work-anniversary-cards` },
 };
 
 export default function WorkAnniversaryCardsLayout({ children }: { children: React.ReactNode }) {

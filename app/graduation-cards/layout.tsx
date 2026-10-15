@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_URL } from "@/lib/site";
 
 const faqSchema = {
   "@context": "https://schema.org",
@@ -64,14 +65,14 @@ const faqSchema = {
 };
 
 export const metadata: Metadata = {
-  title: "Free Online Graduation Card — From You or the Whole Class | Cardora",
+  title: "Free Online Graduation Card — From You or the Whole Class",
   description:
     "Create a beautiful graduation card online. Write a proud message yourself or invite classmates, teachers, and family to sign together. Add photos & GIFs. Free, no credit card needed.",
   openGraph: {
     title: "Free Online Graduation Card — From You or the Whole Class | Cardora",
     description:
       "Celebrate graduation with a beautiful card. Write it yourself or invite everyone to sign. Add photos & GIFs. Free with no credit card required.",
-    url: "https://cardora.cards/graduation-cards",
+    url: `${SITE_URL}/graduation-cards`,
     images: [{ url: "/cardoraMainDemo.png", width: 1200, height: 630, alt: "Cardora graduation card" }],
   },
   twitter: {
@@ -81,7 +82,7 @@ export const metadata: Metadata = {
     images: ["/cardoraMainDemo.png"],
   },
   alternates: {
-    canonical: "https://cardora.cards/graduation-cards",
+    canonical: `${SITE_URL}/graduation-cards`,
   },
 };
 

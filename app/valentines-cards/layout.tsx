@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_URL } from "@/lib/site";
 
 const faqSchema = {
   "@context": "https://schema.org",
@@ -64,14 +65,14 @@ const faqSchema = {
 };
 
 export const metadata: Metadata = {
-  title: "Free Online Valentine's Day Card — Beautiful & Personal | Cardora",
+  title: "Free Online Valentine's Day Card — Beautiful & Personal",
   description:
     "Create a beautiful Valentine's Day card online. Write a heartfelt message for someone special or invite everyone to share their love. Add photos & GIFs. Schedule delivery for February 14th. Free.",
   openGraph: {
     title: "Free Online Valentine's Day Card — Beautiful & Personal | Cardora",
     description:
       "Create a beautiful Valentine's Day card. Write it yourself or invite everyone to share their love. Add photos & GIFs. Free with no credit card required.",
-    url: "https://cardora.cards/valentines-cards",
+    url: `${SITE_URL}/valentines-cards`,
     images: [{ url: "/cardoraMainDemo.png", width: 1200, height: 630, alt: "Cardora Valentine's Day card" }],
   },
   twitter: {
@@ -81,7 +82,7 @@ export const metadata: Metadata = {
     images: ["/cardoraMainDemo.png"],
   },
   alternates: {
-    canonical: "https://cardora.cards/valentines-cards",
+    canonical: `${SITE_URL}/valentines-cards`,
   },
 };
 

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_URL } from "@/lib/site";
 
 const faqSchema = {
   "@context": "https://schema.org",
@@ -47,7 +48,7 @@ export const metadata: Metadata = {
     title: "Pricing – Free Group Cards | Cardora",
     description:
       "Cardora is free for a limited time. Create unlimited group cards, invite unlimited contributors, and celebrate every occasion with no credit card required.",
-    url: "https://cardora.cards/pricing",
+    url: `${SITE_URL}/pricing`,
     images: [
       {
         url: "/cardoraMainDemo.png",
@@ -65,7 +66,7 @@ export const metadata: Metadata = {
     images: ["/cardoraMainDemo.png"],
   },
   alternates: {
-    canonical: "https://cardora.cards/pricing",
+    canonical: `${SITE_URL}/pricing`,
   },
 };
 
