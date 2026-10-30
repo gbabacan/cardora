@@ -21,6 +21,26 @@ www / non-www confusion (below) grew.
 Validation has been started for all three reasons (14 Oct). Validation of the
 non-www groups may show "failed" — that's fine, those URLs are meant to redirect.
 
+### Update — 29 Oct 2026
+
+- **"Page with redirect" validation failed (24 Oct).** Expected: the 4 URLs
+  (`http://www`, `http://`, bare `https://cardora.cards/` and its `/contact`) are
+  meant to 308-redirect to www, and they do. Don't revalidate it.
+- **Indexed roughly doubled since 14 Oct**; not-indexed fell from ~31 to ~19. All
+  non-www URLs have left the "Discovered" list.
+- **Crawled – currently not indexed (7 pages + favicon):** privacy,
+  team-celebration-cards, benefits/personal, new-baby-cards, christmas-cards,
+  promotion-cards, benefits/corporate. All last crawled 18 Jun – 13 Sep, i.e.
+  **before** the canonical fix, so Google is still judging the old version.
+- **Discovered – currently not indexed (7 pages, never crawled):**
+  congratulations-cards, employee-appreciation-cards, graduation-cards, pricing,
+  retirement-cards, valentines-cards, wedding-cards.
+- **Indexed (by elimination, 7 of 21 sitemap URLs):** home, templates, contact,
+  birthday-cards, farewell-cards, thank-you-cards, work-anniversary-cards.
+- Every page above is linked from both the homepage and /templates, so internal
+  linking isn't the problem. The remaining levers are recrawls (request indexing)
+  and links from other sites.
+
 ### Search performance (last 3 months, web)
 
 - **191 impressions, 9 clicks.** Mostly brand searches.
@@ -80,9 +100,17 @@ image download.
 - 14 Oct: started validation for "Page with redirect", "Discovered – currently
   not indexed" and "Crawled – currently not indexed".
 - 14 Oct: requested indexing for the redirect-affected pages.
+- 29 Oct: requested indexing (day 1 of 2) for team-celebration-cards,
+  congratulations-cards, employee-appreciation-cards, retirement-cards,
+  wedding-cards, new-baby-cards, promotion-cards, pricing, graduation-cards,
+  christmas-cards.
 
 ## To do
 
+- [ ] 30 Oct: request indexing (day 2) for valentines-cards, benefits/personal,
+  benefits/corporate, privacy.
+- [ ] Mid-November: re-export the "Crawled" and "Discovered" lists and compare
+  with the 29 Oct update above.
 - [ ] Request indexing for the **www** URLs, ~10 per day (URL inspection → paste the full `https://www.cardora.cards/...` address):
   - Day 1: birthday-cards, thank-you-cards, farewell-cards, team-celebration-cards, congratulations-cards, work-anniversary-cards, retirement-cards, employee-appreciation-cards, templates, pricing
   - Day 2: wedding-cards, new-baby-cards, graduation-cards, christmas-cards, valentines-cards, promotion-cards, benefits/personal, benefits/corporate, privacy
