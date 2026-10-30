@@ -6,7 +6,7 @@ import DeliveryEmail from '@/emails/DeliveryEmail';
 import ContributorNotificationEmail from '@/emails/ContributorNotificationEmail';
 import { EMAIL_FROM, summarizeSendResults } from '@/lib/email';
 import { sendLogged, type EmailTrigger } from '@/lib/emailLog';
-import { supabaseAdmin } from '@/lib/serverAuth';
+import { supabaseAdmin, savedEmailList } from '@/lib/serverAuth';
 
 // The columns deliverBoard reads; load with select(DELIVERY_SELECT).
 export const DELIVERY_SELECT = '*, recipients(*), contributors(*)';
@@ -27,8 +27,9 @@ export type DeliveryResult =
   | { success: false; error: string };
 
 // Emails the recipients, then (if enabled) the contributors, then marks the
-// board DELIVERED. If every recipient email fails, nothing is marked and no
-// contributor is told, so a later run can retry.
+// board DELIVERED. If there's no valid recipient address or every recipient
+// email fails, nothing is marked and no contributor is told, so the board
+// stays due and shows up as failed rather than silently "delivered".
 export async function deliverBoard(
   resend: Resend,
   board: DeliverableBoard,
@@ -38,38 +39,37 @@ export async function deliverBoard(
   const formatType = board.format_type || 'board';
   const boardLink = `cardora.cards/${formatType === 'card' ? 'cards' : 'boards'}/${board.short_id}/view`;
 
-  const recipientEmails = board.recipients
-    .map(r => r.email)
-    .filter((email): email is string => !!email && !!email.trim());
+  const recipientEmails = savedEmailList(board.recipients.map(r => r.email));
+  if (recipientEmails.length === 0) {
+    console.error(`Board ${board.id} has no valid recipient email address`);
+    return { success: false, error: 'No valid recipient email address' };
+  }
 
-  let recipientEmailsSent = 0;
+  const recipientResults = await Promise.allSettled(
+    recipientEmails.map(async email => {
+      const html = await render(
+        DeliveryEmail({
+          recipientEmail: email,
+          boardTitle: board.title,
+          recipientNames,
+          boardLink,
+          deliveryMessage: board.recipient_message ?? undefined,
+          formatType,
+        })
+      );
+      return sendLogged(
+        resend,
+        { from: EMAIL_FROM, to: email, subject: `You have a special gift waiting for you 💝`, html },
+        { kind: 'delivery', trigger, boardId: board.id }
+      );
+    })
+  );
+  const summary = summarizeSendResults(recipientResults);
+  const recipientEmailsSent = summary.sent;
 
-  if (recipientEmails.length > 0) {
-    const recipientResults = await Promise.allSettled(
-      recipientEmails.map(async email => {
-        const html = await render(
-          DeliveryEmail({
-            recipientEmail: email,
-            boardTitle: board.title,
-            recipientNames,
-            boardLink,
-            deliveryMessage: board.recipient_message ?? undefined,
-          })
-        );
-        return sendLogged(
-          resend,
-          { from: EMAIL_FROM, to: email, subject: `You have a special gift waiting for you 💝`, html },
-          { kind: 'delivery', trigger, boardId: board.id }
-        );
-      })
-    );
-    const summary = summarizeSendResults(recipientResults);
-    recipientEmailsSent = summary.sent;
-
-    if (recipientEmailsSent === 0) {
-      console.error(`All recipient emails failed for board ${board.id}:`, summary.errors);
-      return { success: false, error: 'All recipient emails failed to send' };
-    }
+  if (recipientEmailsSent === 0) {
+    console.error(`All recipient emails failed for board ${board.id}:`, summary.errors);
+    return { success: false, error: 'All recipient emails failed to send' };
   }
 
   let contributorEmailsSent = 0;

@@ -23,7 +23,7 @@ export interface Board {
   recipient_message?: string;
   notify_contributors: boolean;
   delivery_type: 'ON_DEMAND' | 'SCHEDULED';
-  scheduled_delivery?: string;
+  scheduled_delivery?: string | null;
   background?: string;
   background_id?: string;
   card_background_id?: string;
@@ -315,11 +315,13 @@ export async function updateBoardRecipients(
   recipients: { name: string; email?: string }[]
 ) {
   try {
-    // Delete existing recipients
-    await supabase
+    // Delete existing recipients. If this fails, inserting would leave the
+    // old and new recipients side by side, so stop here.
+    const { error: deleteError } = await supabase
       .from('recipients')
       .delete()
       .eq('board_id', boardId);
+    if (deleteError) throw deleteError;
 
     // Insert new recipients
     if (recipients.length > 0) {

@@ -131,7 +131,7 @@ function BoardEditorPageContent() {
   const [sendingInvites, setSendingInvites] = useState(false);
 
   // Toast state
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info'; duration?: number } | null>(null);
   const [showMarkDeliveredConfirm, setShowMarkDeliveredConfirm] = useState(false);
   const [markingDelivered, setMarkingDelivered] = useState(false);
 
@@ -404,53 +404,31 @@ function BoardEditorPageContent() {
     }
   };
 
+  // Everything a delivery needs, whether it's sent now or scheduled: a title,
+  // named recipients with valid email addresses, and the card's message.
+  // Returns the problem to show, or null when the card is ready.
+  const deliveryProblem = (): string | null => {
+    if (!boardTitle.trim()) return `Please add a title to your ${formatType}`;
+    if (recipients.length === 0 || !recipients.some(r => r.trim())) return 'Please add at least one recipient';
+    if (recipients.some(name => !name.trim())) return 'Please provide names for all recipients';
+    if (recipients.some((_, index) => !recipientEmails[index]?.trim())) return 'Please provide email addresses for all recipients';
+    const invalidRecipientEmails = recipients
+      .map((_, index) => recipientEmails[index]?.trim())
+      .filter(email => email && !isValidEmail(email));
+    if (invalidRecipientEmails.length > 0) return `Invalid recipient email format: ${invalidRecipientEmails.join(', ')}`;
+    if (!deliveryMessage.replace(/<[^>]*>/g, '').trim()) {
+      return 'Please write a message inside your card before delivering. Open the card and add your message in the inside view.';
+    }
+    return null;
+  };
+
   // Handle deliver now button click - runs validations then shows confirmation
   const handleDeliverNowClick = async () => {
     if (!boardId) return;
 
-    // Validation 1: Check if board title exists
-    if (!boardTitle.trim()) {
-      setToast({ message: `Please add a title to your ${formatType}`, type: 'error' });
-      return;
-    }
-
-    // Validation 2: Check if there are recipients
-    if (recipients.length === 0 || !recipients.some(r => r.trim())) {
-      setToast({ message: 'Please add at least one recipient', type: 'error' });
-      return;
-    }
-
-    // Validation 3: Check all recipients have names
-    const recipientsWithoutNames = recipients.filter((name) => !name.trim());
-    if (recipientsWithoutNames.length > 0) {
-      setToast({ message: 'Please provide names for all recipients', type: 'error' });
-      return;
-    }
-
-    // Validation 4: Check all recipients have email addresses
-    const recipientsWithoutEmails = recipients.filter((_, index) => !recipientEmails[index]?.trim());
-    if (recipientsWithoutEmails.length > 0) {
-      setToast({ message: 'Please provide email addresses for all recipients', type: 'error' });
-      return;
-    }
-
-    // Validation 5: Validate all recipient email formats
-    const invalidRecipientEmails = recipients
-      .map((_, index) => recipientEmails[index]?.trim())
-      .filter(email => email && !isValidEmail(email));
-
-    if (invalidRecipientEmails.length > 0) {
-      setToast({
-        message: `Invalid recipient email format: ${invalidRecipientEmails.join(', ')}`,
-        type: 'error'
-      });
-      return;
-    }
-
-    // Validation 6: Check if the card has an actual written message
-    const messageText = deliveryMessage.replace(/<[^>]*>/g, '').trim();
-    if (!messageText) {
-      setToast({ message: 'Please write a message inside your card before delivering. Open the card and add your message in the inside view.', type: 'error' });
+    const problem = deliveryProblem();
+    if (problem) {
+      setToast({ message: problem, type: 'error' });
       return;
     }
 
@@ -547,12 +525,14 @@ function BoardEditorPageContent() {
         }
       }
 
-      // Update board status to DELIVERED
+      // Save everything the email is built from. The card is only marked
+      // DELIVERED (and locked) by the server once the email has gone out, so
+      // a failed send leaves it editable and the owner can try again.
       const { error: boardError } = await updateBoard(boardId, {
-        status: 'DELIVERED',
         recipient_message: recipientMessage,
         notify_contributors: notifyContributors,
         delivery_type: 'ON_DEMAND',
+        scheduled_delivery: null,
         effect_id: selectedEffect?.id ?? null,
         texture_id: selectedTexture?.id || undefined
       });
@@ -578,30 +558,29 @@ function BoardEditorPageContent() {
       }
 
       // Send delivery emails to recipients
-      const recipientEmailsList = recipients
-        .map((name, index) => recipientEmails[index])
-        .filter(email => email && email.trim());
+      const emailResponse = await fetch('/api/send-delivery', {
+        method: 'POST',
+        headers: await getAuthHeaders(),
+        body: JSON.stringify({
+          boardId,
+          senderName: senderName || user?.user_metadata?.name || user?.email || 'Sender'
+        })
+      });
+      const emailResult = await emailResponse.json().catch(() => ({}));
 
-      let recipientEmailsSent = 0;
-
-      if (recipientEmailsList.length > 0) {
-        const emailResponse = await fetch('/api/send-delivery', {
-          method: 'POST',
-          headers: await getAuthHeaders(),
-          body: JSON.stringify({
-            boardId,
-            senderName: senderName || user?.user_metadata?.name || user?.email || 'Sender'
-          })
+      if (!emailResponse.ok) {
+        setToast({
+          message: `Your ${formatType} was not delivered: ${emailResult.error || 'the email could not be sent'}. Please try again.`,
+          type: 'error',
+          duration: 8000
         });
-
-        const emailResult = await emailResponse.json();
-
-        if (!emailResponse.ok) {
-          console.error('Error sending delivery emails:', emailResult.error);
-        } else {
-          recipientEmailsSent = emailResult.sent;
-        }
+        setDeliveringNow(false);
+        setShowDeliveryConfirmation(false);
+        return;
       }
+
+      const recipientEmailsSent: number = emailResult.sent ?? 0;
+      const failedEmails: string[] = emailResult.failedEmails ?? [];
 
       // Send notification emails to contributors if checkbox is checked
       let contributorEmailsSent = 0;
@@ -648,15 +627,23 @@ function BoardEditorPageContent() {
         successMessage = `${formatName} delivered successfully! 🎉`;
       }
 
-      setToast({
-        message: successMessage,
-        type: 'success'
-      });
+      if (failedEmails.length > 0) {
+        setToast({
+          message: `${formatName} delivered to ${recipientEmailsSent} recipient(s), but the email to ${failedEmails.join(', ')} could not be sent. Check the address and share the link with them directly.`,
+          type: 'error',
+          duration: 10000
+        });
+      } else {
+        setToast({
+          message: successMessage,
+          type: 'success'
+        });
+      }
 
       setDeliveringNow(false);
       setShowDeliveryConfirmation(false);
       setIsReadOnly(true);
-      setTimeout(() => router.push('/dashboard'), 2000);
+      setTimeout(() => router.push('/dashboard'), failedEmails.length > 0 ? 10000 : 2000);
     } catch (error: any) {
       setToast({ message: `Error delivering ${formatType}: ` + error.message, type: 'error' });
       setDeliveringNow(false);
@@ -735,7 +722,8 @@ function BoardEditorPageContent() {
     }
   };
 
-  // Auto-save schedule to DB without requiring full save
+  // Saves just the schedule; used to clear it. Confirming a schedule goes
+  // through handleSaveBoard so the card is published and complete.
   const autoSaveSchedule = async (date: string, time: string) => {
     if (!boardId) return;
     const isScheduled = !!(date && time);
@@ -743,7 +731,7 @@ function BoardEditorPageContent() {
       delivery_type: isScheduled ? 'SCHEDULED' : 'ON_DEMAND',
       scheduled_delivery: isScheduled
         ? new Date(`${date}T${time}:00`).toISOString()
-        : undefined,
+        : null,
     });
   };
 
@@ -786,7 +774,11 @@ function BoardEditorPageContent() {
     }
   };
 
-  const handleSaveBoard = async () => {
+  // Saves and publishes everything. With a schedule set, the card must be
+  // ready to deliver, since the hourly job only sends published cards.
+  // `confirmSchedule` is the "Confirm This Schedule" button: same save, but
+  // the editor stays open instead of returning to the dashboard.
+  const handleSaveBoard = async ({ confirmSchedule = false }: { confirmSchedule?: boolean } = {}) => {
     if (!boardId) return;
 
     // Validate scheduled delivery date is in the future
@@ -797,17 +789,9 @@ function BoardEditorPageContent() {
         return;
       }
 
-      // Validate all recipients have emails when scheduling
-      const recipientsWithoutEmails = recipients.filter((_, index) => !recipientEmails[index]?.trim());
-      if (recipientsWithoutEmails.length > 0) {
-        setToast({ message: 'All recipients must have email addresses for scheduled delivery', type: 'error' });
-        return;
-      }
-
-      // Validate card has a written message before scheduling delivery
-      const scheduledMessageText = deliveryMessage.replace(/<[^>]*>/g, '').trim();
-      if (!scheduledMessageText) {
-        setToast({ message: 'Please write a message inside your card before scheduling delivery. Open the card and add your message in the inside view.', type: 'error' });
+      const problem = deliveryProblem();
+      if (problem) {
+        setToast({ message: `To schedule delivery: ${problem}`, type: 'error', duration: 6000 });
         return;
       }
     }
@@ -947,7 +931,7 @@ function BoardEditorPageContent() {
         delivery_type: scheduledDate && scheduledTime ? 'SCHEDULED' : 'ON_DEMAND',
         scheduled_delivery: scheduledDate && scheduledTime
           ? new Date(`${scheduledDate}T${scheduledTime}:00`).toISOString()
-          : undefined,
+          : null,
         status: 'PUBLISHED',
         texture_id: selectedTexture?.id || undefined
       });
@@ -975,6 +959,13 @@ function BoardEditorPageContent() {
       // Reload messages after save
       await reloadMessages();
 
+      if (confirmSchedule) {
+        setScheduleConfirmed(true);
+        setToast({ message: `Schedule saved! Your ${formatType} will be delivered automatically.`, type: 'success' });
+        setSaving(false);
+        return;
+      }
+
       setToast({ message: `${formatType === 'board' ? 'Board' : 'Card'} saved and published successfully! 🎉`, type: 'success' });
       setSaving(false);
       setTimeout(() => router.push('/dashboard'), 2000);
@@ -991,6 +982,7 @@ function BoardEditorPageContent() {
         <Toast
           message={toast.message}
           type={toast.type}
+          duration={toast.duration}
           onClose={() => setToast(null)}
         />
       )}
@@ -1065,7 +1057,7 @@ function BoardEditorPageContent() {
               </Link>
               {/* Save button */}
               <button
-                onClick={handleSaveBoard}
+                onClick={() => handleSaveBoard()}
                 disabled={saving}
                 className="px-3 md:px-6 py-2 bg-[#1A7F77] hover:bg-[#156C65] text-white rounded-lg font-medium transition-colors shadow-sm disabled:bg-gray-400 disabled:cursor-not-allowed text-sm md:text-base"
               >
@@ -1842,8 +1834,14 @@ function BoardEditorPageContent() {
                             <button
                               onClick={() => {
                                 setRecipients(recipients.filter((_, i) => i !== index));
-                                const newEmails = {...recipientEmails};
-                                delete newEmails[index];
+                                // Emails are keyed by position: move the ones after
+                                // the removed recipient down so each keeps its name.
+                                const newEmails: {[key: number]: string} = {};
+                                Object.entries(recipientEmails).forEach(([key, email]) => {
+                                  const i = Number(key);
+                                  if (i < index) newEmails[i] = email;
+                                  else if (i > index) newEmails[i - 1] = email;
+                                });
                                 setRecipientEmails(newEmails);
                               }}
                               className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-red-50 text-red-500 transition-colors flex-shrink-0"
@@ -2062,7 +2060,7 @@ function BoardEditorPageContent() {
                             Go Back
                           </button>
                           <button
-                            onClick={async () => { await autoSaveSchedule(scheduledDate, scheduledTime); setScheduleConfirmed(true); setShowScheduleModal(false); setToast({ message: 'Schedule saved! Your card will be delivered automatically.', type: 'success' }); }}
+                            onClick={async () => { setShowScheduleModal(false); await handleSaveBoard({ confirmSchedule: true }); }}
                             className="flex-1 py-2.5 bg-[#1A7F77] hover:bg-[#156C65] text-white rounded-lg font-semibold text-sm transition-colors"
                           >
                             Confirm Schedule
@@ -2122,7 +2120,7 @@ function BoardEditorPageContent() {
                         Mark as Delivered
                       </button>
                       <p className="text-xs text-[#5B6B75] mt-2">
-                        Once you've shared the link and want to mark this {formatType === 'board' ? 'board' : 'card'} as delivered, click the button above. This will make the {formatType === 'board' ? 'board' : 'card'} read-only.
+                        Already shared the link yourself? Mark this {formatType === 'board' ? 'board' : 'card'} as delivered to make it read-only. <strong>No email is sent</strong>; use Deliver Now above to email the recipients.
                       </p>
                     </div>
                   )}
@@ -2785,7 +2783,7 @@ function BoardEditorPageContent() {
                 Mark as Delivered?
               </h3>
               <p className="text-[#5B6B75]">
-                Once marked as delivered, this {formatType === 'board' ? 'board' : 'card'} will become <strong>read-only</strong> and can no longer be edited. Are you sure you want to continue?
+                <strong>No email will be sent to the recipients</strong>; use Deliver Now for that. Once marked as delivered, this {formatType === 'board' ? 'board' : 'card'} becomes <strong>read-only</strong> and can no longer be edited. Are you sure you want to continue?
               </p>
             </div>
 
