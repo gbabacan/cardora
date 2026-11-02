@@ -46,6 +46,18 @@ const countBy = <T,>(items: T[], key: (item: T) => string) => {
   return counts;
 };
 
+// Each board's first-touch source (boards.acquisition, see lib/acquisition.ts),
+// fetched separately so a missing column doesn't break the rest of the page.
+// Null until the add_board_acquisition migration has run.
+async function fetchSources(): Promise<Map<string, string> | null> {
+  try {
+    const rows = await fetchAllRows<{ id: string; acquisition: { source?: string } | null }>('boards', 'id, acquisition');
+    return new Map(rows.map(r => [r.id, r.acquisition?.source || 'unknown']));
+  } catch {
+    return null;
+  }
+}
+
 export async function GET(request: NextRequest) {
   const admin = await getRequestAdmin(request);
   if (!admin) {
@@ -60,7 +72,7 @@ export async function GET(request: NextRequest) {
   const prevStart = start - days * DAY;
 
   try {
-    const [users, allBoards, messages, contributors] = await Promise.all([
+    const [users, allBoards, messages, contributors, sourceById] = await Promise.all([
       listAllUsers(),
       fetchAllRows<BoardRow>(
         'boards',
@@ -68,6 +80,7 @@ export async function GET(request: NextRequest) {
       ),
       fetchAllRows<MessageRow>('messages', 'board_id, created_at'),
       fetchAllRows<{ board_id: string; created_at: string }>('contributors', 'board_id, created_at'),
+      fetchSources(),
     ]);
 
     const templates = new Map(allBoards.filter(b => b.is_template).map(b => [b.id, b]));
@@ -114,6 +127,31 @@ export async function GET(request: NextRequest) {
 
     const sentBoards = boards.filter(sent);
 
+    // Boards created this period by their creator's first-touch source.
+    // "New creators" are people whose first ever board is in this period,
+    // counted under that first board's source.
+    const firstBoardByUser = new Map<string, BoardRow>();
+    for (const b of boards) {
+      if (b.user_id && !firstBoardByUser.has(b.user_id)) firstBoardByUser.set(b.user_id, b); // boards are oldest first
+    }
+    const sourceRows = new Map<string, { boards: number; creators: Set<string>; newCreators: number; delivered: number }>();
+    const sourceRow = (source: string) => {
+      const row = sourceRows.get(source) ?? { boards: 0, creators: new Set<string>(), newCreators: 0, delivered: 0 };
+      sourceRows.set(source, row);
+      return row;
+    };
+    if (sourceById) {
+      for (const b of periodBoards) {
+        const row = sourceRow(sourceById.get(b.id) ?? 'unknown');
+        row.boards++;
+        if (b.user_id) row.creators.add(b.user_id);
+        if (b.status === 'DELIVERED') row.delivered++;
+      }
+      for (const first of firstBoardByUser.values()) {
+        if (inRange(first.created_at, start, now + 1)) sourceRow(sourceById.get(first.id) ?? 'unknown').newCreators++;
+      }
+    }
+
     return NextResponse.json({
       range: { days, bucket, start: new Date(start).toISOString() },
       totals: {
@@ -154,6 +192,18 @@ export async function GET(request: NextRequest) {
         },
       },
       series: [...series.entries()].map(([t, row]) => ({ date: new Date(t).toISOString().slice(0, 10), ...row })),
+      acquisition: {
+        ready: !!sourceById,
+        sources: [...sourceRows.entries()]
+          .map(([source, row]) => ({
+            source,
+            boards: row.boards,
+            creators: row.creators.size,
+            newCreators: row.newCreators,
+            delivered: row.delivered,
+          }))
+          .sort((a, b) => b.creators - a.creators || b.boards - a.boards),
+      },
       occasions: [...occasionCounts.entries()]
         .map(([label, row]) => ({ label, ...row, total: row.boards + row.cards }))
         .sort((a, b) => b.total - a.total)

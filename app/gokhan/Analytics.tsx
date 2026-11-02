@@ -39,6 +39,10 @@ interface AnalyticsData {
     funnel: { created: number; withMessages: number; sent: number; delivered: number; deleted: number };
   };
   series: SeriesPoint[];
+  acquisition: {
+    ready: boolean;
+    sources: { source: string; boards: number; creators: number; newCreators: number; delivered: number }[];
+  };
   occasions: { label: string; boards: number; cards: number; total: number }[];
   templates: { id: string; uses: number; title: string; format: string | null; occasion: string | null; shortId: string | null }[];
   recentSignups: {
@@ -362,6 +366,53 @@ export default function Analytics() {
               )}
             </Panel>
           </div>
+
+          <Panel title="Where board creators come from" note="this period">
+            {!data.acquisition.ready ? (
+              <p className="text-sm text-[#5B6B75]">
+                Sources aren&apos;t being saved yet. Run <code>supabase/migrations/add_board_acquisition.sql</code> in Supabase.
+              </p>
+            ) : data.acquisition.sources.length === 0 ? (
+              <p className="text-sm text-[#5B6B75]">No boards or cards created in this period.</p>
+            ) : (
+              <div className="overflow-x-auto -mx-4 md:-mx-5">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-left text-xs uppercase tracking-wide text-[#5B6B75]">
+                      <th className="px-4 md:px-5 py-2 font-semibold">Source</th>
+                      <th className="px-3 py-2 font-semibold text-right">Creators</th>
+                      <th className="px-3 py-2 font-semibold text-right" title="People whose first ever board was created in this period">New creators</th>
+                      <th className="px-3 py-2 font-semibold text-right">Boards &amp; cards</th>
+                      <th className="px-4 md:px-5 py-2 font-semibold text-right">Delivered</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.acquisition.sources.map((row) => (
+                      <tr key={row.source} className="border-t border-[#E5EAF0]">
+                        <td className="px-4 md:px-5 py-2 text-[#0B1F2A]">
+                          {row.source === "unknown" ? (
+                            <span className="text-[#5B6B75]" title="Created before tracking started, or on a device with no saved source">
+                              unknown
+                            </span>
+                          ) : (
+                            row.source
+                          )}
+                        </td>
+                        <td className="px-3 py-2 text-right font-semibold text-[#0B1F2A]">{row.creators}</td>
+                        <td className="px-3 py-2 text-right text-[#0B1F2A]">{row.newCreators}</td>
+                        <td className="px-3 py-2 text-right text-[#0B1F2A]">{row.boards}</td>
+                        <td className="px-4 md:px-5 py-2 text-right text-[#0B1F2A]">{row.delivered}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            <p className="mt-3 text-xs text-[#5B6B75]">
+              Source is where the creator first arrived from: a <code>utm_source</code> on the link, otherwise the referring
+              site, otherwise &ldquo;direct&rdquo;. Visits by source are in Google Analytics.
+            </p>
+          </Panel>
 
           <Panel title="Recent signups">
             <div className="overflow-x-auto -mx-4 md:-mx-5">

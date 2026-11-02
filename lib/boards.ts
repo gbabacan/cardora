@@ -1,4 +1,6 @@
 import { supabase } from './supabase';
+import { getAcquisition } from './acquisition';
+import { trackEvent } from './analytics';
 import type { Background } from './backgrounds';
 import { createSolidBackground, createAnimationBackground } from './backgrounds';
 import type { Effect } from './effects';
@@ -68,6 +70,28 @@ export interface Contributor {
 }
 
 // Create a new board
+// Inserts a board a user is creating, with the source they first came from
+// (lib/acquisition.ts) for the admin analytics, and reports it to Google
+// Analytics. Until the
+// add_board_acquisition migration has run the column doesn't exist, so the
+// insert is retried without it rather than failing to create the board.
+export async function insertUserBoard(row: Record<string, unknown>) {
+  const insert = (values: Record<string, unknown>) =>
+    supabase.from('boards').insert(values).select().single();
+  const acquisition = getAcquisition();
+  let result = await insert(acquisition ? { ...row, acquisition } : row);
+  if (acquisition && result.error && /acquisition/i.test(result.error.message)) result = await insert(row);
+  if (!result.error) {
+    trackEvent('board_created', {
+      format: String(row.format_type ?? 'board'),
+      occasion: String(row.occasion_type ?? ''),
+      from_template: !!row.source_template_id,
+      first_source: acquisition?.source ?? 'unknown',
+    });
+  }
+  return result;
+}
+
 export async function createBoard(data: {
   title: string;
   occasion_type: string;
@@ -157,9 +181,7 @@ export async function createBoard(data: {
     }
 
     // Insert board with occasion defaults
-    const { data: board, error: boardError } = await supabase
-      .from('boards')
-      .insert({
+    const { data: board, error: boardError } = await insertUserBoard({
         id: boardId,
         short_id: shortId,
         user_id: user.id,
@@ -183,9 +205,7 @@ export async function createBoard(data: {
         texture_id: textureId,
         background_id: backgroundId,
         card_background_id: cardBackgroundId
-      })
-      .select()
-      .single();
+      });
 
     if (boardError) throw boardError;
 

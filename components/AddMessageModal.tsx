@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { trackEvent } from "@/lib/analytics";
 import Image from "next/image";
 
 interface AddMessageModalProps {
@@ -510,6 +511,8 @@ export default function AddMessageModal({
       if (!response.ok) {
         throw new Error(result.error || 'Failed to post message');
       }
+
+      trackEvent('message_added', { media: mediaTab });
 
       // Reset form
       setContributorName('');

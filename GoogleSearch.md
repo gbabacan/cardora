@@ -104,11 +104,11 @@ image download.
   congratulations-cards, employee-appreciation-cards, retirement-cards,
   wedding-cards, new-baby-cards, promotion-cards, pricing, graduation-cards,
   christmas-cards.
+- 2 Nov: requested indexing (day 2 of 2) for valentines-cards, benefits/personal,
+  benefits/corporate, privacy. All 14 not-indexed pages have now been requested.
 
 ## To do
 
-- [ ] 30 Oct: request indexing (day 2) for valentines-cards, benefits/personal,
-  benefits/corporate, privacy.
 - [ ] Mid-November: re-export the "Crawled" and "Discovered" lists and compare
   with the 29 Oct update above.
 - [ ] Request indexing for the **www** URLs, ~10 per day (URL inspection → paste the full `https://www.cardora.cards/...` address):

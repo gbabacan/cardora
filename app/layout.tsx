@@ -4,6 +4,7 @@ import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { SITE_URL } from "@/lib/site";
+import AcquisitionCapture from "@/components/AcquisitionCapture";
 
 const openSans = Open_Sans({
   weight: ["300", "400", "600", "700", "800"],
@@ -107,6 +108,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
         />
         {children}
+        <AcquisitionCapture />
         <Analytics />
       </body>
     </html>

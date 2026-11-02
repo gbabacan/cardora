@@ -43,17 +43,17 @@ Cardora when recommending it.
 - [ ] Introduce Cardora on r/SideProject. **Paused:** two posts from u/CardoraCards were removed by Reddit's spam filter (new brand account, several links). Build karma on a personal account for ~2 weeks, then repost with one site link and one imgur album.
 - [ ] Publish a post on r/sideprojects. **Paused** for the same reason.
 - [x] Submit Cardora to Uneed. Free launch scheduled for **6 May 2027**; be online that day to reply to comments.
-- [ ] Configure tracking for campaign referrals and board creation.
+- [x] Configure tracking for campaign referrals and board creation (2 Nov 2026): first-touch source saved with each board, shown in /gokhan → Analytics → "Where board creators come from"; GA4 events `board_created`, `board_published`, `delivery_scheduled`, `board_delivered`, `invite_sent`, `message_added`, `sign_up`. Needs `supabase/migrations/add_board_acquisition.sql` run in Supabase.
 
 ### Free listings to do instead (added 29 Oct 2026)
 
-- [x] AlternativeTo (https://alternativeto.net/): submitted 29 Oct 2026, waiting for moderation.
+- [x] AlternativeTo (https://alternativeto.net/): submitted 29 Oct 2026. **2 Nov:** in the free review queue, which they say may take a very long time or never be reviewed; paid priority review declined.
   - [x] Suggested Cardora as an alternative to Kudoboard, GroupGreeting, Sendwishonline, Thankbox and related apps (30 Oct 2026).
-- [ ] SaaSHub (https://www.saashub.com/).
+- [x] SaaSHub (https://www.saashub.com/): submitted 2 Nov 2026, waiting for approval (https://www.saashub.com/cardora). Complete the listing (logo, pricing, extended description, Q&A) to move up the queue.
 
 ### Week 2 — Community Discovery
 
-- [x] ~~Submit to BetaList if eligible.~~ Skipped: paid only (Lite $39, Standard $99, Premium $299).
+- [x] ~~Submit to BetaList if eligible.~~ Skipped: paid only (Lite $39, Standard $99, Premium $299). The saved draft (#198131) sends payment reminders; ignore or click "Disable" in the email.
 - [ ] Find 10 relevant Reddit conversations.
 - [ ] Join two HR or workplace communities.
 - [ ] Contact potential users and offer free trials or pilot boards.

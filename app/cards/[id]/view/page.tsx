@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import LottieAnimation from "@/components/LottieAnimation";
 import { useRouter } from "next/navigation";
-import { getBoardByShortId } from "@/lib/boards";
+import { getBoardByShortId, insertUserBoard } from "@/lib/boards";
 import { getBoardMessages } from "@/lib/messages";
 import type { Board, Recipient } from "@/lib/boards";
 import type { Message } from "@/lib/messages";
@@ -346,9 +346,7 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
         return;
       }
 
-      const { data: newCard, error } = await supabase
-        .from('boards')
-        .insert({
+      const { data: newCard, error } = await insertUserBoard({
           user_id: user.id,
           title: board.title,
           occasion_type: board.occasion_type,
@@ -371,9 +369,7 @@ export default function CardViewPage({ params }: { params: Promise<{ id: string 
           notify_contributors: true,
           is_template: false,
           source_template_id: board.id,
-        })
-        .select()
-        .single();
+        });
 
       if (error || !newCard) {
         setToast({ message: 'Failed to create card from template', type: 'error' });

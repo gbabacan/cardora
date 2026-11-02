@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { trackEvent } from './analytics';
 
 export interface AuthUser {
   id: string;
@@ -20,6 +21,7 @@ export async function signUp(email: string, password: string, name: string) {
     });
 
     if (error) throw error;
+    trackEvent('sign_up', { method: 'email' });
     return { data, error: null };
   } catch (error: any) {
     return { data: null, error: error.message };

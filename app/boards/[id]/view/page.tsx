@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import LottieAnimation from "@/components/LottieAnimation";
 import { useRouter } from "next/navigation";
-import { getBoardByShortId } from "@/lib/boards";
+import { getBoardByShortId, insertUserBoard } from "@/lib/boards";
 import { getBoardMessages } from "@/lib/messages";
 import type { Board, Recipient } from "@/lib/boards";
 import type { Message } from "@/lib/messages";
@@ -164,9 +164,7 @@ export default function RecipientViewPage({ params }: { params: Promise<{ id: st
         return;
       }
 
-      const { data: newBoard, error } = await supabase
-        .from('boards')
-        .insert({
+      const { data: newBoard, error } = await insertUserBoard({
           user_id: user.id,
           title: board.title,
           occasion_type: board.occasion_type,
@@ -189,9 +187,7 @@ export default function RecipientViewPage({ params }: { params: Promise<{ id: st
           notify_contributors: true,
           is_template: false,
           source_template_id: board.id,
-        })
-        .select()
-        .single();
+        });
 
       if (error || !newBoard) {
         setToast({ message: 'Failed to create board from template', type: 'error' });

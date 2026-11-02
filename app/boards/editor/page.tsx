@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef, Suspense } from "react";
+import { trackEvent } from "@/lib/analytics";
 import { FONTS } from "@/lib/fonts";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -445,6 +446,7 @@ function BoardEditorPageContent() {
 
       const recipientEmailsSent: number = emailResult.sent ?? 0;
       const failedEmails: string[] = emailResult.failedEmails ?? [];
+      trackEvent('board_delivered', { format: formatType, method: 'now', recipients: recipientEmailsSent });
 
       // Send notification emails to contributors if checkbox is checked
       let contributorEmailsSent = 0;
@@ -576,6 +578,7 @@ function BoardEditorPageContent() {
         message: `Successfully sent ${emailResult.sent} invite email${emailResult.sent > 1 ? 's' : ''}! 📧`,
         type: 'success'
       });
+      trackEvent('invite_sent', { format: formatType, count: emailResult.sent });
 
       // Clear the email fields
       setInviteEmails(['']);
@@ -710,6 +713,11 @@ function BoardEditorPageContent() {
 
       // Reload messages after save
       await reloadMessages();
+
+      trackEvent(confirmSchedule ? 'delivery_scheduled' : 'board_published', {
+        format: formatType,
+        scheduled: !!(scheduledDate && scheduledTime),
+      });
 
       if (confirmSchedule) {
         setScheduleConfirmed(true);
